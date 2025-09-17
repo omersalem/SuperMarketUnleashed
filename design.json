@@ -1,0 +1,146 @@
+{
+  "designSystemProfile": {
+    "name": "Modern Gradient Portfolio",
+    "version": "1.0.0",
+    "description": "A design system based on a dark theme with vibrant gradients, clean typography, and rounded components. Ideal for personal portfolios and creative showcases.",
+    "style": "Modern, Professional, Tech-focused",
+    "theme": "Dark",
+    "colors": {
+      "primary": {
+        "deepPurple": "#1A1A2E",
+        "brightBlue": "#007BFF",
+        "accentGradient": "linear-gradient(to right, #4A00E0, #8E2DE2)"
+      },
+      "secondary": {
+        "teal": "#00C9A7",
+        "yellow": "#FFC107"
+      },
+      "background": {
+        "main": "#0D1117",
+        "card": "rgba(255, 255, 255, 0.05)",
+        "gradientOverlay": "radial-gradient(circle, rgba(26,26,46,0.8) 0%, rgba(13,17,23,1) 70%)"
+      },
+      "text": {
+        "primary": "#FFFFFF",
+        "secondary": "#B0B0B0",
+        "link": "#00AFFF",
+        "linkHover": "#007BFF"
+      },
+      "status": {
+        "success": "#28A745",
+        "warning": "#FFC107",
+        "info": "#17A2B8"
+      }
+    },
+    "typography": {
+      "fontFamily": {
+        "headings": "'Inter', sans-serif",
+        "body": "'Inter', sans-serif"
+      },
+      "fontSizes": {
+        "heroTitle": "3.5rem",
+        "h1": "2.5rem",
+        "h2": "2rem",
+        "h3": "1.5rem",
+        "body": "1rem",
+        "caption": "0.875rem"
+      },
+      "fontWeight": {
+        "light": 300,
+        "regular": 400,
+        "medium": 500,
+        "bold": 700
+      },
+      "lineHeight": {
+        "headings": 1.2,
+        "body": 1.6
+      }
+    },
+    "layout": {
+      "container": {
+        "maxWidth": "1200px",
+        "padding": "0 2rem"
+      },
+      "grid": {
+        "columns": 12,
+        "gap": "1.5rem"
+      },
+      "spacing": {
+        "xs": "0.25rem",
+        "sm": "0.5rem",
+        "md": "1rem",
+        "lg": "1.5rem",
+        "xl": "2rem",
+        "xxl": "4rem"
+      }
+    },
+    "components": {
+      "button": {
+        "borderRadius": "50px",
+        "padding": "0.75rem 1.5rem",
+        "fontWeight": "bold",
+        "textTransform": "none",
+        "boxShadow": "0 4px 15px rgba(0, 123, 255, 0.2)",
+        "transition": "all 0.3s ease",
+        "variants": {
+          "primary": {
+            "background": "linear-gradient(to right, #007BFF, #00AFFF)",
+            "color": "#FFFFFF"
+          },
+          "secondary": {
+            "background": "transparent",
+            "color": "#FFFFFF",
+            "border": "2px solid #007BFF"
+          }
+        }
+      },
+      "card": {
+        "backgroundColor": "rgba(255, 255, 255, 0.05)",
+        "borderRadius": "16px",
+        "padding": "2rem",
+        "border": "1px solid rgba(255, 255, 255, 0.1)",
+        "boxShadow": "0 8px 32px 0 rgba(0, 0, 0, 0.1)"
+      },
+      "testimonialCard": {
+        "backgroundColor": "transparent",
+        "borderLeft": "4px solid #007BFF",
+        "padding": "1.5rem"
+      },
+      "tag": {
+        "borderRadius": "12px",
+        "padding": "0.25rem 0.75rem",
+        "fontSize": "0.75rem",
+        "fontWeight": "500"
+      },
+      "avatar": {
+        "size": "96px",
+        "borderRadius": "50%",
+        "border": "3px solid #007BFF"
+      },
+      "iconButton": {
+        "size": "40px",
+        "borderRadius": "50%",
+        "backgroundColor": "rgba(255, 255, 255, 0.1)",
+        "color": "#FFFFFF"
+      }
+    },
+    "structure": {
+      "header": {
+        "position": "sticky",
+        "top": 0,
+        "background": "rgba(13, 17, 23, 0.8)",
+        "backdropFilter": "blur(10px)",
+        "zIndex": 1000
+      },
+      "sections": {
+        "padding": "4rem 0",
+        "titleAlignment": "center",
+        "subtitleOpacity": 0.7
+      },
+      "footer": {
+        "padding": "2rem 0",
+        "backgroundColor": "#1A1A2E"
+      }
+    }
+  }
+}

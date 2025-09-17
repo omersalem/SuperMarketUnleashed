@@ -1,0 +1,69 @@
+"I want to build a responsive multilingual supermarket management website accessible on PCs, tablets, and phones. The frontend will use React and Tailwind CSS, strictly following UI design specs in design.json. The backend services will rely on Firebase Free Tier for authentication and database.
+
+Core Project Specifications:
+Use Context7 MCP at all times to get the latest official documentation of all technologies used.
+
+The site must fully support both Arabic and English languages with seamless switching.
+
+It must be responsive, working smoothly on various devices: PC, tablets, and smartphones.
+
+User Roles & Authentication:
+There will be two user roles:
+
+Admin: Full access to manage users, products, vendors, sales, purchases, invoices, workers, and settings.
+
+User: Restricted to view invoices only.
+
+Firebase Authentication handles sign-in and sign-up for these roles.
+
+Workers do not get individual login accounts but have a dedicated admin page to manage salary and loan data.
+
+Functional Modules:
+User Management: Role-based login and access.
+
+Customer Management: CRUD for customers with contact and purchase history.
+
+Vendor Management: CRUD for vendors and product supplies.
+
+Product Management: Dynamic categories, descriptions, prices, stock tracking, manual and camera-based product addition.
+
+Sales Management: Customer sales recording, invoice generation, stock updates.
+
+Purchase Management: Purchase recording from vendors, inventory & invoice updates.
+
+Invoice Management: Create, edit, view invoices with role-based permissions.
+
+Check Management: Financial checks administration.
+
+Worker Management: Salary & loan tracking without login accounts.
+
+Inventory Management: Real-time inventory tracking, low stock alert, restock tracking.
+
+Development Workflow & Best Practices:
+Develop in modular iterative cycles, finishing and testing one module fully before the next.
+
+After each module, perform code cleanup removing unused or dead code.
+
+Maintain detailed logs in memory.md: module progress, test results, remarks.
+
+Follow strict user approval before coding and after each module completion.
+
+Present React UI components first as browser previews for approval, implementing full functionality afterward.
+
+Prioritize scalability, maintainability, role-based security, bilingual support, and responsive design throughout.
+
+Development Steps per Module:
+Plan and describe the module: files, components, and UI expectations.
+
+Develop full module functionality per its requirements.
+
+Thoroughly test all module functionalities.
+
+Clean and refactor the codebase.
+
+Document in memory.md with functionality and test notes.
+
+Present completed module for approval before proceeding.
+
+Start planning and preview the Basic Authentication and Foundation module UI in React with multilingual support and role selection (Admin/User). Await my approval before full implementation."
+

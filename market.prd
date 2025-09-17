@@ -1,0 +1,42 @@
+# Project Instructions for Supermarket Management Website Development
+
+## General Guidelines
+- The project development follows a strict module-based iterative approach.
+- Work on **one functional module at a time**. Do not start the next module until the current one is complete and approved.
+- This is a **web application only**, not an APK or mobile app.
+- Use **React** with **Tailwind CSS** for frontend development.
+- Use **Context7 MCP** to always get the latest documentation for all technologies used.
+- Use **Firebase Free Tier** for Authentication and Database.
+- Support both **Arabic and English languages** with proper internationalization (i18n).
+- The website should be **fully responsive** and work well on PCs, tablets, and phones.
+- Apply the UI design strictly from the `design.md` file.
+- Manage two user roles:  
+  - **Admin**: full access including edits.  
+  - **User**: view-only access for invoices.
+- The "Workers" module manages workers data (loans, salaries) without authentication accounts.
+- Avoid using Kotlin or Node.js.
+- The codebase should be clean, easy to extend, and maintain.
+- After completing each task, **run tests to verify functionality** before proceeding.
+- Remove any dead or unused code after each task to keep the code clean.
+- Document every completed module in `memory.md` with notes about functionality and tests done.
+- Each change must be tested and verified before moving on.
+
+## Development Workflow per Module
+1. Plan the module and explain your intended approach with the exact files you will create or modify.
+2. Develop the module’s functionality fully.
+3. Implement tests validating the module's features work as expected.
+4. Refactor and clean the code, removing redundant or unused parts.
+5. Update `memory.md` with a detailed progress note about the module, including test results.
+6. Present the completed module and wait for user approval before moving to the next.
+
+## Communication with User
+- Present design layouts initially for user approval.
+- Ask for explicit user approval before starting any code writing operation.
+- Always wait for feedback and confirmation before progressing.
+
+---
+
+This setup ensures quality, maintainability, bilingual support, responsiveness, and clear communication throughout the web app development.
+
+Please confirm if you want me to start with the first module:  
+**[Basic Foundation and Authentication Module - design preview on browser]**

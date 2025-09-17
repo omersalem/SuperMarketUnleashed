@@ -1,0 +1,250 @@
+import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import app from "./config";
+
+const db = getFirestore(app);
+
+// Customers
+const customersCollection = collection(db, "customers");
+
+export const getCustomers = async () => {
+  const snapshot = await getDocs(customersCollection);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const addCustomer = async (customer) => {
+  const docRef = await addDoc(customersCollection, customer);
+  return { id: docRef.id, ...customer };
+};
+
+export const updateCustomer = async (id, customer) => {
+  const customerDoc = doc(db, "customers", id);
+  await updateDoc(customerDoc, customer);
+};
+
+export const deleteCustomer = async (id) => {
+  const customerDoc = doc(db, "customers", id);
+  await deleteDoc(customerDoc);
+};
+
+// Vendors
+const vendorsCollection = collection(db, "vendors");
+
+export const getVendors = async () => {
+  const snapshot = await getDocs(vendorsCollection);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const addVendor = async (vendor) => {
+  const docRef = await addDoc(vendorsCollection, vendor);
+  return { id: docRef.id, ...vendor };
+};
+
+export const updateVendor = async (id, vendor) => {
+  const vendorDoc = doc(db, "vendors", id);
+  await updateDoc(vendorDoc, vendor);
+};
+
+export const deleteVendor = async (id) => {
+  const vendorDoc = doc(db, "vendors", id);
+  await deleteDoc(vendorDoc);
+};
+
+// Categories
+const categoriesCollection = collection(db, "categories");
+
+export const getCategories = async () => {
+  const snapshot = await getDocs(categoriesCollection);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const addCategory = async (category) => {
+  const docRef = await addDoc(categoriesCollection, category);
+  return { id: docRef.id, ...category };
+};
+
+export const updateCategory = async (id, category) => {
+  const categoryDoc = doc(db, "categories", id);
+  await updateDoc(categoryDoc, category);
+};
+
+export const deleteCategory = async (id) => {
+  const categoryDoc = doc(db, "categories", id);
+  await deleteDoc(categoryDoc);
+};
+
+// Sales
+const salesCollection = collection(db, "sales");
+
+export const getSales = async () => {
+  const snapshot = await getDocs(salesCollection);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const addSale = async (sale) => {
+  const docRef = await addDoc(salesCollection, sale);
+  return { id: docRef.id, ...sale };
+};
+
+export const updateSale = async (id, sale) => {
+  const saleDoc = doc(db, "sales", id);
+  await updateDoc(saleDoc, sale);
+};
+
+export const deleteSale = async (id) => {
+  const saleDoc = doc(db, "sales", id);
+  await deleteDoc(saleDoc);
+};
+
+// Products
+const productsCollection = collection(db, "products");
+
+export const getProducts = async () => {
+  const snapshot = await getDocs(productsCollection);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const addProduct = async (product) => {
+  const docRef = await addDoc(productsCollection, product);
+  return { id: docRef.id, ...product };
+};
+
+export const updateProduct = async (id, product) => {
+  const productDoc = doc(db, "products", id);
+  await updateDoc(productDoc, product);
+};
+
+export const deleteProduct = async (id) => {
+  const productDoc = doc(db, "products", id);
+  await deleteDoc(productDoc);
+};
+
+
+
+// Purchases
+const purchasesCollection = collection(db, "purchases");
+
+export const getPurchases = async () => {
+  const snapshot = await getDocs(purchasesCollection);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const addPurchase = async (purchase) => {
+  const docRef = await addDoc(purchasesCollection, purchase);
+  return { id: docRef.id, ...purchase };
+};
+
+export const updatePurchase = async (id, purchase) => {
+  const purchaseDoc = doc(db, "purchases", id);
+  await updateDoc(purchaseDoc, purchase);
+};
+
+export const deletePurchase = async (id) => {
+  const purchaseDoc = doc(db, "purchases", id);
+  await deleteDoc(purchaseDoc);
+};
+
+// Checks
+const checksCollection = collection(db, "checks");
+
+export const getChecks = async () => {
+  const snapshot = await getDocs(checksCollection);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const addCheck = async (check) => {
+  const docRef = await addDoc(checksCollection, check);
+  return { id: docRef.id, ...check };
+};
+
+export const updateCheck = async (id, check) => {
+  const checkDoc = doc(db, "checks", id);
+  await updateDoc(checkDoc, check);
+};
+
+export const deleteCheck = async (id) => {
+  const checkDoc = doc(db, "checks", id);
+  await deleteDoc(checkDoc);
+};
+
+// Banks
+const banksCollection = collection(db, "banks");
+
+export const getBanks = async () => {
+  const snapshot = await getDocs(banksCollection);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const addBank = async (bank) => {
+  const docRef = await addDoc(banksCollection, bank);
+  return { id: docRef.id, ...bank };
+};
+
+// Currencies
+const currenciesCollection = collection(db, "currencies");
+
+export const getCurrencies = async () => {
+  const snapshot = await getDocs(currenciesCollection);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const addCurrency = async (currency) => {
+  const docRef = await addDoc(currenciesCollection, currency);
+  return { id: docRef.id, ...currency };
+};
+
+// Workers
+const workersCollection = collection(db, "workers");
+
+export const getWorkers = async () => {
+  const snapshot = await getDocs(workersCollection);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const addWorker = async (worker) => {
+  const docRef = await addDoc(workersCollection, worker);
+  return { id: docRef.id, ...worker };
+};
+
+export const updateWorker = async (id, worker) => {
+  const workerDoc = doc(db, "workers", id);
+  await updateDoc(workerDoc, worker);
+};
+
+export const deleteWorker = async (id) => {
+  const workerDoc = doc(db, "workers", id);
+  await deleteDoc(workerDoc);
+};
+
+// Salary Payments
+const salaryPaymentsCollection = collection(db, "salaryPayments");
+
+export const getSalaryPayments = async (workerId = null) => {
+  const snapshot = await getDocs(salaryPaymentsCollection);
+  const payments = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  return workerId
+    ? payments.filter((payment) => payment.workerId === workerId)
+    : payments;
+};
+
+export const addSalaryPayment = async (payment) => {
+  const docRef = await addDoc(salaryPaymentsCollection, payment);
+  return { id: docRef.id, ...payment };
+};
+
+// Worker Expenses
+const workerExpensesCollection = collection(db, "workerExpenses");
+
+export const getWorkerExpenses = async (workerId = null) => {
+  const snapshot = await getDocs(workerExpensesCollection);
+  const expenses = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  return workerId
+    ? expenses.filter((expense) => expense.workerId === workerId)
+    : expenses;
+};
+
+export const addWorkerExpense = async (expense) => {
+  const docRef = await addDoc(workerExpensesCollection, expense);
+  return { id: docRef.id, ...expense };
+};
+
+export default db;

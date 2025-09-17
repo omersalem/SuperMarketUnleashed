@@ -1,0 +1,11 @@
+{
+  "login": {
+    "title": "Login",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "admin": "Admin",
+    "user": "User",
+    "loginButton": "Login"
+  }
+}
