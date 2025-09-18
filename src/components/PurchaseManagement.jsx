@@ -151,7 +151,7 @@ const PurchaseManagement = ({
       setCheckDetails(null);
       setError(null);
 
-      alert(`Payment of $${paymentAmount.toFixed(2)} recorded successfully!`);
+      alert(`Payment of ₪${paymentAmount.toFixed(2)} recorded successfully!`);
     } catch (error) {
       setError("Error recording payment: " + error.message);
       console.error("Error recording quick payment:", error);
@@ -205,10 +205,10 @@ const PurchaseManagement = ({
 
     if (paidAmount > totalAmount) {
       const shouldContinue = window.confirm(
-        `Amount paid ($${paidAmount.toFixed(
+        `Amount paid (₪${paidAmount.toFixed(
           2
-        )}) is greater than total amount ($${totalAmount.toFixed(2)}). ` +
-          `This will result in change of $${(paidAmount - totalAmount).toFixed(
+        )}) is greater than total amount (₪${totalAmount.toFixed(2)}). ` +
+          `This will result in change of ₪${(paidAmount - totalAmount).toFixed(
             2
           )}. Continue?`
       );
@@ -286,7 +286,7 @@ const PurchaseManagement = ({
       const statusMessage =
         getPaymentStatus() === "paid"
           ? "Purchase completed and fully paid!"
-          : `Purchase recorded. Outstanding balance: $${balance.toFixed(2)}`;
+          : `Purchase recorded. Outstanding balance: ₪${balance.toFixed(2)}`;
 
       alert(statusMessage);
     } catch (error) {
@@ -540,7 +540,7 @@ const PurchaseManagement = ({
                         {item.name}
                       </td>
                       <td className="py-2 px-4 border-b border-gray-700">
-                        ${!isNaN(price) ? price.toFixed(2) : "N/A"}
+                        ₪{!isNaN(price) ? price.toFixed(2) : "N/A"}
                       </td>
                       <td className="py-2 px-4 border-b border-gray-700">
                         <input
@@ -554,7 +554,7 @@ const PurchaseManagement = ({
                         />
                       </td>
                       <td className="py-2 px-4 border-b border-gray-700">
-                        ${subtotal.toFixed(2)}
+                        ₪{subtotal.toFixed(2)}
                       </td>
                       <td className="py-2 px-4 border-b border-gray-700">
                         <button
@@ -577,14 +577,14 @@ const PurchaseManagement = ({
             <div className="text-center">
               <div className="text-sm text-gray-300">Total Amount</div>
               <div className="text-2xl font-bold text-blue-400">
-                ${calculateTotal().toFixed(2)}
+                ₪{calculateTotal().toFixed(2)}
               </div>
             </div>
 
             <div className="text-center">
               <div className="text-sm text-gray-300">Amount Paid</div>
               <div className="text-2xl font-bold text-green-400">
-                ${(parseFloat(amountPaid) || 0).toFixed(2)}
+                ₪{(parseFloat(amountPaid) || 0).toFixed(2)}
               </div>
             </div>
 
@@ -599,7 +599,7 @@ const PurchaseManagement = ({
                     : "text-green-400"
                 }`}
               >
-                ${Math.abs(calculateBalance()).toFixed(2)}
+                ₪{Math.abs(calculateBalance()).toFixed(2)}
                 {calculateBalance() < 0 && " (Change)"}
                 {calculateBalance() > 0 && " (Due)"}
               </div>

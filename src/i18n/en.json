@@ -6,6 +6,7 @@
     "role": "Role",
     "admin": "Admin",
     "user": "User",
-    "loginButton": "Login"
+    "loginButton": "Login",
+    "loggingIn": "Logging in..."
   }
 }

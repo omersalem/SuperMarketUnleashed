@@ -37,7 +37,19 @@ const ReportsDashboard = ({
     endDate: format(new Date(), "yyyy-MM-dd"),
   });
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(false);
   const reportRef = React.useRef();
+
+  // Handle date changes with loading animation
+  const handleDateChange = async (field, value) => {
+    setIsLoadingData(true);
+
+    // Simulate processing time for better UX
+    setTimeout(() => {
+      setDateRange((prev) => ({ ...prev, [field]: value }));
+      setIsLoadingData(false);
+    }, 300);
+  };
 
   // Filter data based on date range
   const filterByDateRange = (data, dateField = "date") => {
@@ -242,7 +254,7 @@ const ReportsDashboard = ({
           format(new Date(sale.date || Date.now()), "MMM dd, yyyy"),
           customerName,
           sale.products?.length || 0,
-          `$${(sale.totalAmount || 0).toFixed(2)}`,
+          `₪${(sale.totalAmount || 0).toFixed(2)}`,
         ];
       });
 
@@ -271,7 +283,7 @@ const ReportsDashboard = ({
         product.name || "N/A",
         product.categoryName || "Uncategorized",
         product.stock || 0,
-        `$${Number(product.price || 0).toFixed(2)}`,
+        `₪${Number(product.price || 0).toFixed(2)}`,
       ]);
 
       pdf.autoTable({
@@ -331,8 +343,8 @@ const ReportsDashboard = ({
         customer.email || "N/A",
         customer.phone || "N/A",
         customer.totalOrders.toString(),
-        `$${customer.totalSpent.toFixed(2)}`,
-        `$${customer.averageOrderValue.toFixed(2)}`,
+        `₪${customer.totalSpent.toFixed(2)}`,
+        `₪${customer.averageOrderValue.toFixed(2)}`,
         customer.lastOrderDate
           ? format(customer.lastOrderDate, "MMM dd, yyyy")
           : "Never",
@@ -710,21 +722,24 @@ const ReportsDashboard = ({
   };
 
   return (
-    <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-white">Reports Dashboard</h2>
-        <div className="flex gap-2">
+    <div className="bg-gray-800 p-3 sm:p-6 rounded-lg shadow-lg max-w-full overflow-hidden">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
+        <h2 className="text-xl sm:text-2xl font-bold text-white">
+          Reports Dashboard
+        </h2>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <button
             onClick={handlePrint}
-            disabled={isGenerating}
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+            disabled={isGenerating || isLoadingData}
+            className="bg-green-500 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded transition-colors w-full sm:w-auto"
           >
             🖨️ Print
           </button>
           <button
             onClick={generatePDF}
-            disabled={isGenerating}
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+            disabled={isGenerating || isLoadingData}
+            className="bg-red-500 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded transition-colors w-full sm:w-auto"
           >
             {isGenerating ? "⏳ Generating..." : "📄 Export PDF"}
           </button>
@@ -732,60 +747,153 @@ const ReportsDashboard = ({
       </div>
 
       {/* Date Range Selector */}
-      <div className="mb-6 flex gap-4 items-center">
-        <div>
-          <label className="block text-sm font-medium text-white mb-1">
-            Start Date
-          </label>
-          <input
-            type="date"
-            value={dateRange.startDate}
-            onChange={(e) =>
-              setDateRange((prev) => ({ ...prev, startDate: e.target.value }))
-            }
-            className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-white mb-1">
-            End Date
-          </label>
-          <input
-            type="date"
-            value={dateRange.endDate}
-            onChange={(e) =>
-              setDateRange((prev) => ({ ...prev, endDate: e.target.value }))
-            }
-            className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-          />
+      <div className="mb-4 sm:mb-6">
+        <h3 className="text-base sm:text-lg font-semibold text-white mb-3">
+          Date Range
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:items-end gap-4">
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-white mb-2">
+              Start Date
+            </label>
+            <div className="relative">
+              <input
+                type="date"
+                value={dateRange.startDate}
+                onChange={(e) => handleDateChange("startDate", e.target.value)}
+                disabled={isLoadingData}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              />
+              {isLoadingData && (
+                <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                  <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-white mb-2">
+              End Date
+            </label>
+            <div className="relative">
+              <input
+                type="date"
+                value={dateRange.endDate}
+                onChange={(e) => handleDateChange("endDate", e.target.value)}
+                disabled={isLoadingData}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              />
+              {isLoadingData && (
+                <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                  <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                </div>
+              )}
+            </div>
+          </div>
+          {/* Quick Date Range Buttons */}
+          <div className="flex flex-wrap gap-2 lg:ml-4">
+            <button
+              onClick={() => {
+                const newRange = {
+                  startDate: format(subDays(new Date(), 7), "yyyy-MM-dd"),
+                  endDate: format(new Date(), "yyyy-MM-dd"),
+                };
+                setIsLoadingData(true);
+                setTimeout(() => {
+                  setDateRange(newRange);
+                  setIsLoadingData(false);
+                }, 300);
+              }}
+              disabled={isLoadingData}
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
+            >
+              7 Days
+            </button>
+            <button
+              onClick={() => {
+                const newRange = {
+                  startDate: format(subMonths(new Date(), 1), "yyyy-MM-dd"),
+                  endDate: format(new Date(), "yyyy-MM-dd"),
+                };
+                setIsLoadingData(true);
+                setTimeout(() => {
+                  setDateRange(newRange);
+                  setIsLoadingData(false);
+                }, 300);
+              }}
+              disabled={isLoadingData}
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
+            >
+              1 Month
+            </button>
+            <button
+              onClick={() => {
+                const newRange = {
+                  startDate: format(subMonths(new Date(), 12), "yyyy-MM-dd"),
+                  endDate: format(new Date(), "yyyy-MM-dd"),
+                };
+                setIsLoadingData(true);
+                setTimeout(() => {
+                  setDateRange(newRange);
+                  setIsLoadingData(false);
+                }, 300);
+              }}
+              disabled={isLoadingData}
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
+            >
+              1 Year
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Report Type Selector */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-white mb-3">
+      <div className="mb-4 sm:mb-6">
+        <h3 className="text-base sm:text-lg font-semibold text-white mb-3">
           Select Report Type
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
           {reportTypes.map((report) => (
             <button
               key={report.id}
               onClick={() => setSelectedReport(report.id)}
-              className={`p-3 rounded-lg text-center transition-colors ${
+              disabled={isLoadingData}
+              className={`p-3 rounded-lg text-center transition-all duration-200 touch-manipulation min-h-[80px] disabled:opacity-50 disabled:cursor-not-allowed ${
                 selectedReport === report.id
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  ? "bg-blue-600 text-white shadow-lg transform scale-105"
+                  : "bg-gray-700 text-gray-300 hover:bg-gray-600 hover:transform hover:scale-102"
               }`}
             >
-              <div className="text-2xl mb-1">{report.icon}</div>
-              <div className="text-sm font-medium">{report.name}</div>
+              <div className="text-xl sm:text-2xl mb-1">{report.icon}</div>
+              <div className="text-xs sm:text-sm font-medium leading-tight">
+                {report.name}
+              </div>
             </button>
           ))}
         </div>
       </div>
 
+      {/* Loading Overlay */}
+      {isLoadingData && (
+        <div className="relative">
+          <div className="absolute inset-0 bg-gray-800 bg-opacity-75 rounded-lg z-10 flex items-center justify-center">
+            <div className="flex flex-col items-center space-y-3">
+              <div className="animate-spin h-8 w-8 border-3 border-blue-500 border-t-transparent rounded-full"></div>
+              <p className="text-white text-sm font-medium">
+                Updating report data...
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Report Content */}
-      <div ref={reportRef} className="bg-white rounded-lg p-6 text-black">
+      <div
+        ref={reportRef}
+        className={`bg-white rounded-lg p-3 sm:p-6 text-black transition-opacity duration-300 ${
+          isLoadingData ? "opacity-50" : "opacity-100"
+        }`}
+      >
         {renderReport()}
       </div>
     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { updatePurchase, addPurchase } from "../firebase/firestore";
 import { format } from "date-fns";
+import ResponsiveTable, { createMobileCard } from "./ResponsiveTable";
 import CheckPaymentModal from "./CheckPaymentModal";
 
 const VendorPaymentManagement = ({
@@ -98,6 +99,142 @@ const VendorPaymentManagement = ({
     });
   }, [purchases, vendors, searchTerm]);
 
+  // Create mobile card component for outstanding purchases
+  const VendorPaymentMobileCard = createMobileCard(({ item: purchase }) => {
+    const vendor = vendors.find((v) => v.id === purchase.vendorId);
+    const vendorName = purchase.vendorName || vendor?.name || "Unknown Vendor";
+
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-lg text-white">{vendorName}</h3>
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-medium ${
+              purchase.paymentStatus === "partial"
+                ? "bg-yellow-100 text-yellow-800"
+                : "bg-red-100 text-red-800"
+            }`}
+          >
+            {purchase.paymentStatus === "partial" ? "Partial" : "Unpaid"}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-gray-400">Date:</span>
+            <p className="text-white font-medium">
+              {format(new Date(purchase.date || Date.now()), "MMM dd, yyyy")}
+            </p>
+          </div>
+          <div>
+            <span className="text-gray-400">Total:</span>
+            <p className="text-green-400 font-medium">
+              ₪{(purchase.totalAmount || 0).toFixed(2)}
+            </p>
+          </div>
+          <div>
+            <span className="text-gray-400">Paid:</span>
+            <p className="text-blue-400 font-medium">
+              ₪{(purchase.amountPaid || 0).toFixed(2)}
+            </p>
+          </div>
+          <div>
+            <span className="text-gray-400">Outstanding:</span>
+            <p className="text-red-400 font-medium">
+              ₪{(purchase.balance || 0).toFixed(2)}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex justify-end pt-2">
+          <button
+            onClick={() => handlePurchaseSelect(purchase)}
+            className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded text-sm transition-colors"
+          >
+            Add Payment
+          </button>
+        </div>
+      </div>
+    );
+  });
+
+  // Table columns configuration
+  const tableColumns = [
+    {
+      key: "date",
+      label: "Date",
+      render: (purchase) =>
+        format(new Date(purchase.date || Date.now()), "MMM dd, yyyy"),
+    },
+    {
+      key: "vendor",
+      label: "Vendor",
+      render: (purchase) => {
+        const vendor = vendors.find((v) => v.id === purchase.vendorId);
+        return purchase.vendorName || vendor?.name || "Unknown Vendor";
+      },
+    },
+    {
+      key: "totalAmount",
+      label: "Total Amount",
+      align: "right",
+      render: (purchase) => (
+        <span className="text-green-400 font-medium">
+          ₪{(purchase.totalAmount || 0).toFixed(2)}
+        </span>
+      ),
+    },
+    {
+      key: "amountPaid",
+      label: "Amount Paid",
+      align: "right",
+      render: (purchase) => (
+        <span className="text-blue-400 font-medium">
+          ₪{(purchase.amountPaid || 0).toFixed(2)}
+        </span>
+      ),
+    },
+    {
+      key: "balance",
+      label: "Outstanding",
+      align: "right",
+      render: (purchase) => (
+        <span className="text-red-400 font-medium">
+          ₪{(purchase.balance || 0).toFixed(2)}
+        </span>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      align: "center",
+      render: (purchase) => (
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium ${
+            purchase.paymentStatus === "partial"
+              ? "bg-yellow-100 text-yellow-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
+          {purchase.paymentStatus === "partial" ? "Partial" : "Unpaid"}
+        </span>
+      ),
+    },
+    {
+      key: "action",
+      label: "Action",
+      align: "center",
+      render: (purchase) => (
+        <button
+          onClick={() => handlePurchaseSelect(purchase)}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
+        >
+          Add Payment
+        </button>
+      ),
+    },
+  ];
+
   const handlePurchaseSelect = (purchase) => {
     setSelectedPurchase(purchase);
     setAdditionalPayment("");
@@ -163,7 +300,7 @@ const VendorPaymentManagement = ({
       }[paymentType];
 
       alert(
-        `${paymentTypeText} of $${paymentAmount.toFixed(
+        `${paymentTypeText} of ₪${paymentAmount.toFixed(
           2
         )} recorded successfully!`
       );
@@ -190,9 +327,9 @@ const VendorPaymentManagement = ({
     const currentBalance = selectedPurchase.balance || 0;
     if (paymentAmount > currentBalance) {
       const shouldContinue = window.confirm(
-        `Payment amount ($${paymentAmount.toFixed(
+        `Payment amount (₪${paymentAmount.toFixed(
           2
-        )}) is greater than outstanding balance ($${currentBalance.toFixed(
+        )}) is greater than outstanding balance (₪${currentBalance.toFixed(
           2
         )}). ` + `This will result in overpayment. Continue?`
       );
@@ -242,7 +379,7 @@ const VendorPaymentManagement = ({
       setCheckDetails(null); // Clear check details
       setError(null);
 
-      alert(`Payment of $${paymentAmount.toFixed(2)} recorded successfully!`);
+      alert(`Payment of ₪${paymentAmount.toFixed(2)} recorded successfully!`);
     } catch (error) {
       setError("Error updating payment: " + error.message);
       console.error("Error updating payment:", error);
@@ -413,89 +550,12 @@ const VendorPaymentManagement = ({
           Outstanding Purchases ({unpaidPurchases.length})
         </h3>
 
-        {unpaidPurchases.length === 0 ? (
-          <div className="text-center py-8 text-gray-400">
-            <p>No outstanding purchases found.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-gray-700 rounded-lg">
-              <thead className="bg-gray-600">
-                <tr>
-                  <th className="py-3 px-4 text-left text-white">Date</th>
-                  <th className="py-3 px-4 text-left text-white">Vendor</th>
-                  <th className="py-3 px-4 text-right text-white">
-                    Total Amount
-                  </th>
-                  <th className="py-3 px-4 text-right text-white">
-                    Amount Paid
-                  </th>
-                  <th className="py-3 px-4 text-right text-white">
-                    Outstanding
-                  </th>
-                  <th className="py-3 px-4 text-center text-white">Status</th>
-                  <th className="py-3 px-4 text-center text-white">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {unpaidPurchases.map((purchase, index) => {
-                  const vendor = vendors.find(
-                    (v) => v.id === purchase.vendorId
-                  );
-                  const vendorName =
-                    purchase.vendorName || vendor?.name || "Unknown Vendor";
-
-                  return (
-                    <tr
-                      key={purchase.id || index}
-                      className={
-                        index % 2 === 0 ? "bg-gray-700" : "bg-gray-600"
-                      }
-                    >
-                      <td className="py-3 px-4 text-white">
-                        {format(
-                          new Date(purchase.date || Date.now()),
-                          "MMM dd, yyyy"
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-white">{vendorName}</td>
-                      <td className="py-3 px-4 text-right text-green-400 font-medium">
-                        ${(purchase.totalAmount || 0).toFixed(2)}
-                      </td>
-                      <td className="py-3 px-4 text-right text-blue-400 font-medium">
-                        ${(purchase.amountPaid || 0).toFixed(2)}
-                      </td>
-                      <td className="py-3 px-4 text-right text-red-400 font-medium">
-                        ${(purchase.balance || 0).toFixed(2)}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            purchase.paymentStatus === "partial"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {purchase.paymentStatus === "partial"
-                            ? "Partial"
-                            : "Unpaid"}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <button
-                          onClick={() => handlePurchaseSelect(purchase)}
-                          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
-                        >
-                          Add Payment
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <ResponsiveTable
+          data={unpaidPurchases}
+          columns={tableColumns}
+          MobileCard={VendorPaymentMobileCard}
+          emptyMessage="No outstanding purchases found."
+        />
       </div>
 
       {/* Payment Form */}
@@ -517,15 +577,15 @@ const VendorPaymentManagement = ({
                 {format(new Date(selectedPurchase.date), "MMM dd, yyyy")}
               </p>
               <p className="text-gray-300">
-                <span className="font-medium">Total Amount:</span> $
+                <span className="font-medium">Total Amount:</span> ₪
                 {(selectedPurchase.totalAmount || 0).toFixed(2)}
               </p>
               <p className="text-gray-300">
-                <span className="font-medium">Amount Paid:</span> $
+                <span className="font-medium">Amount Paid:</span> ₪
                 {(selectedPurchase.amountPaid || 0).toFixed(2)}
               </p>
               <p className="text-red-400 font-medium">
-                <span className="font-medium">Outstanding:</span> $
+                <span className="font-medium">Outstanding:</span> ₪
                 {(selectedPurchase.balance || 0).toFixed(2)}
               </p>
             </div>

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { updateSale, addSale } from "../firebase/firestore";
 import { format } from "date-fns";
+import ResponsiveTable, { createMobileCard } from "./ResponsiveTable";
 import CheckPaymentModal from "./CheckPaymentModal";
 
 const PaymentManagement = ({
@@ -168,7 +169,7 @@ const PaymentManagement = ({
       }[paymentType];
 
       alert(
-        `${paymentTypeText} of $${paymentAmount.toFixed(
+        `${paymentTypeText} of ₪${paymentAmount.toFixed(
           2
         )} recorded successfully!`
       );
@@ -179,6 +180,143 @@ const PaymentManagement = ({
       setLoading(false);
     }
   };
+
+  // Create mobile card component for outstanding sales
+  const PaymentMobileCard = createMobileCard(({ item: sale }) => {
+    const customer = customers.find((c) => c.id === sale.customerId);
+    const customerName =
+      sale.customerName || customer?.name || "Unknown Customer";
+
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-lg text-white">{customerName}</h3>
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-medium ${
+              sale.paymentStatus === "partial"
+                ? "bg-yellow-100 text-yellow-800"
+                : "bg-red-100 text-red-800"
+            }`}
+          >
+            {sale.paymentStatus === "partial" ? "Partial" : "Unpaid"}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-gray-400">Date:</span>
+            <p className="text-white font-medium">
+              {format(new Date(sale.date || Date.now()), "MMM dd, yyyy")}
+            </p>
+          </div>
+          <div>
+            <span className="text-gray-400">Total:</span>
+            <p className="text-green-400 font-medium">
+              ₪{(sale.totalAmount || 0).toFixed(2)}
+            </p>
+          </div>
+          <div>
+            <span className="text-gray-400">Paid:</span>
+            <p className="text-blue-400 font-medium">
+              ₪{(sale.amountPaid || 0).toFixed(2)}
+            </p>
+          </div>
+          <div>
+            <span className="text-gray-400">Outstanding:</span>
+            <p className="text-red-400 font-medium">
+              ₪{(sale.balance || 0).toFixed(2)}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex justify-end pt-2">
+          <button
+            onClick={() => handleSaleSelect(sale)}
+            className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded text-sm transition-colors"
+          >
+            Add Payment
+          </button>
+        </div>
+      </div>
+    );
+  });
+
+  // Table columns configuration
+  const tableColumns = [
+    {
+      key: "date",
+      label: "Date",
+      render: (sale) =>
+        format(new Date(sale.date || Date.now()), "MMM dd, yyyy"),
+    },
+    {
+      key: "customer",
+      label: "Customer",
+      render: (sale) => {
+        const customer = customers.find((c) => c.id === sale.customerId);
+        return sale.customerName || customer?.name || "Unknown Customer";
+      },
+    },
+    {
+      key: "totalAmount",
+      label: "Total Amount",
+      align: "right",
+      render: (sale) => (
+        <span className="text-green-400 font-medium">
+          ₪{(sale.totalAmount || 0).toFixed(2)}
+        </span>
+      ),
+    },
+    {
+      key: "amountPaid",
+      label: "Amount Paid",
+      align: "right",
+      render: (sale) => (
+        <span className="text-blue-400 font-medium">
+          ₪{(sale.amountPaid || 0).toFixed(2)}
+        </span>
+      ),
+    },
+    {
+      key: "balance",
+      label: "Outstanding",
+      align: "right",
+      render: (sale) => (
+        <span className="text-red-400 font-medium">
+          ₪{(sale.balance || 0).toFixed(2)}
+        </span>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      align: "center",
+      render: (sale) => (
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium ${
+            sale.paymentStatus === "partial"
+              ? "bg-yellow-100 text-yellow-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
+          {sale.paymentStatus === "partial" ? "Partial" : "Unpaid"}
+        </span>
+      ),
+    },
+    {
+      key: "action",
+      label: "Action",
+      align: "center",
+      render: (sale) => (
+        <button
+          onClick={() => handleSaleSelect(sale)}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
+        >
+          Add Payment
+        </button>
+      ),
+    },
+  ];
 
   const handlePaymentUpdate = async () => {
     if (!selectedSale || !additionalPayment) {
@@ -202,9 +340,9 @@ const PaymentManagement = ({
     const currentBalance = selectedSale.balance || 0;
     if (paymentAmount > currentBalance) {
       const shouldContinue = window.confirm(
-        `Payment amount ($${paymentAmount.toFixed(
+        `Payment amount (₪${paymentAmount.toFixed(
           2
-        )}) is greater than outstanding balance ($${currentBalance.toFixed(
+        )}) is greater than outstanding balance (₪${currentBalance.toFixed(
           2
         )}). ` + `This will result in overpayment. Continue?`
       );
@@ -250,7 +388,7 @@ const PaymentManagement = ({
       setCheckDetails(null);
       setError(null);
 
-      alert(`Payment of $${paymentAmount.toFixed(2)} recorded successfully!`);
+      alert(`Payment of ₪${paymentAmount.toFixed(2)} recorded successfully!`);
     } catch (error) {
       setError("Error updating payment: " + error.message);
       console.error("Error updating payment:", error);
@@ -419,89 +557,12 @@ const PaymentManagement = ({
           Outstanding Sales ({unpaidSales.length})
         </h3>
 
-        {unpaidSales.length === 0 ? (
-          <div className="text-center py-8 text-gray-400">
-            <p>No outstanding sales found.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-gray-700 rounded-lg">
-              <thead className="bg-gray-600">
-                <tr>
-                  <th className="py-3 px-4 text-left text-white">Date</th>
-                  <th className="py-3 px-4 text-left text-white">Customer</th>
-                  <th className="py-3 px-4 text-right text-white">
-                    Total Amount
-                  </th>
-                  <th className="py-3 px-4 text-right text-white">
-                    Amount Paid
-                  </th>
-                  <th className="py-3 px-4 text-right text-white">
-                    Outstanding
-                  </th>
-                  <th className="py-3 px-4 text-center text-white">Status</th>
-                  <th className="py-3 px-4 text-center text-white">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {unpaidSales.map((sale, index) => {
-                  const customer = customers.find(
-                    (c) => c.id === sale.customerId
-                  );
-                  const customerName =
-                    sale.customerName || customer?.name || "Unknown Customer";
-
-                  return (
-                    <tr
-                      key={sale.id || index}
-                      className={
-                        index % 2 === 0 ? "bg-gray-700" : "bg-gray-600"
-                      }
-                    >
-                      <td className="py-3 px-4 text-white">
-                        {format(
-                          new Date(sale.date || Date.now()),
-                          "MMM dd, yyyy"
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-white">{customerName}</td>
-                      <td className="py-3 px-4 text-right text-green-400 font-medium">
-                        ${(sale.totalAmount || 0).toFixed(2)}
-                      </td>
-                      <td className="py-3 px-4 text-right text-blue-400 font-medium">
-                        ${(sale.amountPaid || 0).toFixed(2)}
-                      </td>
-                      <td className="py-3 px-4 text-right text-red-400 font-medium">
-                        ${(sale.balance || 0).toFixed(2)}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            sale.paymentStatus === "partial"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {sale.paymentStatus === "partial"
-                            ? "Partial"
-                            : "Unpaid"}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <button
-                          onClick={() => handleSaleSelect(sale)}
-                          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
-                        >
-                          Add Payment
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <ResponsiveTable
+          data={unpaidSales}
+          columns={tableColumns}
+          MobileCard={PaymentMobileCard}
+          emptyMessage="No outstanding sales found."
+        />
       </div>
 
       {/* Payment Form */}

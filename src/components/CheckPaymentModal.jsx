@@ -54,15 +54,18 @@ const CheckPaymentModal = ({
     setLoading(true);
     try {
       // Add new bank if needed
-      if (showNewBankInput && bankName) {
+      if (showNewBankInput && bankName && setBanks) {
         const newBank = await addBank({ name: bankName });
-        setBanks((prevBanks) => [...prevBanks, newBank]);
+        setBanks((prevBanks) => [...(prevBanks || []), newBank]);
       }
 
       // Add new currency if needed
-      if (showNewCurrencyInput && currency) {
+      if (showNewCurrencyInput && currency && setCurrencies) {
         const newCurrency = await addCurrency({ name: currency });
-        setCurrencies((prevCurrencies) => [...prevCurrencies, newCurrency]);
+        setCurrencies((prevCurrencies) => [
+          ...(prevCurrencies || []),
+          newCurrency,
+        ]);
       }
 
       // Return check details to parent component
@@ -113,7 +116,7 @@ const CheckPaymentModal = ({
         Check Payment Details
       </h2>
       <p className="text-gray-300 mb-4">
-        Please enter the check information for the payment of $
+        Please enter the check information for the payment of ₪
         {paymentAmount.toFixed(2)}
       </p>
 
@@ -150,7 +153,7 @@ const CheckPaymentModal = ({
             required
           >
             <option value="">Select Bank</option>
-            {banks.map((bank) => (
+            {(banks || []).map((bank) => (
               <option key={bank.id} value={bank.name}>
                 {bank.name}
               </option>
@@ -218,7 +221,7 @@ const CheckPaymentModal = ({
             className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
           >
             <option value="">Select Currency</option>
-            {currencies.map((curr) => (
+            {(currencies || []).map((curr) => (
               <option key={curr.id} value={curr.name}>
                 {curr.name}
               </option>

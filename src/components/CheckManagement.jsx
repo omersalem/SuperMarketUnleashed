@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
-import { addCheck, updateCheck, deleteCheck } from '../firebase/firestore';
-import AddCheckModal from './AddCheckModal';
-import EditCheckModal from './EditCheckModal';
+import React, { useState } from "react";
+import { addCheck, updateCheck, deleteCheck } from "../firebase/firestore";
+import ResponsiveTable, { createMobileCard } from "./ResponsiveTable";
+import AddCheckModal from "./AddCheckModal";
+import EditCheckModal from "./EditCheckModal";
 
-const CheckManagement = ({ checks, setChecks, banks, setBanks, currencies, setCurrencies }) => {
+const CheckManagement = ({
+  checks,
+  setChecks,
+  banks,
+  setBanks,
+  currencies,
+  setCurrencies,
+}) => {
   const [error, setError] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -27,7 +35,7 @@ const CheckManagement = ({ checks, setChecks, banks, setBanks, currencies, setCu
   const handleUpdateCheck = async (id, check) => {
     try {
       await updateCheck(id, check);
-      setChecks(checks.map(c => c.id === id ? { id, ...check } : c));
+      setChecks(checks.map((c) => (c.id === id ? { id, ...check } : c)));
       setIsEditModalOpen(false);
       setEditingCheck(null);
     } catch (error) {
@@ -36,28 +44,133 @@ const CheckManagement = ({ checks, setChecks, banks, setBanks, currencies, setCu
   };
 
   const handleDeleteCheck = async (id) => {
-    if (window.confirm('Are you sure you want to delete this check?')) {
+    if (window.confirm("Are you sure you want to delete this check?")) {
       try {
         await deleteCheck(id);
-        setChecks(checks.filter(check => check.id !== id));
+        setChecks(checks.filter((check) => check.id !== id));
       } catch (error) {
         setError(error.message);
       }
     }
   };
 
+  // Create mobile card component for checks
+  const CheckMobileCard = createMobileCard(({ item: check }) => (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="font-bold text-lg text-white">#{check.checkNumber}</h3>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handleEditCheck(check)}
+            className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => handleDeleteCheck(check.id)}
+            className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <span className="text-gray-400">Amount:</span>
+          <p className="text-green-400 font-medium">
+            {check.amount} {check.currency}
+          </p>
+        </div>
+        <div>
+          <span className="text-gray-400">Date:</span>
+          <p className="text-white font-medium">
+            {new Date(check.date).toLocaleDateString()}
+          </p>
+        </div>
+        <div>
+          <span className="text-gray-400">Bank:</span>
+          <p className="text-white font-medium">{check.bankName}</p>
+        </div>
+        <div>
+          <span className="text-gray-400">Payee:</span>
+          <p className="text-white font-medium">{check.payee}</p>
+        </div>
+      </div>
+    </div>
+  ));
+
+  // Table columns configuration
+  const tableColumns = [
+    {
+      key: "id",
+      label: "ID",
+    },
+    {
+      key: "amount",
+      label: "Amount",
+      render: (check) => `₪${check.amount} ${check.currency}`,
+    },
+    {
+      key: "date",
+      label: "Date",
+      render: (check) => new Date(check.date).toLocaleDateString(),
+    },
+    {
+      key: "bankName",
+      label: "Bank Name",
+    },
+    {
+      key: "checkNumber",
+      label: "Check Number",
+    },
+    {
+      key: "payee",
+      label: "Payee",
+    },
+    {
+      key: "currency",
+      label: "Currency",
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (check) => (
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handleEditCheck(check)}
+            className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded text-sm"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => handleDeleteCheck(check.id)}
+            className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm"
+          >
+            Delete
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   return (
-    <div className="bg-gray-800 p-6 rounded-lg shadow-lg mt-8">
-      <h2 className="text-2xl font-bold mb-4">Check Management</h2>
-      <button onClick={() => setIsAddModalOpen(true)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4">
+    <div className="bg-gray-800 p-3 sm:p-6 rounded-lg shadow-lg mt-4 sm:mt-8 max-w-full overflow-hidden">
+      <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-white">
+        Check Management
+      </h2>
+      <button
+        onClick={() => setIsAddModalOpen(true)}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4 w-full sm:w-auto"
+      >
         Add Check
       </button>
 
       {isAddModalOpen && (
-        <AddCheckModal 
+        <AddCheckModal
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
-          onAdd={handleAddCheck} 
+          onAdd={handleAddCheck}
           banks={banks}
           setBanks={setBanks}
           currencies={currencies}
@@ -81,43 +194,14 @@ const CheckManagement = ({ checks, setChecks, banks, setBanks, currencies, setCu
         />
       )}
 
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="text-red-500 mb-4">{error}</p>}
 
-      <table className="min-w-full bg-gray-800">
-        <thead>
-          <tr>
-            <th className="py-2 px-4 border-b border-gray-700 text-left">ID</th>
-            <th className="py-2 px-4 border-b border-gray-700 text-left">Amount</th>
-            <th className="py-2 px-4 border-b border-gray-700 text-left">Date</th>
-            <th className="py-2 px-4 border-b border-gray-700 text-left">Bank Name</th>
-            <th className="py-2 px-4 border-b border-gray-700 text-left">Check Number</th>
-            <th className="py-2 px-4 border-b border-gray-700 text-left">Payee</th>
-            <th className="py-2 px-4 border-b border-gray-700 text-left">Currency</th>
-            <th className="py-2 px-4 border-b border-gray-700 text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {checks.map((check) => (
-            <tr key={check.id}>
-              <td className="py-2 px-4 border-b border-gray-700">{check.id}</td>
-              <td className="py-2 px-4 border-b border-gray-700">{check.amount}</td>
-              <td className="py-2 px-4 border-b border-gray-700">{new Date(check.date).toLocaleDateString()}</td>
-              <td className="py-2 px-4 border-b border-gray-700">{check.bankName}</td>
-              <td className="py-2 px-4 border-b border-gray-700">{check.checkNumber}</td>
-              <td className="py-2 px-4 border-b border-gray-700">{check.payee}</td>
-              <td className="py-2 px-4 border-b border-gray-700">{check.currency}</td>
-              <td className="py-2 px-4 border-b border-gray-700">
-                <button onClick={() => handleEditCheck(check)} className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded mr-2">
-                  Edit
-                </button>
-                <button onClick={() => handleDeleteCheck(check.id)} className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <ResponsiveTable
+        data={checks}
+        columns={tableColumns}
+        MobileCard={CheckMobileCard}
+        emptyMessage="No checks found. Add your first check to get started!"
+      />
     </div>
   );
 };

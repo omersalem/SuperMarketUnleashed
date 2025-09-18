@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import AddToStockModal from './AddToStockModal';
-import { updateProduct } from '../firebase/firestore';
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import AddToStockModal from "./AddToStockModal";
+import { updateProduct } from "../firebase/firestore";
 
 const InventoryManagement = ({ products, setProducts }) => {
   const { t } = useTranslation();
@@ -12,15 +12,19 @@ const InventoryManagement = ({ products, setProducts }) => {
 
   const handleAddToStock = async (productId, quantity) => {
     try {
-      const productToUpdate = products.find(p => p.id === productId);
+      const productToUpdate = products.find((p) => p.id === productId);
       if (productToUpdate) {
         const newStock = productToUpdate.stock + quantity;
         await updateProduct(productId, { stock: newStock });
-        setProducts(products.map(p => p.id === productId ? { ...p, stock: newStock } : p));
+        setProducts(
+          products.map((p) =>
+            p.id === productId ? { ...p, stock: newStock } : p
+          )
+        );
       }
       setIsAddToStockModalOpen(false);
       setError(null);
-      alert('Stock updated successfully!');
+      alert("Stock updated successfully!");
     } catch (error) {
       setError(error.message);
       console.error("Error adding to stock:", error);
@@ -29,38 +33,47 @@ const InventoryManagement = ({ products, setProducts }) => {
 
   return (
     <div className="p-6 bg-gray-900 min-h-screen text-white">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">{t('inventoryManagement')}</h1>
-        <button
-          onClick={() => setIsAddToStockModalOpen(true)}
-          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          Add to Stock
-        </button>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">{t("inventoryManagement")}</h1>
       </div>
       {error && <p className="text-red-500">{error}</p>}
       <div className="bg-gray-800 shadow-md rounded-lg p-4">
         <table className="min-w-full">
           <thead>
             <tr>
-              <th className="px-6 py-3 border-b-2 border-gray-700 text-left text-sm leading-4 text-gray-300 uppercase tracking-wider">{t('product')}</th>
-              <th className="px-6 py-3 border-b-2 border-gray-700 text-left text-sm leading-4 text-gray-300 uppercase tracking-wider">{t('stock')}</th>
-              <th className="px-6 py-3 border-b-2 border-gray-700 text-left text-sm leading-4 text-gray-300 uppercase tracking-wider">{t('status')}</th>
+              <th className="px-6 py-3 border-b-2 border-gray-700 text-left text-sm leading-4 text-gray-300 uppercase tracking-wider">
+                {t("product")}
+              </th>
+              <th className="px-6 py-3 border-b-2 border-gray-700 text-left text-sm leading-4 text-gray-300 uppercase tracking-wider">
+                {t("stock")}
+              </th>
+              <th className="px-6 py-3 border-b-2 border-gray-700 text-left text-sm leading-4 text-gray-300 uppercase tracking-wider">
+                {t("status")}
+              </th>
             </tr>
           </thead>
           <tbody>
             {products.map((product) => (
-              <tr key={product.id} className={product.stock < lowStockThreshold ? 'bg-red-900' : ''}>
-                <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-700">{product.name}</td>
-                <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-700">{product.stock}</td>
+              <tr
+                key={product.id}
+                className={
+                  product.stock < lowStockThreshold ? "bg-red-900" : ""
+                }
+              >
+                <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-700">
+                  {product.name}
+                </td>
+                <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-700">
+                  {product.stock}
+                </td>
                 <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-700">
                   {product.stock < lowStockThreshold ? (
                     <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-700 text-white">
-                      {t('lowStock')}
+                      {t("lowStock")}
                     </span>
                   ) : (
                     <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-700 text-white">
-                      {t('inStock')}
+                      {t("inStock")}
                     </span>
                   )}
                 </td>
@@ -69,7 +82,18 @@ const InventoryManagement = ({ products, setProducts }) => {
           </tbody>
         </table>
       </div>
-      <AddToStockModal 
+
+      {/* Add to Stock button moved below the table */}
+      <div className="mt-6 flex justify-center">
+        <button
+          onClick={() => setIsAddToStockModalOpen(true)}
+          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
+          Add to Stock
+        </button>
+      </div>
+
+      <AddToStockModal
         isOpen={isAddToStockModalOpen}
         onClose={() => setIsAddToStockModalOpen(false)}
         onAddToStock={handleAddToStock}

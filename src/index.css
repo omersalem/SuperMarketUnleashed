@@ -2,9 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent horizontal scroll and ensure mobile responsiveness */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 /* Smooth scrolling for navigation links */
 html {
   scroll-behavior: smooth;
+}
+
+/* Mobile-first responsive table scrolling */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 1024px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
 }
 
 /* Custom scrollbar for better UX */

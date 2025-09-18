@@ -1,4 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import ErrorBoundary from "../components/ErrorBoundary";
+import MobileNav from "../components/MobileNav";
+import { AuthContext } from "../context/AuthContext";
+import {
+  PageLoadingSpinner,
+  SectionLoadingSpinner,
+} from "../components/LoadingSpinner";
+import { StatsSkeleton } from "../components/SkeletonLoader";
 import CustomerManagement from "../components/CustomerManagement";
 import VendorManagement from "../components/VendorManagement";
 import CategoryManagement from "../components/CategoryManagement";
@@ -12,6 +20,7 @@ import InventoryManagement from "../components/InventoryManagement";
 import PaymentManagement from "../components/PaymentManagement";
 import VendorPaymentManagement from "../components/VendorPaymentManagement";
 import ReportsDashboard from "../components/ReportsDashboard";
+import { handleFirebaseError, logError } from "../utils/errorHandling";
 
 import {
   getCustomers,
@@ -30,6 +39,7 @@ import {
 } from "../firebase/firestore";
 
 const AdminDashboard = () => {
+  const { logout, currentUser, userRole } = useContext(AuthContext);
   const [customers, setCustomers] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -45,11 +55,25 @@ const AdminDashboard = () => {
   const [workerAttendance, setWorkerAttendance] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [loadingStates, setLoadingStates] = useState({
+    initial: true,
+    reports: false,
+    customers: false,
+    vendors: false,
+    categories: false,
+    products: false,
+    sales: false,
+    purchases: false,
+    checks: false,
+    workers: false,
+    inventory: false,
+  });
 
   useEffect(() => {
     const fetchAllData = async () => {
       try {
         setLoading(true);
+        setError(null);
         const [
           customersData,
           vendorsData,
@@ -93,21 +117,25 @@ const AdminDashboard = () => {
         setWorkerExpenses(workerExpensesData);
         setWorkerAttendance(workerAttendanceData);
       } catch (err) {
-        setError(err.message);
+        const handledError = handleFirebaseError(err);
+        logError(handledError, { context: "AdminDashboard - fetchAllData" });
+        setError(handledError.message);
       } finally {
         setLoading(false);
+        setLoadingStates((prev) => ({ ...prev, initial: false }));
       }
     };
 
     fetchAllData();
   }, []);
 
+  // Helper function to handle section loading
+  const handleSectionLoading = (section, isLoading) => {
+    setLoadingStates((prev) => ({ ...prev, [section]: isLoading }));
+  };
+
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-900 text-white p-8 flex items-center justify-center">
-        <p>Loading all data...</p>
-      </div>
-    );
+    return <PageLoadingSpinner message="Loading dashboard data..." />;
   }
 
   if (error) {
@@ -121,219 +149,215 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Fixed Navigation Header */}
-      <nav className="fixed top-0 left-0 right-0 bg-gray-800 border-b border-gray-700 z-50 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-white">Admin Dashboard</h1>
-          <div className="flex flex-wrap gap-2 overflow-x-auto">
-            <a
-              href="#reports"
-              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm transition-colors"
+      <nav className="fixed top-0 left-0 right-0 bg-gray-800 border-b border-gray-700 z-50 px-2 sm:px-4 py-3">
+        <div className="flex items-center justify-between max-w-full">
+          <h1 className="text-lg sm:text-xl font-bold text-white truncate">
+            Admin Dashboard
+          </h1>
+
+          <div className="flex items-center space-x-4">
+            {/* User info */}
+            <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-300">
+              <span className="text-blue-400">👤</span>
+              <span>{currentUser?.email}</span>
+            </div>
+
+            {/* Logout button */}
+            <button
+              onClick={logout}
+              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg transition-colors duration-200 text-sm font-medium flex items-center space-x-2"
+              title="Logout"
             >
-              📊 Reports
-            </a>
-            <a
-              href="#customers"
-              className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded text-sm transition-colors"
-            >
-              👥 Customers
-            </a>
-            <a
-              href="#vendors"
-              className="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-sm transition-colors"
-            >
-              🏪 Vendors
-            </a>
-            <a
-              href="#categories"
-              className="px-3 py-1 bg-yellow-600 hover:bg-yellow-700 rounded text-sm transition-colors"
-            >
-              📂 Categories
-            </a>
-            <a
-              href="#products"
-              className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm transition-colors"
-            >
-              📦 Products
-            </a>
-            <a
-              href="#sales"
-              className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 rounded text-sm transition-colors"
-            >
-              💰 Sales
-            </a>
-            <a
-              href="#payments"
-              className="px-3 py-1 bg-pink-600 hover:bg-pink-700 rounded text-sm transition-colors"
-            >
-              💳 Payments
-            </a>
-            <a
-              href="#purchases"
-              className="px-3 py-1 bg-teal-600 hover:bg-teal-700 rounded text-sm transition-colors"
-            >
-              🛒 Purchases
-            </a>
-            <a
-              href="#vendor-payments"
-              className="px-3 py-1 bg-orange-600 hover:bg-orange-700 rounded text-sm transition-colors"
-            >
-              💼 Vendor Pay
-            </a>
-            <a
-              href="#invoices"
-              className="px-3 py-1 bg-cyan-600 hover:bg-cyan-700 rounded text-sm transition-colors"
-            >
-              📋 Invoices
-            </a>
-            <a
-              href="#checks"
-              className="px-3 py-1 bg-lime-600 hover:bg-lime-700 rounded text-sm transition-colors"
-            >
-              💳 Checks
-            </a>
-            <a
-              href="#workers"
-              className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 rounded text-sm transition-colors"
-            >
-              👷 Workers
-            </a>
-            <a
-              href="#inventory"
-              className="px-3 py-1 bg-rose-600 hover:bg-rose-700 rounded text-sm transition-colors"
-            >
-              📊 Inventory
-            </a>
+              <span className="hidden sm:inline">Logout</span>
+              <span className="text-base">🚪</span>
+            </button>
+
+            <MobileNav userRole={userRole || "admin"} />
           </div>
         </div>
       </nav>
 
-      {/* Main Content with top padding to account for fixed header */}
-      <div className="pt-20 px-8 pb-8">
-        <section id="reports">
-          <ReportsDashboard
-            sales={sales}
-            purchases={purchases}
-            customers={customers}
-            vendors={vendors}
-            products={products}
-            workers={workers}
-            salaryPayments={salaryPayments}
-            workerExpenses={workerExpenses}
-            workerAttendance={workerAttendance}
-            checks={checks}
-            categories={categories}
-          />
-        </section>
+      {/* Main Content */}
+      <div className="pt-16 px-2 sm:px-4 lg:px-8 max-w-full overflow-hidden">
+        <ErrorBoundary fallbackMessage="Reports dashboard failed to load.">
+          <section id="reports" className="mb-8">
+            {loadingStates.reports ? (
+              <SectionLoadingSpinner message="Loading reports..." />
+            ) : (
+              <ReportsDashboard
+                customers={customers}
+                vendors={vendors}
+                products={products}
+                sales={sales}
+                purchases={purchases}
+                checks={checks}
+                workers={workers}
+                banks={banks}
+                currencies={currencies}
+                salaryPayments={salaryPayments}
+                workerExpenses={workerExpenses}
+                workerAttendance={workerAttendance}
+                onLoadingChange={(loading) =>
+                  handleSectionLoading("reports", loading)
+                }
+              />
+            )}
+          </section>
+        </ErrorBoundary>
+        <ErrorBoundary fallbackMessage="Customer management failed to load.">
+          <section id="customers" className="mb-8">
+            <CustomerManagement
+              customers={customers}
+              setCustomers={setCustomers}
+            />
+          </section>
+        </ErrorBoundary>
 
-        <section id="customers">
-          <CustomerManagement
-            customers={customers}
-            setCustomers={setCustomers}
-          />
-        </section>
+        <ErrorBoundary fallbackMessage="Vendor management failed to load.">
+          <section id="vendors" className="mb-8">
+            <VendorManagement vendors={vendors} setVendors={setVendors} />
+          </section>
+        </ErrorBoundary>
 
-        <section id="vendors">
-          <VendorManagement vendors={vendors} setVendors={setVendors} />
-        </section>
+        <ErrorBoundary fallbackMessage="Category management failed to load.">
+          <section id="categories" className="mb-8">
+            <CategoryManagement
+              categories={categories}
+              setCategories={setCategories}
+            />
+          </section>
+        </ErrorBoundary>
 
-        <section id="categories">
-          <CategoryManagement
-            categories={categories}
-            setCategories={setCategories}
-          />
-        </section>
+        <ErrorBoundary fallbackMessage="Product management failed to load.">
+          <section id="products" className="mb-8">
+            {loadingStates.products ? (
+              <SectionLoadingSpinner message="Loading products..." />
+            ) : (
+              <ProductManagement
+                products={products}
+                setProducts={setProducts}
+                categories={categories}
+                onLoadingChange={(loading) =>
+                  handleSectionLoading("products", loading)
+                }
+              />
+            )}
+          </section>
+        </ErrorBoundary>
 
-        <section id="products">
-          <ProductManagement
-            products={products}
-            setProducts={setProducts}
-            categories={categories}
-          />
-        </section>
+        <ErrorBoundary fallbackMessage="Sales management failed to load.">
+          <section id="sales" className="mb-8">
+            {loadingStates.sales ? (
+              <SectionLoadingSpinner message="Loading sales..." />
+            ) : (
+              <SalesManagement
+                sales={sales}
+                setSales={setSales}
+                customers={customers}
+                products={products}
+                setProducts={setProducts}
+                banks={banks}
+                setBanks={setBanks}
+                currencies={currencies}
+                setCurrencies={setCurrencies}
+                onLoadingChange={(loading) =>
+                  handleSectionLoading("sales", loading)
+                }
+              />
+            )}
+          </section>
+        </ErrorBoundary>
 
-        <section id="sales">
-          <SalesManagement
-            sales={sales}
-            setSales={setSales}
-            customers={customers}
-            products={products}
-            setProducts={setProducts}
-            banks={banks}
-            setBanks={setBanks}
-            currencies={currencies}
-            setCurrencies={setCurrencies}
-          />
-        </section>
+        <ErrorBoundary fallbackMessage="Payment management failed to load.">
+          <section id="payments" className="mb-8">
+            <PaymentManagement
+              sales={sales}
+              setSales={setSales}
+              customers={customers}
+              banks={banks}
+              setBanks={setBanks}
+              currencies={currencies}
+              setCurrencies={setCurrencies}
+            />
+          </section>
+        </ErrorBoundary>
 
-        <section id="payments">
-          <PaymentManagement
-            sales={sales}
-            setSales={setSales}
-            customers={customers}
-            banks={banks}
-            setBanks={setBanks}
-            currencies={currencies}
-            setCurrencies={setCurrencies}
-          />
-        </section>
+        <ErrorBoundary fallbackMessage="Purchase management failed to load.">
+          <section id="purchases" className="mb-8">
+            <PurchaseManagement
+              purchases={purchases}
+              setPurchases={setPurchases}
+              vendors={vendors}
+              products={products}
+              setProducts={setProducts}
+              banks={banks}
+              setBanks={setBanks}
+              currencies={currencies}
+              setCurrencies={setCurrencies}
+            />
+          </section>
+        </ErrorBoundary>
 
-        <section id="purchases">
-          <PurchaseManagement
-            purchases={purchases}
-            setPurchases={setPurchases}
-            vendors={vendors}
-            products={products}
-            setProducts={setProducts}
-            banks={banks}
-            setBanks={setBanks}
-            currencies={currencies}
-            setCurrencies={setCurrencies}
-          />
-        </section>
+        <ErrorBoundary fallbackMessage="Vendor payment management failed to load.">
+          <section id="vendor-payments" className="mb-8">
+            <VendorPaymentManagement
+              purchases={purchases}
+              setPurchases={setPurchases}
+              vendors={vendors}
+              banks={banks}
+              setBanks={setBanks}
+              currencies={currencies}
+              setCurrencies={setCurrencies}
+            />
+          </section>
+        </ErrorBoundary>
 
-        <section id="vendor-payments">
-          <VendorPaymentManagement
-            purchases={purchases}
-            setPurchases={setPurchases}
-            vendors={vendors}
-            banks={banks}
-            setBanks={setBanks}
-            currencies={currencies}
-            setCurrencies={setCurrencies}
-          />
-        </section>
+        <ErrorBoundary fallbackMessage="Invoice management failed to load.">
+          <section id="invoices" className="mb-8">
+            <InvoiceManagement
+              sales={sales}
+              customers={customers}
+              userRole="admin"
+            />
+          </section>
+        </ErrorBoundary>
 
-        <section id="invoices">
-          <InvoiceManagement sales={sales} userRole="admin" />
-        </section>
+        <ErrorBoundary fallbackMessage="Check management failed to load.">
+          <section id="checks" className="mb-8">
+            <CheckManagement
+              checks={checks}
+              setChecks={setChecks}
+              banks={banks}
+              setBanks={setBanks}
+              currencies={currencies}
+              setCurrencies={setCurrencies}
+            />
+          </section>
+        </ErrorBoundary>
 
-        <section id="checks">
-          <CheckManagement
-            checks={checks}
-            setChecks={setChecks}
-            banks={banks}
-            setBanks={setBanks}
-            currencies={currencies}
-            setCurrencies={setCurrencies}
-          />
-        </section>
+        <ErrorBoundary fallbackMessage="Worker management failed to load.">
+          <section id="workers" className="mb-8">
+            <WorkerManagement
+              workers={workers}
+              setWorkers={setWorkers}
+              salaryPayments={salaryPayments}
+              setSalaryPayments={setSalaryPayments}
+              workerExpenses={workerExpenses}
+              setWorkerExpenses={setWorkerExpenses}
+              workerAttendance={workerAttendance}
+              setWorkerAttendance={setWorkerAttendance}
+            />
+          </section>
+        </ErrorBoundary>
 
-        <section id="workers">
-          <WorkerManagement
-            workers={workers}
-            setWorkers={setWorkers}
-            salaryPayments={salaryPayments}
-            setSalaryPayments={setSalaryPayments}
-            workerExpenses={workerExpenses}
-            setWorkerExpenses={setWorkerExpenses}
-            workerAttendance={workerAttendance}
-            setWorkerAttendance={setWorkerAttendance}
-          />
-        </section>
-
-        <section id="inventory">
-          <InventoryManagement products={products} setProducts={setProducts} />
-        </section>
+        <ErrorBoundary fallbackMessage="Inventory management failed to load.">
+          <section id="inventory" className="mb-8">
+            <InventoryManagement
+              products={products}
+              setProducts={setProducts}
+            />
+          </section>
+        </ErrorBoundary>
       </div>
     </div>
   );

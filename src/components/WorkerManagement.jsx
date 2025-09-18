@@ -7,6 +7,7 @@ import {
   eachDayOfInterval,
   isWeekend,
 } from "date-fns";
+import ResponsiveTable, { createMobileCard } from "./ResponsiveTable";
 import AddWorkerModal from "./AddWorkerModal";
 import EditWorkerModal from "./EditWorkerModal";
 import {
@@ -121,6 +122,306 @@ const WorkerManagement = ({
   const selectedWorkerStats = useMemo(() => {
     return workerStats.find((w) => w.id === selectedWorkerId) || null;
   }, [workerStats, selectedWorkerId]);
+
+  // Create mobile card component for worker overview
+  const WorkerOverviewMobileCard = createMobileCard(({ item: worker }) => (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="font-bold text-lg text-white">{worker.name}</h3>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handleEdit(worker)}
+            className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
+          >
+            ✏️ Edit
+          </button>
+          <button
+            onClick={() => handleDelete(worker.id)}
+            className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
+          >
+            🗑️ Delete
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <span className="text-gray-400">Monthly Salary:</span>
+          <p className="text-white font-medium">
+            ${(worker.salary || 0).toFixed(2)}
+          </p>
+        </div>
+        <div>
+          <span className="text-gray-400">Daily Salary:</span>
+          <p className="text-white font-medium">
+            ${worker.dailySalary.toFixed(2)}
+          </p>
+        </div>
+        <div>
+          <span className="text-gray-400">Expenses:</span>
+          <p className="text-red-400 font-medium">
+            ${worker.monthlyExpenses.toFixed(2)}
+          </p>
+        </div>
+        <div>
+          <span className="text-gray-400">Absences:</span>
+          <p className="text-orange-400 font-medium">
+            {worker.monthlyAbsences} days
+          </p>
+        </div>
+        <div>
+          <span className="text-gray-400">Deductions:</span>
+          <p className="text-red-400 font-medium">
+            ${worker.totalDeductions.toFixed(2)}
+          </p>
+        </div>
+        <div>
+          <span className="text-gray-400">Remaining:</span>
+          <p
+            className={`font-medium ${
+              worker.remainingSalary >= 0 ? "text-green-400" : "text-red-500"
+            }`}
+          >
+            ${worker.remainingSalary.toFixed(2)}
+          </p>
+        </div>
+      </div>
+    </div>
+  ));
+
+  // Mobile card for expenses
+  const ExpenseMobileCard = createMobileCard(({ item: expense }) => (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="font-bold text-lg text-white">Expense</h3>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handleDeleteExpense(expense.id)}
+            className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
+          >
+            🗑️ Delete
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <span className="text-gray-400">Date:</span>
+          <p className="text-white font-medium">
+            {format(new Date(expense.date), "MMM dd, yyyy")}
+          </p>
+        </div>
+        <div>
+          <span className="text-gray-400">Amount:</span>
+          <p className="text-red-400 font-medium">
+            ${expense.amount.toFixed(2)}
+          </p>
+        </div>
+        <div className="col-span-2">
+          <span className="text-gray-400">Description:</span>
+          <p className="text-white font-medium">{expense.description}</p>
+        </div>
+      </div>
+    </div>
+  ));
+
+  // Mobile card for attendance
+  const AttendanceMobileCard = createMobileCard(({ item: attendance }) => (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="font-bold text-lg text-white">
+          {format(new Date(attendance.date), "MMM dd, yyyy")}
+        </h3>
+        <div className="flex space-x-2">
+          <span
+            className={`px-2 py-1 rounded text-sm ${
+              attendance.status === "absent"
+                ? "bg-red-600 text-white"
+                : attendance.status === "sick"
+                ? "bg-yellow-600 text-white"
+                : attendance.status === "vacation"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-600 text-white"
+            }`}
+          >
+            {attendance.status}
+          </span>
+          <button
+            onClick={() => handleDeleteAttendance(attendance.id)}
+            className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
+          >
+            🗑️ Delete
+          </button>
+        </div>
+      </div>
+
+      <div className="text-sm">
+        <span className="text-gray-400">Reason:</span>
+        <p className="text-white font-medium">{attendance.reason || "N/A"}</p>
+      </div>
+    </div>
+  ));
+
+  // Table columns configurations
+  const workerOverviewColumns = [
+    {
+      key: "name",
+      label: "Name",
+      render: (worker) => <span className="text-white">{worker.name}</span>,
+    },
+    {
+      key: "salary",
+      label: "Monthly Salary",
+      render: (worker) => (
+        <span className="text-white">${(worker.salary || 0).toFixed(2)}</span>
+      ),
+    },
+    {
+      key: "dailySalary",
+      label: "Daily Salary",
+      render: (worker) => (
+        <span className="text-white">${worker.dailySalary.toFixed(2)}</span>
+      ),
+    },
+    {
+      key: "expenses",
+      label: "Expenses",
+      render: (worker) => (
+        <span className="text-red-400">
+          ${worker.monthlyExpenses.toFixed(2)}
+        </span>
+      ),
+    },
+    {
+      key: "absences",
+      label: "Absences",
+      render: (worker) => (
+        <span className="text-orange-400">{worker.monthlyAbsences} days</span>
+      ),
+    },
+    {
+      key: "deductions",
+      label: "Total Deductions",
+      render: (worker) => (
+        <span className="text-red-400">
+          ${worker.totalDeductions.toFixed(2)}
+        </span>
+      ),
+    },
+    {
+      key: "remaining",
+      label: "Remaining Salary",
+      render: (worker) => (
+        <span
+          className={`font-medium ${
+            worker.remainingSalary >= 0 ? "text-green-400" : "text-red-500"
+          }`}
+        >
+          ${worker.remainingSalary.toFixed(2)}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (worker) => (
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handleEdit(worker)}
+            className="text-blue-400 hover:text-blue-300"
+          >
+            ✏️ Edit
+          </button>
+          <button
+            onClick={() => handleDelete(worker.id)}
+            className="text-red-400 hover:text-red-300 ml-3"
+          >
+            🗑️ Delete
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+  const expenseColumns = [
+    {
+      key: "date",
+      label: "Date",
+      render: (expense) => format(new Date(expense.date), "MMM dd, yyyy"),
+    },
+    {
+      key: "description",
+      label: "Description",
+      render: (expense) => (
+        <span className="text-white">{expense.description}</span>
+      ),
+    },
+    {
+      key: "amount",
+      label: "Amount",
+      render: (expense) => (
+        <span className="text-red-400">${expense.amount.toFixed(2)}</span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (expense) => (
+        <button
+          onClick={() => handleDeleteExpense(expense.id)}
+          className="text-red-400 hover:text-red-300"
+        >
+          🗑️ Delete
+        </button>
+      ),
+    },
+  ];
+
+  const attendanceColumns = [
+    {
+      key: "date",
+      label: "Date",
+      render: (attendance) => format(new Date(attendance.date), "MMM dd, yyyy"),
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: (attendance) => (
+        <span
+          className={`px-2 py-1 rounded text-sm ${
+            attendance.status === "absent"
+              ? "bg-red-600 text-white"
+              : attendance.status === "sick"
+              ? "bg-yellow-600 text-white"
+              : attendance.status === "vacation"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-600 text-white"
+          }`}
+        >
+          {attendance.status}
+        </span>
+      ),
+    },
+    {
+      key: "reason",
+      label: "Reason",
+      render: (attendance) => (
+        <span className="text-white">{attendance.reason || "N/A"}</span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (attendance) => (
+        <button
+          onClick={() => handleDeleteAttendance(attendance.id)}
+          className="text-red-400 hover:text-red-300"
+        >
+          🗑️ Delete
+        </button>
+      ),
+    },
+  ];
 
   const handleEdit = (worker) => {
     setSelectedWorker(worker);
@@ -259,34 +560,36 @@ const WorkerManagement = ({
   };
 
   return (
-    <div className="bg-gray-800 p-6 rounded-lg shadow-lg mt-8">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-white">👷 Worker Management</h2>
+    <div className="bg-gray-800 p-3 sm:p-6 rounded-lg shadow-lg mt-4 sm:mt-8 max-w-full overflow-hidden">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
+        <h2 className="text-xl sm:text-2xl font-bold text-white">
+          👷 Worker Management
+        </h2>
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         >
           ➕ {t("addWorker")}
         </button>
       </div>
 
       {/* Month Selector */}
-      <div className="mb-6 flex items-center gap-4">
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
         <label className="text-white font-medium">📅 Month:</label>
         <input
           type="month"
           value={format(currentMonth, "yyyy-MM")}
           onChange={(e) => setCurrentMonth(new Date(e.target.value))}
-          className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+          className="w-full sm:w-auto px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
         />
       </div>
 
       {/* Tab Navigation */}
-      <div className="mb-6">
-        <div className="flex border-b border-gray-600">
+      <div className="mb-4 sm:mb-6">
+        <div className="flex border-b border-gray-600 overflow-x-auto">
           <button
             onClick={() => setActiveTab("overview")}
-            className={`px-4 py-2 font-medium transition-colors ${
+            className={`px-4 py-2 font-medium transition-colors whitespace-nowrap ${
               activeTab === "overview"
                 ? "text-blue-400 border-b-2 border-blue-400"
                 : "text-gray-300 hover:text-white"
@@ -296,7 +599,7 @@ const WorkerManagement = ({
           </button>
           <button
             onClick={() => setActiveTab("expenses")}
-            className={`px-4 py-2 font-medium transition-colors ${
+            className={`px-4 py-2 font-medium transition-colors whitespace-nowrap ${
               activeTab === "expenses"
                 ? "text-blue-400 border-b-2 border-blue-400"
                 : "text-gray-300 hover:text-white"
@@ -306,7 +609,7 @@ const WorkerManagement = ({
           </button>
           <button
             onClick={() => setActiveTab("attendance")}
-            className={`px-4 py-2 font-medium transition-colors ${
+            className={`px-4 py-2 font-medium transition-colors whitespace-nowrap ${
               activeTab === "attendance"
                 ? "text-blue-400 border-b-2 border-blue-400"
                 : "text-gray-300 hover:text-white"
@@ -320,86 +623,12 @@ const WorkerManagement = ({
       {/* Overview Tab */}
       {activeTab === "overview" && (
         <div className="space-y-6">
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead>
-                <tr className="border-b border-gray-600">
-                  <th className="px-4 py-3 text-left text-white font-medium">
-                    Name
-                  </th>
-                  <th className="px-4 py-3 text-left text-white font-medium">
-                    Monthly Salary
-                  </th>
-                  <th className="px-4 py-3 text-left text-white font-medium">
-                    Daily Salary
-                  </th>
-                  <th className="px-4 py-3 text-left text-white font-medium">
-                    Expenses
-                  </th>
-                  <th className="px-4 py-3 text-left text-white font-medium">
-                    Absences
-                  </th>
-                  <th className="px-4 py-3 text-left text-white font-medium">
-                    Total Deductions
-                  </th>
-                  <th className="px-4 py-3 text-left text-white font-medium">
-                    Remaining Salary
-                  </th>
-                  <th className="px-4 py-3 text-left text-white font-medium">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {workerStats.map((worker) => (
-                  <tr
-                    key={worker.id}
-                    className="border-b border-gray-700 hover:bg-gray-700"
-                  >
-                    <td className="px-4 py-3 text-white">{worker.name}</td>
-                    <td className="px-4 py-3 text-white">
-                      ${(worker.salary || 0).toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3 text-white">
-                      ${worker.dailySalary.toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3 text-red-400">
-                      ${worker.monthlyExpenses.toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3 text-orange-400">
-                      {worker.monthlyAbsences} days
-                    </td>
-                    <td className="px-4 py-3 text-red-400">
-                      ${worker.totalDeductions.toFixed(2)}
-                    </td>
-                    <td
-                      className={`px-4 py-3 font-medium ${
-                        worker.remainingSalary >= 0
-                          ? "text-green-400"
-                          : "text-red-500"
-                      }`}
-                    >
-                      ${worker.remainingSalary.toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => handleEdit(worker)}
-                        className="text-blue-400 hover:text-blue-300 mr-3"
-                      >
-                        ✏️ Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(worker.id)}
-                        className="text-red-400 hover:text-red-300"
-                      >
-                        🗑️ Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ResponsiveTable
+            data={workerStats}
+            columns={workerOverviewColumns}
+            MobileCard={WorkerOverviewMobileCard}
+            emptyMessage="No workers found. Add your first worker to get started!"
+          />
         </div>
       )}
 
@@ -480,55 +709,17 @@ const WorkerManagement = ({
                 💰 Expenses for {selectedWorkerStats.name} -{" "}
                 {format(currentMonth, "MMMM yyyy")}
               </h3>
-              <div className="overflow-x-auto">
-                <table className="min-w-full">
-                  <thead>
-                    <tr className="border-b border-gray-600">
-                      <th className="px-4 py-2 text-left text-white">Date</th>
-                      <th className="px-4 py-2 text-left text-white">
-                        Description
-                      </th>
-                      <th className="px-4 py-2 text-left text-white">Amount</th>
-                      <th className="px-4 py-2 text-left text-white">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedWorkerStats.expensesList
-                      .filter((exp) => {
-                        const expDate = new Date(exp.date);
-                        const monthStart = startOfMonth(currentMonth);
-                        const monthEnd = endOfMonth(currentMonth);
-                        return expDate >= monthStart && expDate <= monthEnd;
-                      })
-                      .map((expense) => (
-                        <tr
-                          key={expense.id}
-                          className="border-b border-gray-700"
-                        >
-                          <td className="px-4 py-2 text-white">
-                            {format(new Date(expense.date), "MMM dd, yyyy")}
-                          </td>
-                          <td className="px-4 py-2 text-white">
-                            {expense.description}
-                          </td>
-                          <td className="px-4 py-2 text-red-400">
-                            ${expense.amount.toFixed(2)}
-                          </td>
-                          <td className="px-4 py-2">
-                            <button
-                              onClick={() => handleDeleteExpense(expense.id)}
-                              className="text-red-400 hover:text-red-300"
-                            >
-                              🗑️ Delete
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
+              <ResponsiveTable
+                data={selectedWorkerStats.expensesList.filter((exp) => {
+                  const expDate = new Date(exp.date);
+                  const monthStart = startOfMonth(currentMonth);
+                  const monthEnd = endOfMonth(currentMonth);
+                  return expDate >= monthStart && expDate <= monthEnd;
+                })}
+                columns={expenseColumns}
+                MobileCard={ExpenseMobileCard}
+                emptyMessage="No expenses found for this month."
+              />
             </div>
           )}
         </div>
@@ -634,67 +825,17 @@ const WorkerManagement = ({
                   </div>
                 </div>
               </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full">
-                  <thead>
-                    <tr className="border-b border-gray-600">
-                      <th className="px-4 py-2 text-left text-white">Date</th>
-                      <th className="px-4 py-2 text-left text-white">Status</th>
-                      <th className="px-4 py-2 text-left text-white">Reason</th>
-                      <th className="px-4 py-2 text-left text-white">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedWorkerStats.attendanceList
-                      .filter((att) => {
-                        const attDate = new Date(att.date);
-                        const monthStart = startOfMonth(currentMonth);
-                        const monthEnd = endOfMonth(currentMonth);
-                        return attDate >= monthStart && attDate <= monthEnd;
-                      })
-                      .map((attendance) => (
-                        <tr
-                          key={attendance.id}
-                          className="border-b border-gray-700"
-                        >
-                          <td className="px-4 py-2 text-white">
-                            {format(new Date(attendance.date), "MMM dd, yyyy")}
-                          </td>
-                          <td className="px-4 py-2">
-                            <span
-                              className={`px-2 py-1 rounded text-sm ${
-                                attendance.status === "absent"
-                                  ? "bg-red-600 text-white"
-                                  : attendance.status === "sick"
-                                  ? "bg-yellow-600 text-white"
-                                  : attendance.status === "vacation"
-                                  ? "bg-blue-600 text-white"
-                                  : "bg-gray-600 text-white"
-                              }`}
-                            >
-                              {attendance.status}
-                            </span>
-                          </td>
-                          <td className="px-4 py-2 text-white">
-                            {attendance.reason || "N/A"}
-                          </td>
-                          <td className="px-4 py-2">
-                            <button
-                              onClick={() =>
-                                handleDeleteAttendance(attendance.id)
-                              }
-                              className="text-red-400 hover:text-red-300"
-                            >
-                              🗑️ Delete
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
+              <ResponsiveTable
+                data={selectedWorkerStats.attendanceList.filter((att) => {
+                  const attDate = new Date(att.date);
+                  const monthStart = startOfMonth(currentMonth);
+                  const monthEnd = endOfMonth(currentMonth);
+                  return attDate >= monthStart && attDate <= monthEnd;
+                })}
+                columns={attendanceColumns}
+                MobileCard={AttendanceMobileCard}
+                emptyMessage="No attendance records found for this month."
+              />
             </div>
           )}
         </div>
