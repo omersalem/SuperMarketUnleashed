@@ -98,3 +98,6 @@ firestore-debug.log
 # Local configuration files that shouldn't be shared
 config.local.js
 settings.local.json
+
+# YoYo AI version control directory
+.yoyo/
