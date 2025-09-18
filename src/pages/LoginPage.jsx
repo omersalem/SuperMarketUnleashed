@@ -11,7 +11,6 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("user");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -24,7 +23,8 @@ const LoginPage = () => {
     setLoading(true);
     setError(null);
     try {
-      await login(email, password, role);
+      const { role } = await login(email, password);
+      // Redirect based on automatically determined role
       if (role === "admin") {
         navigate("/admin");
       } else {
@@ -35,7 +35,6 @@ const LoginPage = () => {
       logError(handledError, {
         context: "LoginPage - handleSubmit",
         email,
-        role,
       });
       setError(handledError.message);
     } finally {
@@ -73,6 +72,7 @@ const LoginPage = () => {
               className="w-full px-3 py-3 sm:py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
           <div>
@@ -89,22 +89,21 @@ const LoginPage = () => {
               className="w-full px-3 py-3 sm:py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
-          <div>
-            <label htmlFor="role" className="block mb-2 text-sm font-medium">
-              {t("login.role")}
-            </label>
-            <select
-              id="role"
-              name="role"
-              className="w-full px-3 py-3 sm:py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-            >
-              <option value="admin">{t("login.admin")}</option>
-              <option value="user">{t("login.user")}</option>
-            </select>
+          <div className="text-center text-sm text-gray-400 bg-gray-700/50 p-3 rounded-md">
+            <p className="mb-1">
+              🔒 <strong>Access Level:</strong>
+            </p>
+            <p>
+              • <span className="text-blue-400">omersalem2008@gmail.com</span> →
+              Admin Access
+            </p>
+            <p>
+              • <span className="text-green-400">All other emails</span> →
+              Read-Only Access
+            </p>
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <LoadingButton

@@ -161,10 +161,12 @@ const UserDashboard = () => {
             {/* User info */}
             <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-300">
               <span className="text-blue-400">👤</span>
-              <span>{currentUser?.email}</span>
-              <span className="text-xs bg-green-600 px-2 py-1 rounded">
-                {userRole || "User"}
-              </span>
+              <div className="flex flex-col">
+                <span className="text-xs">{currentUser?.email}</span>
+                <span className="text-xs bg-green-600 px-2 py-0.5 rounded text-center">
+                  Read-Only User
+                </span>
+              </div>
             </div>
 
             {/* Logout button */}

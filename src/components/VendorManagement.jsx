@@ -4,8 +4,9 @@ import { LoadingButton } from "./LoadingSpinner";
 import ResponsiveTable, { createMobileCard } from "./ResponsiveTable";
 import AddVendorModal from "./AddVendorModal";
 import EditVendorModal from "./EditVendorModal";
+import RoleGuard, { ReadOnlyWrapper, RoleMessage } from "./RoleGuard";
 
-const VendorManagement = ({ vendors, setVendors }) => {
+const VendorManagement = ({ vendors, setVendors, userRole = "admin" }) => {
   const [error, setError] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -113,24 +114,26 @@ const VendorManagement = ({ vendors, setVendors }) => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex space-x-3 pt-4">
-              <LoadingButton
-                loading={isEditing}
-                onClick={() => handleEditVendor(vendor)}
-                className="flex-1 bg-gradient-to-r from-yellow-500/80 to-orange-500/80 hover:from-yellow-400 hover:to-orange-400 text-white font-medium py-2.5 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg backdrop-blur-sm border border-yellow-500/30"
-                loadingText="Editing..."
-              >
-                ✏️ Edit
-              </LoadingButton>
-              <LoadingButton
-                loading={isDeleting}
-                onClick={() => handleDeleteVendor(vendor.id)}
-                className="flex-1 bg-gradient-to-r from-red-500/80 to-pink-500/80 hover:from-red-400 hover:to-pink-400 text-white font-medium py-2.5 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg backdrop-blur-sm border border-red-500/30"
-                loadingText="Deleting..."
-              >
-                🗑️ Delete
-              </LoadingButton>
-            </div>
+            <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+              <div className="flex space-x-3 pt-4">
+                <LoadingButton
+                  loading={isEditing}
+                  onClick={() => handleEditVendor(vendor)}
+                  className="flex-1 bg-gradient-to-r from-yellow-500/80 to-orange-500/80 hover:from-yellow-400 hover:to-orange-400 text-white font-medium py-2.5 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg backdrop-blur-sm border border-yellow-500/30"
+                  loadingText="Editing..."
+                >
+                  ✏️ Edit
+                </LoadingButton>
+                <LoadingButton
+                  loading={isDeleting}
+                  onClick={() => handleDeleteVendor(vendor.id)}
+                  className="flex-1 bg-gradient-to-r from-red-500/80 to-pink-500/80 hover:from-red-400 hover:to-pink-400 text-white font-medium py-2.5 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg backdrop-blur-sm border border-red-500/30"
+                  loadingText="Deleting..."
+                >
+                  🗑️ Delete
+                </LoadingButton>
+              </div>
+            </RoleGuard>
           </div>
         </div>
 
@@ -153,24 +156,26 @@ const VendorManagement = ({ vendors, setVendors }) => {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-bold text-lg text-white">{vendor.name}</h3>
-          <div className="flex space-x-2">
-            <LoadingButton
-              loading={isEditing}
-              onClick={() => handleEditVendor(vendor)}
-              className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
-              loadingText="Editing..."
-            >
-              Edit
-            </LoadingButton>
-            <LoadingButton
-              loading={isDeleting}
-              onClick={() => handleDeleteVendor(vendor.id)}
-              className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
-              loadingText="Deleting..."
-            >
-              Delete
-            </LoadingButton>
-          </div>
+          <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+            <div className="flex space-x-2">
+              <LoadingButton
+                loading={isEditing}
+                onClick={() => handleEditVendor(vendor)}
+                className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
+                loadingText="Editing..."
+              >
+                Edit
+              </LoadingButton>
+              <LoadingButton
+                loading={isDeleting}
+                onClick={() => handleDeleteVendor(vendor.id)}
+                className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
+                loadingText="Deleting..."
+              >
+                Delete
+              </LoadingButton>
+            </div>
+          </RoleGuard>
         </div>
 
         <div className="space-y-2">
@@ -219,30 +224,39 @@ const VendorManagement = ({ vendors, setVendors }) => {
       header: "Actions",
       key: "actions",
       render: (vendor) => (
-        <div className="flex space-x-2">
-          <LoadingButton
-            loading={loadingStates.editing && editingVendor?.id === vendor.id}
-            onClick={() => handleEditVendor(vendor)}
-            className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded text-sm"
-            loadingText="Editing..."
-          >
-            Edit
-          </LoadingButton>
-          <LoadingButton
-            loading={loadingStates.deleting === vendor.id}
-            onClick={() => handleDeleteVendor(vendor.id)}
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm"
-            loadingText="Deleting..."
-          >
-            Delete
-          </LoadingButton>
-        </div>
+        <RoleGuard
+          userRole={userRole}
+          allowedRoles={["admin"]}
+          fallback={<span className="text-gray-500 text-xs">View Only</span>}
+        >
+          <div className="flex space-x-2">
+            <LoadingButton
+              loading={loadingStates.editing && editingVendor?.id === vendor.id}
+              onClick={() => handleEditVendor(vendor)}
+              className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded text-sm"
+              loadingText="Editing..."
+            >
+              Edit
+            </LoadingButton>
+            <LoadingButton
+              loading={loadingStates.deleting === vendor.id}
+              onClick={() => handleDeleteVendor(vendor.id)}
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm"
+              loadingText="Deleting..."
+            >
+              Delete
+            </LoadingButton>
+          </div>
+        </RoleGuard>
       ),
     },
   ];
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-3 sm:p-6 rounded-2xl shadow-2xl mt-4 sm:mt-8 max-w-full overflow-hidden border border-white/10">
+      {/* Role Message */}
+      <RoleMessage userRole={userRole} />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
         <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent mb-4 sm:mb-0">
@@ -276,14 +290,16 @@ const VendorManagement = ({ vendors, setVendors }) => {
           </div>
 
           {/* Add Vendor Button */}
-          <LoadingButton
-            loading={loadingStates.adding}
-            onClick={() => setIsAddModalOpen(true)}
-            className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 text-white font-bold py-2.5 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg backdrop-blur-sm border border-purple-500/30"
-            loadingText="Adding..."
-          >
-            ➕ Add Vendor
-          </LoadingButton>
+          <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+            <LoadingButton
+              loading={loadingStates.adding}
+              onClick={() => setIsAddModalOpen(true)}
+              className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 text-white font-bold py-2.5 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg backdrop-blur-sm border border-purple-500/30"
+              loadingText="Adding..."
+            >
+              ➕ Add Vendor
+            </LoadingButton>
+          </RoleGuard>
         </div>
       </div>
 
@@ -328,14 +344,16 @@ const VendorManagement = ({ vendors, setVendors }) => {
               <p className="text-gray-400 mb-6">
                 Add your first vendor to get started!
               </p>
-              <LoadingButton
-                loading={loadingStates.adding}
-                onClick={() => setIsAddModalOpen(true)}
-                className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 text-white font-bold py-3 px-8 rounded-xl transition-all duration-300 transform hover:scale-105"
-                loadingText="Adding..."
-              >
-                ➕ Add Your First Vendor
-              </LoadingButton>
+              <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+                <LoadingButton
+                  loading={loadingStates.adding}
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 text-white font-bold py-3 px-8 rounded-xl transition-all duration-300 transform hover:scale-105"
+                  loadingText="Adding..."
+                >
+                  ➕ Add Your First Vendor
+                </LoadingButton>
+              </RoleGuard>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

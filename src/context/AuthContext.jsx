@@ -12,6 +12,21 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Function to determine user role based on email
+  const determineUserRole = (userEmail) => {
+    // List of admin emails - add more emails here to grant admin access
+    const adminEmails = [
+      "omersalem2008@gmail.com",
+      // "another-admin@example.com",  // Uncomment and add more admin emails as needed
+      // "third-admin@example.com",
+    ];
+
+    if (adminEmails.includes(userEmail)) {
+      return "admin";
+    }
+    return "user"; // All other users get readonly access
+  };
+
   useEffect(() => {
     const auth = getAuth();
 
@@ -20,6 +35,13 @@ export const AuthProvider = ({ children }) => {
       (user) => {
         try {
           setCurrentUser(user);
+          if (user) {
+            // Automatically determine role based on email
+            const role = determineUserRole(user.email);
+            setUserRole(role);
+          } else {
+            setUserRole(null);
+          }
           setError(null); // Clear any previous errors
           setLoading(false);
         } catch (err) {
@@ -45,9 +67,11 @@ export const AuthProvider = ({ children }) => {
     return unsubscribe;
   }, []);
 
-  const login = async (email, password, role) => {
+  const login = async (email, password) => {
     try {
       const user = await signIn(email, password);
+      // Automatically determine role based on email
+      const role = determineUserRole(email);
       setCurrentUser(user);
       setUserRole(role);
       setError(null);

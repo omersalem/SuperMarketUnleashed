@@ -158,9 +158,20 @@ const MobileNav = ({ userRole = "admin" }) => {
 
               {/* User info */}
               <div className="mb-4 p-3 bg-gray-700 rounded-lg">
-                <div className="flex items-center space-x-2 text-sm text-gray-300">
-                  <span className="text-blue-400">👤</span>
-                  <span className="truncate">{currentUser?.email}</span>
+                <div className="flex items-center justify-between text-sm text-gray-300">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-blue-400">👤</span>
+                    <span className="truncate">{currentUser?.email}</span>
+                  </div>
+                  <span
+                    className={`text-xs px-2 py-1 rounded ${
+                      userRole === "admin"
+                        ? "bg-red-600 text-white"
+                        : "bg-green-600 text-white"
+                    }`}
+                  >
+                    {userRole === "admin" ? "Admin" : "Read-Only"}
+                  </span>
                 </div>
               </div>
 

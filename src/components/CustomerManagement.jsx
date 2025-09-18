@@ -119,24 +119,26 @@ const CustomerManagement = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="flex space-x-3 pt-4">
-              <LoadingButton
-                loading={isEditing}
-                onClick={() => handleEditCustomer(customer)}
-                className="flex-1 bg-gradient-to-r from-yellow-500/80 to-orange-500/80 hover:from-yellow-400 hover:to-orange-400 text-white font-medium py-2.5 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg backdrop-blur-sm border border-yellow-500/30"
-                loadingText="Editing..."
-              >
-                ✏️ Edit
-              </LoadingButton>
-              <LoadingButton
-                loading={isDeleting}
-                onClick={() => handleDeleteCustomer(customer.id)}
-                className="flex-1 bg-gradient-to-r from-red-500/80 to-pink-500/80 hover:from-red-400 hover:to-pink-400 text-white font-medium py-2.5 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg backdrop-blur-sm border border-red-500/30"
-                loadingText="Deleting..."
-              >
-                🗑️ Delete
-              </LoadingButton>
-            </div>
+            <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+              <div className="flex space-x-3 pt-4">
+                <LoadingButton
+                  loading={isEditing}
+                  onClick={() => handleEditCustomer(customer)}
+                  className="flex-1 bg-gradient-to-r from-yellow-500/80 to-orange-500/80 hover:from-yellow-400 hover:to-orange-400 text-white font-medium py-2.5 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg backdrop-blur-sm border border-yellow-500/30"
+                  loadingText="Editing..."
+                >
+                  ✏️ Edit
+                </LoadingButton>
+                <LoadingButton
+                  loading={isDeleting}
+                  onClick={() => handleDeleteCustomer(customer.id)}
+                  className="flex-1 bg-gradient-to-r from-red-500/80 to-pink-500/80 hover:from-red-400 hover:to-pink-400 text-white font-medium py-2.5 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg backdrop-blur-sm border border-red-500/30"
+                  loadingText="Deleting..."
+                >
+                  🗑️ Delete
+                </LoadingButton>
+              </div>
+            </RoleGuard>
           </div>
         </div>
 
@@ -161,22 +163,24 @@ const CustomerManagement = ({
         <div className="flex items-center justify-between">
           <h3 className="font-bold text-lg text-white">{customer.name}</h3>
           <div className="flex space-x-2">
-            <LoadingButton
-              loading={isEditing}
-              onClick={() => handleEditCustomer(customer)}
-              className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
-              loadingText="Editing..."
-            >
-              Edit
-            </LoadingButton>
-            <LoadingButton
-              loading={isDeleting}
-              onClick={() => handleDeleteCustomer(customer.id)}
-              className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
-              loadingText="Deleting..."
-            >
-              Delete
-            </LoadingButton>
+            <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+              <LoadingButton
+                loading={isEditing}
+                onClick={() => handleEditCustomer(customer)}
+                className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
+                loadingText="Editing..."
+              >
+                Edit
+              </LoadingButton>
+              <LoadingButton
+                loading={isDeleting}
+                onClick={() => handleDeleteCustomer(customer.id)}
+                className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
+                loadingText="Deleting..."
+              >
+                Delete
+              </LoadingButton>
+            </RoleGuard>
           </div>
         </div>
 
@@ -222,26 +226,32 @@ const CustomerManagement = ({
       accessor: "actions",
       sortable: false,
       render: (customer) => (
-        <div className="flex space-x-2">
-          <LoadingButton
-            loading={
-              loadingStates.editing && editingCustomer?.id === customer.id
-            }
-            onClick={() => handleEditCustomer(customer)}
-            className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
-            loadingText="Editing..."
-          >
-            Edit
-          </LoadingButton>
-          <LoadingButton
-            loading={loadingStates.deleting === customer.id}
-            onClick={() => handleDeleteCustomer(customer.id)}
-            className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
-            loadingText="Deleting..."
-          >
-            Delete
-          </LoadingButton>
-        </div>
+        <RoleGuard
+          userRole={userRole}
+          allowedRoles={["admin"]}
+          fallback={<span className="text-gray-500 text-xs">View Only</span>}
+        >
+          <div className="flex space-x-2">
+            <LoadingButton
+              loading={
+                loadingStates.editing && editingCustomer?.id === customer.id
+              }
+              onClick={() => handleEditCustomer(customer)}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
+              loadingText="Editing..."
+            >
+              Edit
+            </LoadingButton>
+            <LoadingButton
+              loading={loadingStates.deleting === customer.id}
+              onClick={() => handleDeleteCustomer(customer.id)}
+              className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
+              loadingText="Deleting..."
+            >
+              Delete
+            </LoadingButton>
+          </div>
+        </RoleGuard>
       ),
     },
   ];
@@ -254,6 +264,9 @@ const CustomerManagement = ({
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(120,119,198,0.4),rgba(255,255,255,0))]"></div>
 
       <div className="relative z-10 container mx-auto px-4 py-8">
+        {/* Role Message */}
+        <RoleMessage userRole={userRole} />
+
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
@@ -291,14 +304,16 @@ const CustomerManagement = ({
                 </button>
               </div>
 
-              <LoadingButton
-                loading={loadingStates.adding}
-                onClick={() => setIsAddModalOpen(true)}
-                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg backdrop-blur-sm border border-green-500/30"
-                loadingText="Adding..."
-              >
-                ➕ Add Customer
-              </LoadingButton>
+              <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+                <LoadingButton
+                  loading={loadingStates.adding}
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg backdrop-blur-sm border border-green-500/30"
+                  loadingText="Adding..."
+                >
+                  ➕ Add Customer
+                </LoadingButton>
+              </RoleGuard>
             </div>
           </div>
         </div>
@@ -330,14 +345,16 @@ const CustomerManagement = ({
               <p className="text-gray-400 mb-6">
                 Start by adding your first customer to the system
               </p>
-              <LoadingButton
-                loading={loadingStates.adding}
-                onClick={() => setIsAddModalOpen(true)}
-                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
-                loadingText="Adding..."
-              >
-                ➕ Add First Customer
-              </LoadingButton>
+              <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+                <LoadingButton
+                  loading={loadingStates.adding}
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+                  loadingText="Adding..."
+                >
+                  ➕ Add First Customer
+                </LoadingButton>
+              </RoleGuard>
             </div>
           </div>
         ) : viewMode === "cards" ? (
