@@ -174,13 +174,13 @@ const CustomerReport = ({ customers = [], sales = [], dateRange }) => {
               <p>
                 <span className="font-medium">Total Spent:</span>{" "}
                 <span className="text-green-600 font-bold">
-                  ${selectedCustomer.totalSpent.toFixed(2)}
+                  ₪{selectedCustomer.totalSpent.toFixed(2)}
                 </span>
               </p>
               <p>
                 <span className="font-medium">Total Paid:</span>{" "}
                 <span className="text-blue-600 font-bold">
-                  ${selectedCustomer.totalPaid.toFixed(2)}
+                  ₪{selectedCustomer.totalPaid.toFixed(2)}
                 </span>
               </p>
               <p>
@@ -192,11 +192,11 @@ const CustomerReport = ({ customers = [], sales = [], dateRange }) => {
                       : "text-green-600"
                   }`}
                 >
-                  ${selectedCustomer.totalBalance.toFixed(2)}
+                  ₪{selectedCustomer.totalBalance.toFixed(2)}
                 </span>
               </p>
               <p>
-                <span className="font-medium">Average Order Value:</span> $
+                <span className="font-medium">Average Order Value:</span> ₪
                 {selectedCustomer.averageOrderValue.toFixed(2)}
               </p>
               <p>

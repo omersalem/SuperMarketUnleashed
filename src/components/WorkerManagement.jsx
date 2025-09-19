@@ -152,19 +152,19 @@ const WorkerManagement = ({
         <div>
           <span className="text-gray-400">Monthly Salary:</span>
           <p className="text-white font-medium">
-            ${(worker.salary || 0).toFixed(2)}
+            ₪{(worker.salary || 0).toFixed(2)}
           </p>
         </div>
         <div>
           <span className="text-gray-400">Daily Salary:</span>
           <p className="text-white font-medium">
-            ${worker.dailySalary.toFixed(2)}
+            ₪{worker.dailySalary.toFixed(2)}
           </p>
         </div>
         <div>
           <span className="text-gray-400">Expenses:</span>
           <p className="text-red-400 font-medium">
-            ${worker.monthlyExpenses.toFixed(2)}
+            ₪{worker.monthlyExpenses.toFixed(2)}
           </p>
         </div>
         <div>
@@ -176,7 +176,7 @@ const WorkerManagement = ({
         <div>
           <span className="text-gray-400">Deductions:</span>
           <p className="text-red-400 font-medium">
-            ${worker.totalDeductions.toFixed(2)}
+            ₪{worker.totalDeductions.toFixed(2)}
           </p>
         </div>
         <div>
@@ -186,7 +186,7 @@ const WorkerManagement = ({
               worker.remainingSalary >= 0 ? "text-green-400" : "text-red-500"
             }`}
           >
-            ${worker.remainingSalary.toFixed(2)}
+            ₪{worker.remainingSalary.toFixed(2)}
           </p>
         </div>
       </div>
@@ -220,7 +220,7 @@ const WorkerManagement = ({
         <div>
           <span className="text-gray-400">Amount:</span>
           <p className="text-red-400 font-medium">
-            ${expense.amount.toFixed(2)}
+            ₪{expense.amount.toFixed(2)}
           </p>
         </div>
         <div className="col-span-2">
@@ -281,14 +281,14 @@ const WorkerManagement = ({
       key: "salary",
       label: "Monthly Salary",
       render: (worker) => (
-        <span className="text-white">${(worker.salary || 0).toFixed(2)}</span>
+        <span className="text-white">₪{(worker.salary || 0).toFixed(2)}</span>
       ),
     },
     {
       key: "dailySalary",
       label: "Daily Salary",
       render: (worker) => (
-        <span className="text-white">${worker.dailySalary.toFixed(2)}</span>
+        <span className="text-white">₪{worker.dailySalary.toFixed(2)}</span>
       ),
     },
     {
@@ -296,7 +296,7 @@ const WorkerManagement = ({
       label: "Expenses",
       render: (worker) => (
         <span className="text-red-400">
-          ${worker.monthlyExpenses.toFixed(2)}
+          ₪{worker.monthlyExpenses.toFixed(2)}
         </span>
       ),
     },
@@ -312,7 +312,7 @@ const WorkerManagement = ({
       label: "Total Deductions",
       render: (worker) => (
         <span className="text-red-400">
-          ${worker.totalDeductions.toFixed(2)}
+          ₪{worker.totalDeductions.toFixed(2)}
         </span>
       ),
     },
@@ -325,7 +325,7 @@ const WorkerManagement = ({
             worker.remainingSalary >= 0 ? "text-green-400" : "text-red-500"
           }`}
         >
-          ${worker.remainingSalary.toFixed(2)}
+          ₪{worker.remainingSalary.toFixed(2)}
         </span>
       ),
     },
@@ -370,7 +370,7 @@ const WorkerManagement = ({
       key: "amount",
       label: "Amount",
       render: (expense) => (
-        <span className="text-red-400">${expense.amount.toFixed(2)}</span>
+        <span className="text-red-400">₪{expense.amount.toFixed(2)}</span>
       ),
     },
     {

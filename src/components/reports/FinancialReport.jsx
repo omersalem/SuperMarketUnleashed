@@ -32,20 +32,20 @@ const FinancialReport = ({ sales = [], purchases = [], salaryPayments = [], work
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-green-50 p-4 rounded-lg border">
           <h3 className="font-semibold text-green-800">Total Revenue</h3>
-          <p className="text-2xl font-bold text-green-600">${totalRevenue.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-green-600">₪{totalRevenue.toFixed(2)}</p>
         </div>
         <div className="bg-blue-50 p-4 rounded-lg border">
           <h3 className="font-semibold text-blue-800">Gross Profit</h3>
-          <p className="text-2xl font-bold text-blue-600">${grossProfit.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-blue-600">₪{grossProfit.toFixed(2)}</p>
         </div>
         <div className="bg-red-50 p-4 rounded-lg border">
           <h3 className="font-semibold text-red-800">Total Expenses</h3>
-          <p className="text-2xl font-bold text-red-600">${totalOperatingExpenses.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-red-600">₪{totalOperatingExpenses.toFixed(2)}</p>
         </div>
         <div className={`p-4 rounded-lg border ${netProfit >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
           <h3 className={`font-semibold ${netProfit >= 0 ? 'text-green-800' : 'text-red-800'}`}>Net Profit</h3>
           <p className={`text-2xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            ${netProfit.toFixed(2)}
+            ₪{netProfit.toFixed(2)}
           </p>
         </div>
       </div>
@@ -66,14 +66,14 @@ const FinancialReport = ({ sales = [], purchases = [], salaryPayments = [], work
               <tr className="bg-green-50">
                 <td className="border border-gray-300 px-4 py-2 font-semibold">Revenue</td>
                 <td className="border border-gray-300 px-4 py-2 text-right font-bold text-green-600">
-                  ${totalRevenue.toFixed(2)}
+                  ₪{totalRevenue.toFixed(2)}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-right">100.0%</td>
               </tr>
               <tr className="bg-red-50">
                 <td className="border border-gray-300 px-4 py-2">Cost of Goods Sold</td>
                 <td className="border border-gray-300 px-4 py-2 text-right text-red-600">
-                  ${totalCOGS.toFixed(2)}
+                  ₪{totalCOGS.toFixed(2)}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-right">
                   {totalRevenue > 0 ? ((totalCOGS / totalRevenue) * 100).toFixed(1) : '0.0'}%
@@ -82,7 +82,7 @@ const FinancialReport = ({ sales = [], purchases = [], salaryPayments = [], work
               <tr className="bg-blue-50">
                 <td className="border border-gray-300 px-4 py-2 font-semibold">Gross Profit</td>
                 <td className="border border-gray-300 px-4 py-2 text-right font-bold text-blue-600">
-                  ${grossProfit.toFixed(2)}
+                  ₪{grossProfit.toFixed(2)}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-right font-semibold">
                   {grossMargin.toFixed(1)}%
@@ -91,7 +91,7 @@ const FinancialReport = ({ sales = [], purchases = [], salaryPayments = [], work
               <tr>
                 <td className="border border-gray-300 px-4 py-2">Salaries</td>
                 <td className="border border-gray-300 px-4 py-2 text-right">
-                  ${totalSalaries.toFixed(2)}
+                  ₪{totalSalaries.toFixed(2)}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-right">
                   {totalRevenue > 0 ? ((totalSalaries / totalRevenue) * 100).toFixed(1) : '0.0'}%
@@ -100,7 +100,7 @@ const FinancialReport = ({ sales = [], purchases = [], salaryPayments = [], work
               <tr>
                 <td className="border border-gray-300 px-4 py-2">Other Expenses</td>
                 <td className="border border-gray-300 px-4 py-2 text-right">
-                  ${totalExpenses.toFixed(2)}
+                  ₪{totalExpenses.toFixed(2)}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-right">
                   {totalRevenue > 0 ? ((totalExpenses / totalRevenue) * 100).toFixed(1) : '0.0'}%
@@ -109,7 +109,7 @@ const FinancialReport = ({ sales = [], purchases = [], salaryPayments = [], work
               <tr className="bg-red-50">
                 <td className="border border-gray-300 px-4 py-2 font-semibold">Total Operating Expenses</td>
                 <td className="border border-gray-300 px-4 py-2 text-right font-bold text-red-600">
-                  ${totalOperatingExpenses.toFixed(2)}
+                  ₪{totalOperatingExpenses.toFixed(2)}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-right font-semibold">
                   {totalRevenue > 0 ? ((totalOperatingExpenses / totalRevenue) * 100).toFixed(1) : '0.0'}%
@@ -118,7 +118,7 @@ const FinancialReport = ({ sales = [], purchases = [], salaryPayments = [], work
               <tr className={netProfit >= 0 ? 'bg-green-50' : 'bg-red-50'}>
                 <td className="border border-gray-300 px-4 py-2 font-bold">Net Profit</td>
                 <td className={`border border-gray-300 px-4 py-2 text-right font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  ${netProfit.toFixed(2)}
+                  ₪{netProfit.toFixed(2)}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-right font-bold">
                   {netMargin.toFixed(1)}%
