@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import ErrorBoundary from "../components/ErrorBoundary";
-import MobileNav from "../components/MobileNav";
 import { AuthContext } from "../context/AuthContext";
 import supermarketLogo from "../assets/supermarket.png";
 import {
   PageLoadingSpinner,
   SectionLoadingSpinner,
 } from "../components/LoadingSpinner";
-import { StatsSkeleton } from "../components/SkeletonLoader";
 import CustomerManagement from "../components/CustomerManagement";
 import VendorManagement from "../components/VendorManagement";
 import CategoryManagement from "../components/CategoryManagement";
@@ -24,6 +22,7 @@ import ReportsDashboard from "../components/ReportsDashboard";
 import BudgetManagement from "../components/BudgetManagement";
 import { handleFirebaseError, logError } from "../utils/errorHandling";
 
+// Firebase functions
 import {
   getCustomers,
   getVendors,
@@ -55,8 +54,11 @@ const AdminDashboard = () => {
   const [salaryPayments, setSalaryPayments] = useState([]);
   const [workerExpenses, setWorkerExpenses] = useState([]);
   const [workerAttendance, setWorkerAttendance] = useState([]);
+  // Loading and error states
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Section loading states
   const [loadingStates, setLoadingStates] = useState({
     initial: true,
     reports: false,
@@ -152,8 +154,6 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Fixed Navigation Header */}
       <nav className="fixed top-0 left-0 right-0 bg-gray-800 border-b border-gray-700 z-50 px-4 py-3 shadow-lg">
-        {/* Decorative Pattern */}
-        <div className="absolute inset-0 opacity-10 z-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsIDI1NSwgMjU1LCAwLjMpIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmZmIiBvcGFjaXR5PSIwLjEiLz48L3N2Zz4=')]"></div>
         <div className="flex flex-col sm:flex-row items-center justify-between max-w-full gap-4 relative z-10">
           {/* Logo and Title */}
           <div className="flex items-center space-x-3">
@@ -187,7 +187,7 @@ const AdminDashboard = () => {
             </button>
             
             {/* Quick Actions Dropdown */}
-            <div class="relative group">
+            <div className="relative group">
               <button className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
                 <span className="text-lg">📋</span>
                 <span className="hidden sm:inline">Actions</span>
@@ -228,8 +228,11 @@ const AdminDashboard = () => {
         </div>
       </nav>
 
-      {/* Main Content */}
-      <div className="pt-16 px-2 sm:px-4 lg:px-8 max-w-full overflow-hidden">
+      <>
+        {/* Main Content */}
+        <div className="pt-16 px-2 sm:px-4 lg:px-8 max-w-full overflow-hidden">
+        
+        {/* Reports Section */}
         <ErrorBoundary fallbackMessage="Reports dashboard failed to load.">
           <section id="reports" className="mb-8">
             {loadingStates.reports ? (
@@ -248,13 +251,13 @@ const AdminDashboard = () => {
                 salaryPayments={salaryPayments}
                 workerExpenses={workerExpenses}
                 workerAttendance={workerAttendance}
-                onLoadingChange={(loading) =>
-                  handleSectionLoading("reports", loading)
-                }
+                onLoadingChange={(loading) => handleSectionLoading("reports", loading)}
               />
             )}
           </section>
         </ErrorBoundary>
+        
+        {/* Customer Management */}
         <ErrorBoundary fallbackMessage="Customer management failed to load.">
           <section id="customers" className="mb-8">
             <CustomerManagement
@@ -264,12 +267,14 @@ const AdminDashboard = () => {
           </section>
         </ErrorBoundary>
 
+        {/* Vendor Management */}
         <ErrorBoundary fallbackMessage="Vendor management failed to load.">
           <section id="vendors" className="mb-8">
             <VendorManagement vendors={vendors} setVendors={setVendors} />
           </section>
         </ErrorBoundary>
 
+        {/* Category Management */}
         <ErrorBoundary fallbackMessage="Category management failed to load.">
           <section id="categories" className="mb-8">
             <CategoryManagement
@@ -279,6 +284,7 @@ const AdminDashboard = () => {
           </section>
         </ErrorBoundary>
 
+        {/* Product Management */}
         <ErrorBoundary fallbackMessage="Product management failed to load.">
           <section id="products" className="mb-8">
             {loadingStates.products ? (
@@ -288,14 +294,13 @@ const AdminDashboard = () => {
                 products={products}
                 setProducts={setProducts}
                 categories={categories}
-                onLoadingChange={(loading) =>
-                  handleSectionLoading("products", loading)
-                }
+                onLoadingChange={(loading) => handleSectionLoading("products", loading)}
               />
             )}
           </section>
         </ErrorBoundary>
 
+        {/* Sales Management */}
         <ErrorBoundary fallbackMessage="Sales management failed to load.">
           <section id="sales" className="mb-8">
             {loadingStates.sales ? (
@@ -311,14 +316,13 @@ const AdminDashboard = () => {
                 setBanks={setBanks}
                 currencies={currencies}
                 setCurrencies={setCurrencies}
-                onLoadingChange={(loading) =>
-                  handleSectionLoading("sales", loading)
-                }
+                onLoadingChange={(loading) => handleSectionLoading("sales", loading)}
               />
             )}
           </section>
         </ErrorBoundary>
 
+        {/* Payment Management */}
         <ErrorBoundary fallbackMessage="Payment management failed to load.">
           <section id="payments" className="mb-8">
             <PaymentManagement
@@ -333,6 +337,7 @@ const AdminDashboard = () => {
           </section>
         </ErrorBoundary>
 
+        {/* Purchase Management */}
         <ErrorBoundary fallbackMessage="Purchase management failed to load.">
           <section id="purchases" className="mb-8">
             <PurchaseManagement
@@ -349,6 +354,7 @@ const AdminDashboard = () => {
           </section>
         </ErrorBoundary>
 
+        {/* Vendor Payment Management */}
         <ErrorBoundary fallbackMessage="Vendor payment management failed to load.">
           <section id="vendor-payments" className="mb-8">
             <VendorPaymentManagement
@@ -363,6 +369,7 @@ const AdminDashboard = () => {
           </section>
         </ErrorBoundary>
 
+        {/* Invoice Management */}
         <ErrorBoundary fallbackMessage="Invoice management failed to load.">
           <section id="invoices" className="mb-8">
             <InvoiceManagement
@@ -373,6 +380,7 @@ const AdminDashboard = () => {
           </section>
         </ErrorBoundary>
 
+        {/* Check Management */}
         <ErrorBoundary fallbackMessage="Check management failed to load.">
           <section id="checks" className="mb-8">
             <CheckManagement
@@ -386,6 +394,7 @@ const AdminDashboard = () => {
           </section>
         </ErrorBoundary>
 
+        {/* Worker Management */}
         <ErrorBoundary fallbackMessage="Worker management failed to load.">
           <section id="workers" className="mb-8">
             <WorkerManagement
@@ -401,6 +410,7 @@ const AdminDashboard = () => {
           </section>
         </ErrorBoundary>
 
+        {/* Inventory Management */}
         <ErrorBoundary fallbackMessage="Inventory management failed to load.">
           <section id="inventory" className="mb-8">
             <InventoryManagement
@@ -410,12 +420,14 @@ const AdminDashboard = () => {
           </section>
         </ErrorBoundary>
 
+        {/* Budget Management */}
         <ErrorBoundary fallbackMessage="Budget management failed to load.">
           <section id="budget" className="mb-8">
             <BudgetManagement userRole="admin" />
           </section>
         </ErrorBoundary>
       </div>
+      </>
     </div>
   );
 };
