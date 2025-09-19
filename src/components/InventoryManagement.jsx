@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import AddToStockModal from "./AddToStockModal";
 import { updateProduct } from "../firebase/firestore";
+import RoleGuard from "./RoleGuard";
 
-const InventoryManagement = ({ products, setProducts }) => {
+const InventoryManagement = ({ products, setProducts, userRole = "admin" }) => {
   const { t } = useTranslation();
   const [isAddToStockModalOpen, setIsAddToStockModalOpen] = useState(false);
   const [error, setError] = useState(null);
@@ -11,6 +12,12 @@ const InventoryManagement = ({ products, setProducts }) => {
   const lowStockThreshold = 10;
 
   const handleAddToStock = async (productId, quantity) => {
+    // Check if user has permission to add to stock
+    if (userRole !== "admin") {
+      setError("You don't have permission to add to stock.");
+      return;
+    }
+    
     try {
       const productToUpdate = products.find((p) => p.id === productId);
       if (productToUpdate) {
@@ -85,12 +92,14 @@ const InventoryManagement = ({ products, setProducts }) => {
 
       {/* Add to Stock button moved below the table */}
       <div className="mt-6 flex justify-center">
-        <button
-          onClick={() => setIsAddToStockModalOpen(true)}
-          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          Add to Stock
-        </button>
+        <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+          <button
+            onClick={() => setIsAddToStockModalOpen(true)}
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Add to Stock
+          </button>
+        </RoleGuard>
       </div>
 
       <AddToStockModal

@@ -11,6 +11,7 @@ const EditCheckModal = ({
   setBanks,
   currencies,
   setCurrencies,
+  userRole = "admin",
 }) => {
   const [amount, setAmount] = useState(0);
   const [date, setDate] = useState("");
@@ -58,6 +59,13 @@ const EditCheckModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check if user has permission to update checks
+    if (userRole !== "admin") {
+      console.error("User doesn't have permission to update checks");
+      return;
+    }
+    
     try {
       if (showNewBankInput && bankName) {
         const newBank = await addBank({ name: bankName });
@@ -232,7 +240,8 @@ const EditCheckModal = ({
           </button>
           <button
             type="submit"
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            disabled={userRole !== "admin"}
+            className={`${userRole === "admin" ? "bg-blue-500 hover:bg-blue-700" : "bg-gray-500 cursor-not-allowed"} text-white font-bold py-2 px-4 rounded`}
           >
             Update
           </button>

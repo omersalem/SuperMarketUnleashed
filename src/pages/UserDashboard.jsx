@@ -254,22 +254,24 @@ const UserDashboard = () => {
           </section>
         </ErrorBoundary>
 
-        <ErrorBoundary fallbackMessage="Sales management failed to load.">
-          <section id="sales" className="mb-8">
-            <SalesManagement
-              sales={sales}
-              setSales={setSales}
-              customers={customers}
-              products={products}
-              setProducts={setProducts}
-              banks={banks}
-              setBanks={setBanks}
-              currencies={currencies}
-              setCurrencies={setCurrencies}
-              userRole="user"
-            />
-          </section>
-        </ErrorBoundary>
+        {userRole === "admin" && (
+          <ErrorBoundary fallbackMessage="Sales management failed to load.">
+            <section id="sales" className="mb-8">
+              <SalesManagement
+                sales={sales}
+                setSales={setSales}
+                customers={customers}
+                products={products}
+                setProducts={setProducts}
+                banks={banks}
+                setBanks={setBanks}
+                currencies={currencies}
+                setCurrencies={setCurrencies}
+                userRole="user"
+              />
+            </section>
+          </ErrorBoundary>
+        )}
 
         <ErrorBoundary fallbackMessage="Payment management failed to load.">
           <section id="payments" className="mb-8">
@@ -286,37 +288,41 @@ const UserDashboard = () => {
           </section>
         </ErrorBoundary>
 
-        <ErrorBoundary fallbackMessage="Purchase management failed to load.">
-          <section id="purchases" className="mb-8">
-            <PurchaseManagement
-              purchases={purchases}
-              setPurchases={setPurchases}
-              vendors={vendors}
-              products={products}
-              setProducts={setProducts}
-              banks={banks}
-              setBanks={setBanks}
-              currencies={currencies}
-              setCurrencies={setCurrencies}
-              userRole="user"
-            />
-          </section>
-        </ErrorBoundary>
+        {userRole === "admin" && (
+          <ErrorBoundary fallbackMessage="Purchase management failed to load.">
+            <section id="purchases" className="mb-8">
+              <PurchaseManagement
+                purchases={purchases}
+                setPurchases={setPurchases}
+                vendors={vendors}
+                products={products}
+                setProducts={setProducts}
+                banks={banks}
+                setBanks={setBanks}
+                currencies={currencies}
+                setCurrencies={setCurrencies}
+                userRole="user"
+              />
+            </section>
+          </ErrorBoundary>
+        )}
 
-        <ErrorBoundary fallbackMessage="Vendor payment management failed to load.">
-          <section id="vendor-payments" className="mb-8">
-            <VendorPaymentManagement
-              purchases={purchases}
-              setPurchases={setPurchases}
-              vendors={vendors}
-              banks={banks}
-              setBanks={setBanks}
-              currencies={currencies}
-              setCurrencies={setCurrencies}
-              userRole="user"
-            />
-          </section>
-        </ErrorBoundary>
+        {userRole === "admin" && (
+          <ErrorBoundary fallbackMessage="Vendor payment management failed to load.">
+            <section id="vendor-payments" className="mb-8">
+              <VendorPaymentManagement
+                purchases={purchases}
+                setPurchases={setPurchases}
+                vendors={vendors}
+                banks={banks}
+                setBanks={setBanks}
+                currencies={currencies}
+                setCurrencies={setCurrencies}
+                userRole="user"
+              />
+            </section>
+          </ErrorBoundary>
+        )}
 
         <ErrorBoundary fallbackMessage="Invoice management failed to load.">
           <section id="invoices" className="mb-8">
@@ -359,15 +365,17 @@ const UserDashboard = () => {
           </section>
         </ErrorBoundary>
 
-        <ErrorBoundary fallbackMessage="Inventory management failed to load.">
-          <section id="inventory" className="mb-8">
-            <InventoryManagement
-              products={products}
-              setProducts={setProducts}
-              userRole="user"
-            />
-          </section>
-        </ErrorBoundary>
+        {userRole === "admin" && (
+          <ErrorBoundary fallbackMessage="Inventory management failed to load.">
+            <section id="inventory" className="mb-8">
+              <InventoryManagement
+                products={products}
+                setProducts={setProducts}
+                userRole="user"
+              />
+            </section>
+          </ErrorBoundary>
+        )}
       </div>
     </div>
   );

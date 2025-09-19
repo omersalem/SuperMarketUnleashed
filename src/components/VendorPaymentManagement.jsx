@@ -3,6 +3,7 @@ import { updatePurchase, addPurchase } from "../firebase/firestore";
 import { format } from "date-fns";
 import ResponsiveTable, { createMobileCard } from "./ResponsiveTable";
 import CheckPaymentModal from "./CheckPaymentModal";
+import RoleGuard from "./RoleGuard";
 
 const VendorPaymentManagement = ({
   purchases,
@@ -12,6 +13,7 @@ const VendorPaymentManagement = ({
   setBanks,
   currencies,
   setCurrencies,
+  userRole = "admin",
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPurchase, setSelectedPurchase] = useState(null);
@@ -147,12 +149,14 @@ const VendorPaymentManagement = ({
         </div>
 
         <div className="flex justify-end pt-2">
-          <button
-            onClick={() => handlePurchaseSelect(purchase)}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded text-sm transition-colors"
-          >
-            Add Payment
-          </button>
+          <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+            <button
+              onClick={() => handlePurchaseSelect(purchase)}
+              className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded text-sm transition-colors"
+            >
+              Add Payment
+            </button>
+          </RoleGuard>
         </div>
       </div>
     );
@@ -225,12 +229,14 @@ const VendorPaymentManagement = ({
       label: "Action",
       align: "center",
       render: (purchase) => (
-        <button
-          onClick={() => handlePurchaseSelect(purchase)}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
-        >
-          Add Payment
-        </button>
+        <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+          <button
+            onClick={() => handlePurchaseSelect(purchase)}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
+          >
+            Add Payment
+          </button>
+        </RoleGuard>
       ),
     },
   ];
@@ -244,6 +250,12 @@ const VendorPaymentManagement = ({
   };
 
   const handleStandalonePayment = async () => {
+    // Check if user has permission to make standalone payments
+    if (userRole !== "admin") {
+      setError("You don't have permission to record standalone payments.");
+      return;
+    }
+    
     if (!selectedVendor || !standaloneAmount) {
       setError("Please select a vendor and enter payment amount.");
       return;
@@ -313,6 +325,12 @@ const VendorPaymentManagement = ({
   };
 
   const handlePaymentUpdate = async () => {
+    // Check if user has permission to update payments
+    if (userRole !== "admin") {
+      setError("You don't have permission to update payments.");
+      return;
+    }
+    
     if (!selectedPurchase || !additionalPayment) {
       setError("Please enter a payment amount.");
       return;
@@ -405,12 +423,14 @@ const VendorPaymentManagement = ({
 
       {/* Action Buttons */}
       <div className="mb-6 flex gap-3">
-        <button
-          onClick={() => setShowStandalonePayment(!showStandalonePayment)}
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-        >
-          {showStandalonePayment ? "Hide" : "Pay"} Vendor (No Purchase)
-        </button>
+        <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+          <button
+            onClick={() => setShowStandalonePayment(!showStandalonePayment)}
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          >
+            {showStandalonePayment ? "Hide" : "Pay"} Vendor (No Purchase)
+          </button>
+        </RoleGuard>
       </div>
 
       {/* Standalone Payment Form */}

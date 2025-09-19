@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import ErrorBoundary from "../components/ErrorBoundary";
 import MobileNav from "../components/MobileNav";
 import { AuthContext } from "../context/AuthContext";
+import supermarketLogo from "../assets/supermarket.png";
 import {
   PageLoadingSpinner,
   SectionLoadingSpinner,
@@ -20,6 +21,7 @@ import InventoryManagement from "../components/InventoryManagement";
 import PaymentManagement from "../components/PaymentManagement";
 import VendorPaymentManagement from "../components/VendorPaymentManagement";
 import ReportsDashboard from "../components/ReportsDashboard";
+import BudgetManagement from "../components/BudgetManagement";
 import { handleFirebaseError, logError } from "../utils/errorHandling";
 
 import {
@@ -149,35 +151,79 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Fixed Navigation Header */}
-      <nav className="fixed top-0 left-0 right-0 bg-gray-800 border-b border-gray-700 z-50 px-2 sm:px-4 py-3">
-        <div className="flex items-center justify-between max-w-full">
-          <h1 className="text-lg sm:text-xl font-bold text-white truncate">
-            Admin Dashboard
-          </h1>
+      <nav className="fixed top-0 left-0 right-0 bg-gray-800 border-b border-gray-700 z-50 px-4 py-3 shadow-lg">
+        {/* Decorative Pattern */}
+        <div className="absolute inset-0 opacity-10 z-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsIDI1NSwgMjU1LCAwLjMpIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmZmIiBvcGFjaXR5PSIwLjEiLz48L3N2Zz4=')]"></div>
+        <div className="flex flex-col sm:flex-row items-center justify-between max-w-full gap-4 relative z-10">
+          {/* Logo and Title */}
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center shadow-md overflow-hidden">
+              <img 
+                src={supermarketLogo} 
+                alt="SuperMarket Logo" 
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-wide">
+              SuperMarket Admin
+            </h1>
+          </div>
 
-          <div className="flex items-center space-x-4">
-            {/* User info */}
-            <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-300">
-              <span className="text-blue-400">👤</span>
-              <div className="flex flex-col">
-                <span className="text-xs">{currentUser?.email}</span>
-                <span className="text-xs bg-red-600 px-2 py-0.5 rounded text-center">
-                  Administrator
-                </span>
+          {/* Action Buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
+            {/* Budget Management Button */}
+            <button
+              onClick={() => {
+                const element = document.querySelector("#budget");
+                if (element) {
+                  element.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+              className="flex items-center space-x-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              title="Budget Management"
+            >
+              <span className="text-lg">💰</span>
+              <span className="hidden sm:inline">Budget</span>
+            </button>
+            
+            {/* Quick Actions Dropdown */}
+            <div class="relative group">
+              <button className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                <span className="text-lg">📋</span>
+                <span className="hidden sm:inline">Actions</span>
+                <span className="text-xs">▼</span>
+              </button>
+              
+              {/* Dropdown Menu */}
+              <div className="absolute right-0 mt-1 w-48 bg-gray-800 rounded-lg shadow-xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-right scale-95 group-hover:scale-100 z-50">
+                <a href="#reports" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">📊 Reports</a>
+                <a href="#customers" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">👥 Customers</a>
+                <a href="#vendors" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">🏪 Vendors</a>
+                <a href="#products" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">📦 Products</a>
+                <a href="#sales" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">💰 Sales</a>
               </div>
             </div>
-
-            {/* Logout button */}
+            
+            {/* User Profile */}
+            <div className="flex items-center space-x-2 bg-gray-700 hover:bg-gray-600 rounded-lg px-3 py-2 transition-colors duration-200 cursor-pointer">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                {currentUser?.email?.charAt(0).toUpperCase() || "U"}
+              </div>
+              <div className="hidden sm:flex flex-col text-right">
+                <span className="text-xs text-gray-300 truncate max-w-[100px]">{currentUser?.email}</span>
+                <span className="text-xs bg-red-500 px-2 py-0.5 rounded text-center">Admin</span>
+              </div>
+            </div>
+            
+            {/* Logout Button */}
             <button
               onClick={logout}
-              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg transition-colors duration-200 text-sm font-medium flex items-center space-x-2"
+              className="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
               title="Logout"
             >
+              <span className="text-lg">🚪</span>
               <span className="hidden sm:inline">Logout</span>
-              <span className="text-base">🚪</span>
             </button>
-
-            <MobileNav userRole={userRole || "admin"} />
           </div>
         </div>
       </nav>
@@ -361,6 +407,12 @@ const AdminDashboard = () => {
               products={products}
               setProducts={setProducts}
             />
+          </section>
+        </ErrorBoundary>
+
+        <ErrorBoundary fallbackMessage="Budget management failed to load.">
+          <section id="budget" className="mb-8">
+            <BudgetManagement userRole="admin" />
           </section>
         </ErrorBoundary>
       </div>

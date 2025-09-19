@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { addSale, updateProduct } from "../firebase/firestore";
 import CheckPaymentModal from "./CheckPaymentModal";
+import RoleGuard, { RoleMessage } from "./RoleGuard";
 
 const SalesManagement = ({
   sales,
@@ -12,6 +13,7 @@ const SalesManagement = ({
   setBanks,
   currencies,
   setCurrencies,
+  userRole = "admin",
 }) => {
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -143,6 +145,12 @@ const SalesManagement = ({
   };
 
   const handleQuickPayment = async () => {
+    // Check if user has permission to make quick payments
+    if (userRole !== "admin") {
+      setError("You don't have permission to make quick payments.");
+      return;
+    }
+    
     if (!quickPaymentCustomer || !quickPaymentAmount) {
       setError("Please select a customer and enter payment amount.");
       return;
@@ -200,6 +208,12 @@ const SalesManagement = ({
   };
 
   const handleRecordSale = async () => {
+    // Check if user has permission to record sales
+    if (userRole !== "admin") {
+      setError("You don't have permission to record sales.");
+      return;
+    }
+    
     if (!selectedCustomer || selectedProducts.length === 0) {
       setError("Please select a customer and at least one product.");
       return;
@@ -314,103 +328,110 @@ const SalesManagement = ({
 
   return (
     <div className="bg-gray-800 p-6 rounded-lg shadow-lg mt-8">
+      {/* Role Message */}
+      <RoleMessage userRole={userRole} />
+
       <h2 className="text-2xl font-bold mb-4">Sales Management</h2>
 
       {error && <p className="text-red-500">{error}</p>}
 
       {/* Quick Payment Button */}
-      <div className="mb-6">
-        <button
-          onClick={() => setShowQuickPayment(!showQuickPayment)}
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-4"
-        >
-          {showQuickPayment ? "Hide" : "💳"} Quick Payment (No Products)
-        </button>
-        <span className="text-gray-400 text-sm">
-          Record payments without purchasing products
-        </span>
-      </div>
+      <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+        <div className="mb-6">
+          <button
+            onClick={() => setShowQuickPayment(!showQuickPayment)}
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-4"
+          >
+            {showQuickPayment ? "Hide" : "💳"} Quick Payment (No Products)
+          </button>
+          <span className="text-gray-400 text-sm">
+            Record payments without purchasing products
+          </span>
+        </div>
+      </RoleGuard>
 
       {/* Quick Payment Form */}
-      {showQuickPayment && (
-        <div className="bg-green-900 p-4 rounded-lg mb-6">
-          <h3 className="text-lg font-semibold mb-3 text-white">
-            💳 Quick Payment
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-white mb-1">
-                Customer
-              </label>
-              <select
-                value={quickPaymentCustomer}
-                onChange={(e) => setQuickPaymentCustomer(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white text-sm"
-              >
-                <option value="">Select Customer</option>
-                {customers.map((customer) => (
-                  <option key={customer.id} value={customer.id}>
-                    {customer.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-white mb-1">
-                Type
-              </label>
-              <select
-                value={quickPaymentType}
-                onChange={(e) => setQuickPaymentType(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white text-sm"
-              >
-                <option value="account_payment">Pay Debt</option>
-                <option value="advance_payment">Advance</option>
-                <option value="store_credit">Store Credit</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-white mb-1">
-                Method
-              </label>
-              <select
-                value={quickPaymentMethod}
-                onChange={(e) => handlePaymentMethodChange(e, true)}
-                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white text-sm"
-              >
-                <option value="cash">Cash</option>
-                <option value="card">Card</option>
-                <option value="check">Check</option>
-                <option value="bank_transfer">Transfer</option>
-                <option value="mobile_payment">Mobile</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-white mb-1">
-                Amount
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={quickPaymentAmount}
-                onChange={(e) => setQuickPaymentAmount(e.target.value)}
-                placeholder="0.00"
-                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white text-sm"
-              />
-            </div>
-            <div className="flex items-end">
-              <button
-                onClick={handleQuickPayment}
-                disabled={!quickPaymentCustomer || !quickPaymentAmount}
-                className="w-full bg-green-500 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-3 rounded text-sm"
-              >
-                Record Payment
-              </button>
+      <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+        {showQuickPayment && (
+          <div className="bg-green-900 p-4 rounded-lg mb-6">
+            <h3 className="text-lg font-semibold mb-3 text-white">
+              💳 Quick Payment
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-white mb-1">
+                  Customer
+                </label>
+                <select
+                  value={quickPaymentCustomer}
+                  onChange={(e) => setQuickPaymentCustomer(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white text-sm"
+                >
+                  <option value="">Select Customer</option>
+                  {customers.map((customer) => (
+                    <option key={customer.id} value={customer.id}>
+                      {customer.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-white mb-1">
+                  Type
+                </label>
+                <select
+                  value={quickPaymentType}
+                  onChange={(e) => setQuickPaymentType(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white text-sm"
+                >
+                  <option value="account_payment">Pay Debt</option>
+                  <option value="advance_payment">Advance</option>
+                  <option value="store_credit">Store Credit</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-white mb-1">
+                  Method
+                </label>
+                <select
+                  value={quickPaymentMethod}
+                  onChange={(e) => handlePaymentMethodChange(e, true)}
+                  className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white text-sm"
+                >
+                  <option value="cash">Cash</option>
+                  <option value="card">Card</option>
+                  <option value="check">Check</option>
+                  <option value="bank_transfer">Transfer</option>
+                  <option value="mobile_payment">Mobile</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-white mb-1">
+                  Amount
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={quickPaymentAmount}
+                  onChange={(e) => setQuickPaymentAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white text-sm"
+                />
+              </div>
+              <div className="flex items-end">
+                <button
+                  onClick={handleQuickPayment}
+                  disabled={!quickPaymentCustomer || !quickPaymentAmount}
+                  className="w-full bg-green-500 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-3 rounded text-sm"
+                >
+                  Record Payment
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </RoleGuard>
 
       <div>
         <div className="mb-4">
@@ -642,17 +663,19 @@ const SalesManagement = ({
           </div>
         </div>
 
-        <button
-          onClick={handleRecordSale}
-          disabled={selectedProducts.length === 0 || !selectedCustomer}
-          className="bg-green-500 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded"
-        >
-          {getPaymentStatus() === "paid"
-            ? "Complete Sale"
-            : getPaymentStatus() === "partial"
-            ? "Record Partial Payment"
-            : "Record Sale (Unpaid)"}
-        </button>
+        <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+          <button
+            onClick={handleRecordSale}
+            disabled={selectedProducts.length === 0 || !selectedCustomer}
+            className="bg-green-500 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded"
+          >
+            {getPaymentStatus() === "paid"
+              ? "Complete Sale"
+              : getPaymentStatus() === "partial"
+              ? "Record Partial Payment"
+              : "Record Sale (Unpaid)"}
+          </button>
+        </RoleGuard>
       </div>
 
       {/* Check Payment Modals */}

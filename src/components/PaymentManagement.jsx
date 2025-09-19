@@ -3,6 +3,7 @@ import { updateSale, addSale } from "../firebase/firestore";
 import { format } from "date-fns";
 import ResponsiveTable, { createMobileCard } from "./ResponsiveTable";
 import CheckPaymentModal from "./CheckPaymentModal";
+import RoleGuard from "./RoleGuard";
 
 const PaymentManagement = ({
   sales,
@@ -12,8 +13,11 @@ const PaymentManagement = ({
   setBanks,
   currencies,
   setCurrencies,
+  userRole = "admin",
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [selectedSale, setSelectedSale] = useState(null);
   const [additionalPayment, setAdditionalPayment] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash");
@@ -83,6 +87,17 @@ const PaymentManagement = ({
 
       if (!hasOutstanding) return false;
 
+      // Apply date range filter
+      if (startDate && endDate) {
+        const saleDate = new Date(sale.date);
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        if (saleDate < start || saleDate > end) {
+          return false;
+        }
+      }
+
       // Apply search filter
       if (searchTerm.trim()) {
         const search = searchTerm.toLowerCase();
@@ -97,7 +112,12 @@ const PaymentManagement = ({
 
       return true;
     });
-  }, [sales, customers, searchTerm]);
+  }, [sales, customers, searchTerm, startDate, endDate]);
+
+  // Calculate total amounts based on filtered sales
+  const totalSalesAmount = unpaidSales.reduce((sum, sale) => sum + sale.totalAmount, 0);
+  const totalPaidAmount = unpaidSales.reduce((sum, sale) => sum + sale.amountPaid, 0);
+  const totalBalance = unpaidSales.reduce((sum, sale) => sum + sale.balance, 0);
 
   const handleSaleSelect = (sale) => {
     setSelectedSale(sale);
@@ -108,6 +128,12 @@ const PaymentManagement = ({
   };
 
   const handleStandalonePayment = async () => {
+    // Check if user has permission to make standalone payments
+    if (userRole !== "admin") {
+      setError("You don't have permission to record standalone payments.");
+      return;
+    }
+    
     if (!selectedCustomer || !standaloneAmount) {
       setError("Please select a customer and enter payment amount.");
       return;
@@ -230,12 +256,14 @@ const PaymentManagement = ({
         </div>
 
         <div className="flex justify-end pt-2">
-          <button
-            onClick={() => handleSaleSelect(sale)}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded text-sm transition-colors"
-          >
-            Add Payment
-          </button>
+          <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+            <button
+              onClick={() => handleSaleSelect(sale)}
+              className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded text-sm transition-colors"
+            >
+              Add Payment
+            </button>
+          </RoleGuard>
         </div>
       </div>
     );
@@ -308,17 +336,25 @@ const PaymentManagement = ({
       label: "Action",
       align: "center",
       render: (sale) => (
-        <button
-          onClick={() => handleSaleSelect(sale)}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
-        >
-          Add Payment
-        </button>
+        <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+          <button
+            onClick={() => handleSaleSelect(sale)}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
+          >
+            Add Payment
+          </button>
+        </RoleGuard>
       ),
     },
   ];
 
   const handlePaymentUpdate = async () => {
+    // Check if user has permission to update payments
+    if (userRole !== "admin") {
+      setError("You don't have permission to update payments.");
+      return;
+    }
+    
     if (!selectedSale || !additionalPayment) {
       setError("Please enter a payment amount.");
       return;
@@ -412,12 +448,14 @@ const PaymentManagement = ({
 
       {/* Action Buttons */}
       <div className="mb-6 flex gap-3">
-        <button
-          onClick={() => setShowStandalonePayment(!showStandalonePayment)}
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-        >
-          {showStandalonePayment ? "Hide" : "Record"} Payment Only (No Purchase)
-        </button>
+        <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+          <button
+            onClick={() => setShowStandalonePayment(!showStandalonePayment)}
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          >
+            {showStandalonePayment ? "Hide" : "Record"} Payment Only (No Purchase)
+          </button>
+        </RoleGuard>
       </div>
 
       {/* Standalone Payment Form */}
@@ -537,18 +575,85 @@ const PaymentManagement = ({
         </div>
       )}
 
+      {/* Summary Section */}
+      <div className="mb-6 p-4 bg-gray-700 rounded-lg">
+        <h3 className="text-lg font-semibold text-white mb-3">Summary</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-gray-800 p-3 rounded-lg">
+            <p className="text-sm text-gray-300">Total Sales Amount</p>
+            <p className="text-xl font-bold text-green-400">₪{totalSalesAmount.toFixed(2)}</p>
+          </div>
+          <div className="bg-gray-800 p-3 rounded-lg">
+            <p className="text-sm text-gray-300">Total Paid Amount</p>
+            <p className="text-xl font-bold text-blue-400">₪{totalPaidAmount.toFixed(2)}</p>
+          </div>
+          <div className="bg-gray-800 p-3 rounded-lg">
+            <p className="text-sm text-gray-300">Total Balance</p>
+            <p className="text-xl font-bold text-red-400">₪{totalBalance.toFixed(2)}</p>
+          </div>
+        </div>
+      </div>
+
       {/* Search Bar */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-white mb-2">
-          Search Sales by Customer Name
-        </label>
-        <input
-          type="text"
-          placeholder="Search by customer name..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">
+              Search Sales by Customer Name
+            </label>
+            <input
+              type="text"
+              placeholder="Search by customer name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">
+              Filter by Date Range
+            </label>
+            <div className="flex items-center space-x-2 mb-2">
+              <button
+                onClick={() => {
+                  setStartDate("");
+                  setEndDate("");
+                }}
+                className="px-3 py-1 bg-gray-600 text-white rounded-md text-sm hover:bg-gray-500 transition-colors"
+              >
+                Clear Filter
+              </button>
+            </div>
+            
+            {startDate && endDate && (
+              <div className="text-sm text-green-400 mb-2">
+                Showing from {format(new Date(startDate), "MMM dd, yyyy")} to {format(new Date(endDate), "MMM dd, yyyy")}
+              </div>
+            )}
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-gray-300 mb-1">Start Date</label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-300 mb-1">End Date</label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Outstanding Sales Table */}

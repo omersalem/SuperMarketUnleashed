@@ -10,6 +10,7 @@ import {
 import ResponsiveTable, { createMobileCard } from "./ResponsiveTable";
 import AddWorkerModal from "./AddWorkerModal";
 import EditWorkerModal from "./EditWorkerModal";
+import RoleGuard from "./RoleGuard";
 import {
   addWorker,
   updateWorker,
@@ -31,6 +32,7 @@ const WorkerManagement = ({
   setWorkerExpenses,
   workerAttendance,
   setWorkerAttendance,
+  userRole = "admin",
 }) => {
   const { t } = useTranslation();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -129,18 +131,20 @@ const WorkerManagement = ({
       <div className="flex items-center justify-between">
         <h3 className="font-bold text-lg text-white">{worker.name}</h3>
         <div className="flex space-x-2">
-          <button
-            onClick={() => handleEdit(worker)}
-            className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
-          >
-            ✏️ Edit
-          </button>
-          <button
-            onClick={() => handleDelete(worker.id)}
-            className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
-          >
-            🗑️ Delete
-          </button>
+          <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+            <button
+              onClick={() => handleEdit(worker)}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
+            >
+              ✏️ Edit
+            </button>
+            <button
+              onClick={() => handleDelete(worker.id)}
+              className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
+            >
+              🗑️ Delete
+            </button>
+          </RoleGuard>
         </div>
       </div>
 
@@ -195,12 +199,14 @@ const WorkerManagement = ({
       <div className="flex items-center justify-between">
         <h3 className="font-bold text-lg text-white">Expense</h3>
         <div className="flex space-x-2">
-          <button
-            onClick={() => handleDeleteExpense(expense.id)}
-            className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
-          >
-            🗑️ Delete
-          </button>
+          <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+            <button
+              onClick={() => handleDeleteExpense(expense.id)}
+              className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
+            >
+              🗑️ Delete
+            </button>
+          </RoleGuard>
         </div>
       </div>
 
@@ -246,12 +252,14 @@ const WorkerManagement = ({
           >
             {attendance.status}
           </span>
-          <button
-            onClick={() => handleDeleteAttendance(attendance.id)}
-            className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
-          >
-            🗑️ Delete
-          </button>
+          <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+            <button
+              onClick={() => handleDeleteAttendance(attendance.id)}
+              className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded text-sm transition-colors"
+            >
+              🗑️ Delete
+            </button>
+          </RoleGuard>
         </div>
       </div>
 
@@ -326,18 +334,20 @@ const WorkerManagement = ({
       label: "Actions",
       render: (worker) => (
         <div className="flex space-x-2">
-          <button
-            onClick={() => handleEdit(worker)}
-            className="text-blue-400 hover:text-blue-300"
-          >
-            ✏️ Edit
-          </button>
-          <button
-            onClick={() => handleDelete(worker.id)}
-            className="text-red-400 hover:text-red-300 ml-3"
-          >
-            🗑️ Delete
-          </button>
+          <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+            <button
+              onClick={() => handleEdit(worker)}
+              className="text-blue-400 hover:text-blue-300"
+            >
+              ✏️ Edit
+            </button>
+            <button
+              onClick={() => handleDelete(worker.id)}
+              className="text-red-400 hover:text-red-300 ml-3"
+            >
+              🗑️ Delete
+            </button>
+          </RoleGuard>
         </div>
       ),
     },
@@ -367,12 +377,14 @@ const WorkerManagement = ({
       key: "actions",
       label: "Actions",
       render: (expense) => (
-        <button
-          onClick={() => handleDeleteExpense(expense.id)}
-          className="text-red-400 hover:text-red-300"
-        >
-          🗑️ Delete
-        </button>
+        <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+          <button
+            onClick={() => handleDeleteExpense(expense.id)}
+            className="text-red-400 hover:text-red-300"
+          >
+            🗑️ Delete
+          </button>
+        </RoleGuard>
       ),
     },
   ];
@@ -413,12 +425,14 @@ const WorkerManagement = ({
       key: "actions",
       label: "Actions",
       render: (attendance) => (
-        <button
-          onClick={() => handleDeleteAttendance(attendance.id)}
-          className="text-red-400 hover:text-red-300"
-        >
-          🗑️ Delete
-        </button>
+        <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+          <button
+            onClick={() => handleDeleteAttendance(attendance.id)}
+            className="text-red-400 hover:text-red-300"
+          >
+            🗑️ Delete
+          </button>
+        </RoleGuard>
       ),
     },
   ];
@@ -429,6 +443,12 @@ const WorkerManagement = ({
   };
 
   const handleAdd = async (worker) => {
+    // Check if user has permission to add workers
+    if (userRole !== "admin") {
+      console.error("User doesn't have permission to add workers");
+      return;
+    }
+    
     try {
       const newWorker = await addWorker(worker);
       setWorkers([...workers, newWorker]);
@@ -438,6 +458,12 @@ const WorkerManagement = ({
   };
 
   const handleUpdate = async (id, worker) => {
+    // Check if user has permission to update workers
+    if (userRole !== "admin") {
+      console.error("User doesn't have permission to update workers");
+      return;
+    }
+    
     try {
       await updateWorker(id, worker);
       setWorkers(workers.map((w) => (w.id === id ? { id, ...worker } : w)));
@@ -447,6 +473,12 @@ const WorkerManagement = ({
   };
 
   const handleDelete = async (workerId) => {
+    // Check if user has permission to delete workers
+    if (userRole !== "admin") {
+      console.error("User doesn't have permission to delete workers");
+      return;
+    }
+    
     if (window.confirm("Are you sure you want to delete this worker?")) {
       try {
         await deleteWorker(workerId);
@@ -459,6 +491,12 @@ const WorkerManagement = ({
 
   // Expense handlers
   const handleAddExpense = async () => {
+    // Check if user has permission to add expenses
+    if (userRole !== "admin") {
+      alert("You don't have permission to add expenses.");
+      return;
+    }
+    
     if (!selectedWorkerId || !expenseAmount || !expenseDescription) {
       alert("Please fill all expense fields");
       return;
@@ -489,6 +527,12 @@ const WorkerManagement = ({
   };
 
   const handleDeleteExpense = async (expenseId) => {
+    // Check if user has permission to delete expenses
+    if (userRole !== "admin") {
+      alert("You don't have permission to delete expenses.");
+      return;
+    }
+    
     if (window.confirm("Are you sure you want to delete this expense?")) {
       try {
         await deleteWorkerExpense(expenseId);
@@ -503,6 +547,12 @@ const WorkerManagement = ({
 
   // Attendance handlers
   const handleAddAttendance = async () => {
+    // Check if user has permission to add attendance
+    if (userRole !== "admin") {
+      alert("You don't have permission to add attendance records.");
+      return;
+    }
+    
     if (!selectedWorkerId || !attendanceDate) {
       alert("Please select worker and date");
       return;
@@ -543,6 +593,12 @@ const WorkerManagement = ({
   };
 
   const handleDeleteAttendance = async (attendanceId) => {
+    // Check if user has permission to delete attendance records
+    if (userRole !== "admin") {
+      alert("You don't have permission to delete attendance records.");
+      return;
+    }
+    
     if (
       window.confirm("Are you sure you want to delete this attendance record?")
     ) {
@@ -565,12 +621,14 @@ const WorkerManagement = ({
         <h2 className="text-xl sm:text-2xl font-bold text-white">
           👷 Worker Management
         </h2>
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          ➕ {t("addWorker")}
-        </button>
+        <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            ➕ {t("addWorker")}
+          </button>
+        </RoleGuard>
       </div>
 
       {/* Month Selector */}
@@ -694,12 +752,14 @@ const WorkerManagement = ({
                 />
               </div>
             </div>
-            <button
-              onClick={handleAddExpense}
-              className="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-            >
-              ➕ Add Expense
-            </button>
+            <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+              <button
+                onClick={handleAddExpense}
+                className="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+              >
+                ➕ Add Expense
+              </button>
+            </RoleGuard>
           </div>
 
           {/* Worker Expense Details */}
@@ -790,12 +850,14 @@ const WorkerManagement = ({
                 />
               </div>
             </div>
-            <button
-              onClick={handleAddAttendance}
-              className="mt-4 px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700"
-            >
-              📅 Record Absence
-            </button>
+            <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
+              <button
+                onClick={handleAddAttendance}
+                className="mt-4 px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700"
+              >
+                📅 Record Absence
+              </button>
+            </RoleGuard>
           </div>
 
           {/* Worker Attendance Details */}

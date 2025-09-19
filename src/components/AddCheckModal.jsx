@@ -10,6 +10,7 @@ const AddCheckModal = ({
   setBanks,
   currencies,
   setCurrencies,
+  userRole = "admin",
 }) => {
   const [amount, setAmount] = useState(0);
   const [date, setDate] = useState("");
@@ -45,6 +46,13 @@ const AddCheckModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check if user has permission to add checks
+    if (userRole !== "admin") {
+      console.error("User doesn't have permission to add checks");
+      return;
+    }
+    
     try {
       if (showNewBankInput && bankName) {
         const newBank = await addBank({ name: bankName });
@@ -219,7 +227,8 @@ const AddCheckModal = ({
           </button>
           <button
             type="submit"
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            disabled={userRole !== "admin"}
+            className={`${userRole === "admin" ? "bg-blue-500 hover:bg-blue-700" : "bg-gray-500 cursor-not-allowed"} text-white font-bold py-2 px-4 rounded`}
           >
             Add
           </button>
