@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { format } from "date-fns";
+import { formatCurrency } from "../../utils/currency";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 
@@ -201,12 +202,12 @@ const VendorDetailReport = ({ vendors = [], purchases = [], dateRange }) => {
 
     doc.setFontSize(10);
     doc.text(`Total Orders: ${vendor.totalOrders}`, 20, yPosition);
-    doc.text(`Total Amount: $${vendor.totalAmount.toFixed(2)}`, 70, yPosition);
-    doc.text(`Total Paid: $${vendor.totalPaid.toFixed(2)}`, 120, yPosition);
-    doc.text(`Balance: $${vendor.totalBalance.toFixed(2)}`, 170, yPosition);
+    doc.text(`Total Amount: ${formatCurrency(vendor.totalAmount)}`, 70, yPosition);
+    doc.text(`Total Paid: ${formatCurrency(vendor.totalPaid)}`, 120, yPosition);
+    doc.text(`Balance: ${formatCurrency(vendor.totalBalance)}`, 170, yPosition);
     yPosition += 6;
     doc.text(
-      `Average Order: $${vendor.averageOrderValue.toFixed(2)}`,
+      `Average Order: ${formatCurrency(vendor.averageOrderValue)}`,
       20,
       yPosition
     );
@@ -224,9 +225,9 @@ const VendorDetailReport = ({ vendors = [], purchases = [], dateRange }) => {
         .map((purchase) => [
           format(new Date(purchase.date), "MMM dd, yyyy"),
           `${(purchase.products || purchase.items || []).length} items`,
-          `$${(purchase.totalAmount || 0).toFixed(2)}`,
-          `$${(purchase.amountPaid || purchase.totalAmount || 0).toFixed(2)}`,
-          `$${(purchase.balance || 0).toFixed(2)}`,
+          `${formatCurrency(purchase.totalAmount || 0)}`,
+          `${formatCurrency(purchase.amountPaid || purchase.totalAmount || 0)}`,
+          `${formatCurrency(purchase.balance || 0)}`,
           purchase.paymentMethod || "cash",
         ]);
 
@@ -258,7 +259,7 @@ const VendorDetailReport = ({ vendors = [], purchases = [], dateRange }) => {
         .map(([name, data]) => [
           name,
           data.quantity.toString(),
-          `$${data.totalValue.toFixed(2)}`,
+          `${formatCurrency(data.totalValue)}`,
           format(new Date(data.lastSupplied), "MMM dd, yyyy"),
         ]);
 
@@ -384,13 +385,13 @@ const VendorDetailReport = ({ vendors = [], purchases = [], dateRange }) => {
               <div className="flex justify-between">
                 <span className="font-medium text-gray-600">Total Amount:</span>
                 <span className="text-2xl font-bold text-green-600">
-                  ${selectedVendor.totalAmount.toFixed(2)}
+                  {formatCurrency(selectedVendor.totalAmount)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="font-medium text-gray-600">Total Paid:</span>
                 <span className="text-xl font-bold text-blue-600">
-                  ${selectedVendor.totalPaid.toFixed(2)}
+                  {formatCurrency(selectedVendor.totalPaid)}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -404,7 +405,7 @@ const VendorDetailReport = ({ vendors = [], purchases = [], dateRange }) => {
                       : "text-green-600"
                   }`}
                 >
-                  ${selectedVendor.totalBalance.toFixed(2)}
+                  {formatCurrency(selectedVendor.totalBalance)}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -412,7 +413,7 @@ const VendorDetailReport = ({ vendors = [], purchases = [], dateRange }) => {
                   Average Order Value:
                 </span>
                 <span className="text-lg font-semibold text-purple-600">
-                  ${selectedVendor.averageOrderValue.toFixed(2)}
+                  {formatCurrency(selectedVendor.averageOrderValue)}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -520,7 +521,7 @@ const VendorDetailReport = ({ vendors = [], purchases = [], dateRange }) => {
                   </div>
                   <div className="text-xs text-gray-600">
                     <div>Quantity: {data.quantity}</div>
-                    <div>Value: ${data.totalValue.toFixed(2)}</div>
+                    <div>Value: {formatCurrency(data.totalValue)}</div>
                     <div>
                       Last:{" "}
                       {format(new Date(data.lastSupplied), "MMM dd, yyyy")}
@@ -573,15 +574,10 @@ const VendorDetailReport = ({ vendors = [], purchases = [], dateRange }) => {
                       {(purchase.products || purchase.items || []).length} items
                     </td>
                     <td className="px-4 py-3 text-sm text-right text-gray-900 font-medium">
-                      ${(purchase.totalAmount || 0).toFixed(2)}
+                      {formatCurrency(purchase.totalAmount || 0)}
                     </td>
                     <td className="px-4 py-3 text-sm text-right text-blue-600 font-medium">
-                      $
-                      {(
-                        purchase.amountPaid ||
-                        purchase.totalAmount ||
-                        0
-                      ).toFixed(2)}
+                      {formatCurrency(purchase.amountPaid || purchase.totalAmount || 0)}
                     </td>
                     <td
                       className={`px-4 py-3 text-sm text-right font-medium ${
@@ -590,7 +586,7 @@ const VendorDetailReport = ({ vendors = [], purchases = [], dateRange }) => {
                           : "text-green-600"
                       }`}
                     >
-                      ${(purchase.balance || 0).toFixed(2)}
+                      {formatCurrency(purchase.balance || 0)}
                     </td>
                     <td className="px-4 py-3 text-sm text-center text-gray-900 capitalize">
                       {purchase.paymentMethod || "cash"}
@@ -701,7 +697,7 @@ const VendorDetailReport = ({ vendors = [], purchases = [], dateRange }) => {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <span className="text-sm font-medium text-green-600">
-                      ${vendor.totalAmount.toFixed(2)}
+                      {formatCurrency(vendor.totalAmount)}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
@@ -712,7 +708,7 @@ const VendorDetailReport = ({ vendors = [], purchases = [], dateRange }) => {
                           : "text-green-600"
                       }`}
                     >
-                      ${vendor.totalBalance.toFixed(2)}
+                      {formatCurrency(vendor.totalBalance)}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-center text-sm text-gray-900">

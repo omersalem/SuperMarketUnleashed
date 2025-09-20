@@ -1,5 +1,6 @@
 import React from "react";
 import { format } from "date-fns";
+import { formatCurrency } from "../../utils/currency";
 
 const WorkerReport = ({ workers = [], salaryPayments = [], workerExpenses = [], dateRange }) => {
   // Calculate worker statistics
@@ -48,11 +49,11 @@ const WorkerReport = ({ workers = [], salaryPayments = [], workerExpenses = [], 
         </div>
         <div className="bg-green-50 p-4 rounded-lg border">
           <h3 className="font-semibold text-green-800">Salaries Paid</h3>
-          <p className="text-2xl font-bold text-green-600">${totalSalariesPaid.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-green-600">{formatCurrency(totalSalariesPaid)}</p>
         </div>
         <div className="bg-purple-50 p-4 rounded-lg border">
           <h3 className="font-semibold text-purple-800">Expenses Paid</h3>
-          <p className="text-2xl font-bold text-purple-600">${totalExpensesPaid.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-purple-600">{formatCurrency(totalExpensesPaid)}</p>
         </div>
       </div>
 
@@ -78,13 +79,13 @@ const WorkerReport = ({ workers = [], salaryPayments = [], workerExpenses = [], 
                   <td className="border border-gray-300 px-4 py-2">{worker.name || 'N/A'}</td>
                   <td className="border border-gray-300 px-4 py-2">{worker.position || 'N/A'}</td>
                   <td className="border border-gray-300 px-4 py-2 text-right">
-                    ${(worker.salary || 0).toFixed(2)}
+                    {formatCurrency(worker.salary || 0)}
                   </td>
                   <td className="border border-gray-300 px-4 py-2 text-right font-medium">
-                    ${worker.totalSalaryPaid.toFixed(2)}
+                    {formatCurrency(worker.totalSalaryPaid)}
                   </td>
                   <td className="border border-gray-300 px-4 py-2 text-right">
-                    ${worker.totalExpenses.toFixed(2)}
+                    {formatCurrency(worker.totalExpenses)}
                   </td>
                   <td className="border border-gray-300 px-4 py-2 text-center">{worker.totalPayments}</td>
                   <td className="border border-gray-300 px-4 py-2">
@@ -125,7 +126,7 @@ const WorkerReport = ({ workers = [], salaryPayments = [], workerExpenses = [], 
                       {worker ? worker.name : 'Unknown Worker'}
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-right font-medium">
-                      ${(payment.amount || 0).toFixed(2)}
+                      {formatCurrency(payment.amount || 0)}
                     </td>
                     <td className="border border-gray-300 px-4 py-2">
                       {payment.notes || 'N/A'}

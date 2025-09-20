@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { format } from "date-fns";
+import { formatCurrency, formatCurrencyForTable } from "../../utils/currency";
 
 const CustomerReport = ({ customers = [], sales = [], dateRange }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -174,13 +175,13 @@ const CustomerReport = ({ customers = [], sales = [], dateRange }) => {
               <p>
                 <span className="font-medium">Total Spent:</span>{" "}
                 <span className="text-green-600 font-bold">
-                  ₪{selectedCustomer.totalSpent.toFixed(2)}
+                  {formatCurrency(selectedCustomer.totalSpent)}
                 </span>
               </p>
               <p>
                 <span className="font-medium">Total Paid:</span>{" "}
                 <span className="text-blue-600 font-bold">
-                  ₪{selectedCustomer.totalPaid.toFixed(2)}
+                  {formatCurrency(selectedCustomer.totalPaid)}
                 </span>
               </p>
               <p>
@@ -192,12 +193,11 @@ const CustomerReport = ({ customers = [], sales = [], dateRange }) => {
                       : "text-green-600"
                   }`}
                 >
-                  ₪{selectedCustomer.totalBalance.toFixed(2)}
+                  {formatCurrency(selectedCustomer.totalBalance)}
                 </span>
               </p>
               <p>
-                <span className="font-medium">Average Order Value:</span> ₪
-                {selectedCustomer.averageOrderValue.toFixed(2)}
+                <span className="font-medium">Average Order Value:</span> {formatCurrency(selectedCustomer.averageOrderValue)}
               </p>
               <p>
                 <span className="font-medium">Last Order:</span>{" "}
@@ -300,13 +300,7 @@ const CustomerReport = ({ customers = [], sales = [], dateRange }) => {
                                 </span>
                                 <span className="text-green-600">
                                   {" "}
-                                  ($
-                                  {(
-                                    product.price ||
-                                    product.priceAtSale ||
-                                    0
-                                  ).toFixed(2)}{" "}
-                                  each)
+                                  ({formatCurrency(product.price || product.priceAtSale || 0)} each)
                                 </span>
                               </div>
                             ))
@@ -322,10 +316,10 @@ const CustomerReport = ({ customers = [], sales = [], dateRange }) => {
                             )}
                       </td>
                       <td className="border border-gray-300 px-4 py-2 text-right font-medium text-green-600">
-                        ${(sale.totalAmount || 0).toFixed(2)}
+                        {formatCurrency(sale.totalAmount || 0)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2 text-right font-medium text-blue-600">
-                        ${(sale.amountPaid || sale.totalAmount || 0).toFixed(2)}
+                        {formatCurrency(sale.amountPaid || sale.totalAmount || 0)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2 text-right font-medium">
                         <span
@@ -335,7 +329,7 @@ const CustomerReport = ({ customers = [], sales = [], dateRange }) => {
                               : "text-green-600"
                           }`}
                         >
-                          ${Math.abs(sale.balance || 0).toFixed(2)}
+                          {formatCurrency(Math.abs(sale.balance || 0))}
                           {(sale.balance || 0) < 0 && " (Change)"}
                         </span>
                       </td>
@@ -456,13 +450,13 @@ const CustomerReport = ({ customers = [], sales = [], dateRange }) => {
         <div className="bg-purple-50 p-4 rounded-lg border">
           <h3 className="font-semibold text-purple-800">Total Revenue</h3>
           <p className="text-2xl font-bold text-purple-600">
-            ${totalRevenue.toFixed(2)}
+            {formatCurrency(totalRevenue)}
           </p>
         </div>
         <div className="bg-red-50 p-4 rounded-lg border">
           <h3 className="font-semibold text-red-800">Outstanding Balance</h3>
           <p className="text-2xl font-bold text-red-600">
-            ${totalOutstanding.toFixed(2)}
+            {formatCurrency(totalOutstanding)}
           </p>
         </div>
       </div>
@@ -530,10 +524,10 @@ const CustomerReport = ({ customers = [], sales = [], dateRange }) => {
                       {customer.totalOrders}
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-right font-medium text-green-600">
-                      ${customer.totalSpent.toFixed(2)}
+                      {formatCurrency(customer.totalSpent)}
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-right font-medium text-blue-600">
-                      ${customer.totalPaid.toFixed(2)}
+                      {formatCurrency(customer.totalPaid)}
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-right font-medium">
                       <span
@@ -543,11 +537,11 @@ const CustomerReport = ({ customers = [], sales = [], dateRange }) => {
                             : "text-green-600"
                         }
                       >
-                        ${customer.totalBalance.toFixed(2)}
+                        {formatCurrency(customer.totalBalance)}
                       </span>
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-right">
-                      ${customer.averageOrderValue.toFixed(2)}
+                      {formatCurrency(customer.averageOrderValue)}
                     </td>
                     <td className="border border-gray-300 px-4 py-2">
                       {customer.lastOrderDate

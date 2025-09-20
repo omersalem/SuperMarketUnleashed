@@ -1,5 +1,6 @@
 import React from "react";
 import { format } from "date-fns";
+import { formatCurrency } from "../../utils/currency";
 
 const VendorReport = ({ vendors = [], purchases = [], dateRange }) => {
   console.log('VendorReport Debug:', {
@@ -72,7 +73,7 @@ const VendorReport = ({ vendors = [], purchases = [], dateRange }) => {
         </div>
         <div className="bg-purple-50 p-4 rounded-lg border">
           <h3 className="font-semibold text-purple-800">Total Purchases</h3>
-          <p className="text-2xl font-bold text-purple-600">${totalPurchaseAmount.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-purple-600">{formatCurrency(totalPurchaseAmount)}</p>
         </div>
       </div>
 
@@ -102,7 +103,7 @@ const VendorReport = ({ vendors = [], purchases = [], dateRange }) => {
                     {purchase.products?.length || 0}
                   </td>
                   <td className="border border-gray-300 px-4 py-2 text-right font-medium">
-                    ${(purchase.totalAmount || 0).toFixed(2)}
+                    {formatCurrency(purchase.totalAmount || 0)}
                   </td>
                 </tr>
               ))}
@@ -133,10 +134,10 @@ const VendorReport = ({ vendors = [], purchases = [], dateRange }) => {
                   <td className="border border-gray-300 px-4 py-2">{vendor.email || vendor.phone || 'N/A'}</td>
                   <td className="border border-gray-300 px-4 py-2 text-center">{vendor.totalOrders}</td>
                   <td className="border border-gray-300 px-4 py-2 text-right font-medium">
-                    ${vendor.totalAmount.toFixed(2)}
+                    {formatCurrency(vendor.totalAmount)}
                   </td>
                   <td className="border border-gray-300 px-4 py-2 text-right">
-                    ${vendor.averageOrderValue.toFixed(2)}
+                    {formatCurrency(vendor.averageOrderValue)}
                   </td>
                   <td className="border border-gray-300 px-4 py-2">
                     {vendor.lastOrderDate 

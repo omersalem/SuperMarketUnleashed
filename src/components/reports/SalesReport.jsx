@@ -10,6 +10,7 @@ import {
   addWorkerExpense,
   addWorkerAttendance,
 } from "../../firebase/firestore";
+import { formatCurrency } from "../../utils/currency";
 
 const SalesReport = ({
   sales,
@@ -233,7 +234,7 @@ const SalesReport = ({
             <div className="bg-blue-50 p-4 rounded-lg border">
               <h3 className="font-semibold text-blue-800">Total Revenue</h3>
               <p className="text-2xl font-bold text-blue-600">
-                ₪{totalRevenue.toFixed(2)}
+                {formatCurrency(totalRevenue)}
               </p>
             </div>
             <div className="bg-green-50 p-4 rounded-lg border">
@@ -249,7 +250,7 @@ const SalesReport = ({
                 Average Order Value
               </h3>
               <p className="text-2xl font-bold text-purple-600">
-                ₪{averageOrderValue.toFixed(2)}
+                {formatCurrency(averageOrderValue)}
               </p>
             </div>
           </div>
@@ -288,7 +289,7 @@ const SalesReport = ({
                         {getCustomerName(sale)}
                       </td>
                       <td className="border border-gray-300 px-4 py-2 text-right font-medium text-green-600">
-                        ₪{(sale.totalAmount || 0).toFixed(2)}
+                        {formatCurrency(sale.totalAmount || 0)}
                       </td>
                     </tr>
                   ))}
@@ -354,7 +355,7 @@ const SalesReport = ({
                   <div className="flex justify-between">
                     <span className="text-gray-600">Monthly Salary:</span>
                     <span className="font-medium text-green-600">
-                      ₪{(worker.salary || 0).toFixed(2)}
+                      {formatCurrency(worker.salary || 0)}
                     </span>
                   </div>
 
@@ -375,14 +376,14 @@ const SalesReport = ({
                   <div className="flex justify-between">
                     <span className="text-gray-600">Daily Salary:</span>
                     <span className="font-medium text-blue-600">
-                      ₪{worker.dailySalary.toFixed(2)}
+                      {formatCurrency(worker.dailySalary)}
                     </span>
                   </div>
 
                   <div className="flex justify-between">
                     <span className="text-gray-600">Monthly Expenses:</span>
                     <span className="font-medium text-red-600">
-                      -₪{worker.totalMonthlyExpenses.toFixed(2)}
+                      -{formatCurrency(worker.totalMonthlyExpenses)}
                     </span>
                   </div>
 
@@ -391,7 +392,7 @@ const SalesReport = ({
                       Absences ({worker.absentWorkingDays} working days):
                     </span>
                     <span className="font-medium text-red-600">
-                      -₪{worker.absenceDeduction.toFixed(2)}
+                      -{formatCurrency(worker.absenceDeduction)}
                     </span>
                   </div>
 
@@ -407,7 +408,7 @@ const SalesReport = ({
                             : "text-red-600"
                         }`}
                       >
-                        ₪{worker.remainingSalary.toFixed(2)}
+                        {formatCurrency(worker.remainingSalary)}
                       </span>
                     </div>
                   </div>
@@ -452,7 +453,7 @@ const SalesReport = ({
                   setNewExpense((prev) => ({ ...prev, amount: e.target.value }))
                 }
                 className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Amount (₪)"
+                placeholder="Amount"
               />
 
               <input
@@ -523,7 +524,7 @@ const SalesReport = ({
                             {expense.description}
                           </td>
                           <td className="border border-gray-300 px-4 py-2 text-right font-medium text-red-600">
-                            ₪{(expense.amount || 0).toFixed(2)}
+                            {formatCurrency(expense.amount || 0)}
                           </td>
                         </tr>
                       );

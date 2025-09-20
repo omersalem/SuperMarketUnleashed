@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { addSale, updateProduct } from "../firebase/firestore";
 import CheckPaymentModal from "./CheckPaymentModal";
 import RoleGuard, { RoleMessage } from "./RoleGuard";
+import { formatCurrency } from "../utils/currency";
 
 const SalesManagement = ({
   sales,
@@ -200,7 +201,7 @@ const SalesManagement = ({
       setCheckDetails(null);
       setError(null);
 
-      alert(`Payment of ₪${paymentAmount.toFixed(2)} recorded successfully!`);
+      alert(`Payment of ${formatCurrency(paymentAmount)} recorded successfully!`);
     } catch (error) {
       setError("Error recording payment: " + error.message);
       console.error("Error recording quick payment:", error);

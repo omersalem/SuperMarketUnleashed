@@ -1,5 +1,6 @@
 import React from "react";
 import { format } from "date-fns";
+import { formatCurrency } from "../../utils/currency";
 
 const InventoryReport = ({ products = [], dateRange }) => {
   const totalProducts = products.length;
@@ -30,7 +31,7 @@ const InventoryReport = ({ products = [], dateRange }) => {
         </div>
         <div className="bg-green-50 p-4 rounded-lg border">
           <h3 className="font-semibold text-green-800">Total Value</h3>
-          <p className="text-2xl font-bold text-green-600">${totalValue.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-green-600">{formatCurrency(totalValue)}</p>
         </div>
         <div className="bg-yellow-50 p-4 rounded-lg border">
           <h3 className="font-semibold text-yellow-800">Low Stock</h3>
@@ -78,8 +79,8 @@ const InventoryReport = ({ products = [], dateRange }) => {
                     <td className="border border-gray-300 px-4 py-2">{product.name || 'N/A'}</td>
                     <td className="border border-gray-300 px-4 py-2">{product.categoryName || 'Uncategorized'}</td>
                     <td className="border border-gray-300 px-4 py-2 text-center">{stock}</td>
-                    <td className="border border-gray-300 px-4 py-2 text-right">${price.toFixed(2)}</td>
-                    <td className="border border-gray-300 px-4 py-2 text-right font-medium">${totalValue.toFixed(2)}</td>
+                    <td className="border border-gray-300 px-4 py-2 text-right">{formatCurrency(price)}</td>
+                    <td className="border border-gray-300 px-4 py-2 text-right font-medium">{formatCurrency(totalValue)}</td>
                     <td className={`border border-gray-300 px-4 py-2 text-center font-medium ${statusColor}`}>
                       {status}
                     </td>

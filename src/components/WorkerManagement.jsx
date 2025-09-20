@@ -7,6 +7,7 @@ import {
   eachDayOfInterval,
   isWeekend,
 } from "date-fns";
+import { formatCurrency, formatCurrencyForTable } from "../utils/currency";
 import ResponsiveTable, { createMobileCard } from "./ResponsiveTable";
 import AddWorkerModal from "./AddWorkerModal";
 import EditWorkerModal from "./EditWorkerModal";
@@ -152,19 +153,19 @@ const WorkerManagement = ({
         <div>
           <span className="text-gray-400">Monthly Salary:</span>
           <p className="text-white font-medium">
-            ₪{(worker.salary || 0).toFixed(2)}
+            {formatCurrency(worker.salary || 0)}
           </p>
         </div>
         <div>
           <span className="text-gray-400">Daily Salary:</span>
           <p className="text-white font-medium">
-            ₪{worker.dailySalary.toFixed(2)}
+            {formatCurrency(worker.dailySalary)}
           </p>
         </div>
         <div>
           <span className="text-gray-400">Expenses:</span>
           <p className="text-red-400 font-medium">
-            ₪{worker.monthlyExpenses.toFixed(2)}
+            {formatCurrency(worker.monthlyExpenses)}
           </p>
         </div>
         <div>
@@ -176,7 +177,7 @@ const WorkerManagement = ({
         <div>
           <span className="text-gray-400">Deductions:</span>
           <p className="text-red-400 font-medium">
-            ₪{worker.totalDeductions.toFixed(2)}
+            {formatCurrency(worker.totalDeductions)}
           </p>
         </div>
         <div>
@@ -186,7 +187,7 @@ const WorkerManagement = ({
               worker.remainingSalary >= 0 ? "text-green-400" : "text-red-500"
             }`}
           >
-            ₪{worker.remainingSalary.toFixed(2)}
+            {formatCurrency(worker.remainingSalary)}
           </p>
         </div>
       </div>
@@ -220,7 +221,7 @@ const WorkerManagement = ({
         <div>
           <span className="text-gray-400">Amount:</span>
           <p className="text-red-400 font-medium">
-            ₪{expense.amount.toFixed(2)}
+            {formatCurrency(expense.amount)}
           </p>
         </div>
         <div className="col-span-2">
@@ -370,7 +371,7 @@ const WorkerManagement = ({
       key: "amount",
       label: "Amount",
       render: (expense) => (
-        <span className="text-red-400">₪{expense.amount.toFixed(2)}</span>
+        <span className="text-red-400">{formatCurrency(expense.amount)}</span>
       ),
     },
     {

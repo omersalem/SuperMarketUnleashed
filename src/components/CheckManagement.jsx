@@ -5,6 +5,7 @@ import AddCheckModal from "./AddCheckModal";
 import EditCheckModal from "./EditCheckModal";
 import RoleGuard from "./RoleGuard";
 import { format } from "date-fns";
+import { formatCurrency, formatCurrencyForTable } from "../utils/currency";
 
 const CheckManagement = ({
   checks,
@@ -134,7 +135,7 @@ const CheckManagement = ({
         <div>
           <span className="text-gray-400">Amount:</span>
           <p className="text-green-400 font-medium">
-            {check.amount} {check.currency}
+            {formatCurrency(check.amount, check.currency)}
           </p>
         </div>
         <div>
@@ -164,7 +165,7 @@ const CheckManagement = ({
     {
       key: "amount",
       label: "Amount",
-      render: (check) => `₪${check.amount} ${check.currency}`,
+      render: (check) => formatCurrency(check.amount, check.currency),
     },
     {
       key: "date",
