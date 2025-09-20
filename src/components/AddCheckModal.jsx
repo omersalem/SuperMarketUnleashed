@@ -158,7 +158,7 @@ const AddCheckModal = ({
         </div>
         <div className="mb-4">
           <label htmlFor="payee" className="block mb-2 text-sm font-medium">
-            Payee
+            Person Name
           </label>
           <input
             type="text"

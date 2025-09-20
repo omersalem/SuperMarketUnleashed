@@ -158,8 +158,8 @@ const CheckManagement = ({
   // Table columns configuration
   const tableColumns = [
     {
-      key: "id",
-      label: "ID",
+      key: "payee",
+      label: "Person",
     },
     {
       key: "amount",
