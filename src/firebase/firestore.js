@@ -185,6 +185,11 @@ export const addBank = async (bank) => {
   return { id: docRef.id, ...bank };
 };
 
+export const deleteBank = async (id) => {
+  const bankDoc = doc(db, "banks", id);
+  await deleteDoc(bankDoc);
+};
+
 // Currencies
 const currenciesCollection = collection(db, "currencies");
 
@@ -196,6 +201,11 @@ export const getCurrencies = async () => {
 export const addCurrency = async (currency) => {
   const docRef = await addDoc(currenciesCollection, currency);
   return { id: docRef.id, ...currency };
+};
+
+export const deleteCurrency = async (id) => {
+  const currencyDoc = doc(db, "currencies", id);
+  await deleteDoc(currencyDoc);
 };
 
 // Workers
@@ -235,6 +245,11 @@ export const getSalaryPayments = async (workerId = null) => {
 export const addSalaryPayment = async (payment) => {
   const docRef = await addDoc(salaryPaymentsCollection, payment);
   return { id: docRef.id, ...payment };
+};
+
+export const deleteSalaryPayment = async (id) => {
+  const paymentDoc = doc(db, "salaryPayments", id);
+  await deleteDoc(paymentDoc);
 };
 
 // Worker Expenses
@@ -290,6 +305,42 @@ export const updateWorkerAttendance = async (id, attendance) => {
 export const deleteWorkerAttendance = async (id) => {
   const attendanceDoc = doc(db, "workerAttendance", id);
   await deleteDoc(attendanceDoc);
+};
+
+// Incomes
+const incomesCollection = collection(db, "incomes");
+
+export const getIncomes = async () => {
+  const snapshot = await getDocs(incomesCollection);
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
+
+export const addIncome = async (income) => {
+  const docRef = await addDoc(incomesCollection, income);
+  return { id: docRef.id, ...income };
+};
+
+export const deleteIncome = async (id) => {
+  const incomeDoc = doc(db, "incomes", id);
+  await deleteDoc(incomeDoc);
+};
+
+// Expenses
+const expensesCollection = collection(db, "expenses");
+
+export const getExpenses = async () => {
+  const snapshot = await getDocs(expensesCollection);
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
+
+export const addExpense = async (expense) => {
+  const docRef = await addDoc(expensesCollection, expense);
+  return { id: docRef.id, ...expense };
+};
+
+export const deleteExpense = async (id) => {
+  const expenseDoc = doc(db, "expenses", id);
+  await deleteDoc(expenseDoc);
 };
 
 export default db;

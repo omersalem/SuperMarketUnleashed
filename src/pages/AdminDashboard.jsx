@@ -37,6 +37,23 @@ import {
   getSalaryPayments,
   getWorkerExpenses,
   getWorkerAttendance,
+  getIncomes,
+  getExpenses,
+  deleteCustomer,
+  deleteVendor,
+  deleteCategory,
+  deleteProduct,
+  deleteSale,
+  deletePurchase,
+  deleteCheck,
+  deleteWorker,
+  deleteBank,
+  deleteCurrency,
+  deleteSalaryPayment,
+  deleteWorkerExpense,
+  deleteWorkerAttendance,
+  deleteIncome,
+  deleteExpense,
 } from "../firebase/firestore";
 
 const AdminDashboard = () => {
@@ -138,6 +155,114 @@ const AdminDashboard = () => {
     setLoadingStates((prev) => ({ ...prev, [section]: isLoading }));
   };
 
+  // Function to reset all data
+  const handleResetAllData = async () => {
+    if (!window.confirm("Are you sure you want to delete all data? This action cannot be undone.")) {
+      return;
+    }
+    
+    // Ask for password confirmation
+    const password = prompt("Please enter your password to confirm data deletion:");
+    if (!password) {
+      alert("Password confirmation required. Data deletion cancelled.");
+      return;
+    }
+    
+    // In a real application, you would verify the password with your backend
+    // For this demo, we'll just check if it's not empty
+    if (password.trim() === "") {
+      alert("Invalid password. Data deletion cancelled.");
+      return;
+    }
+
+    try {
+      // Reset all state
+      setCustomers([]);
+      setVendors([]);
+      setCategories([]);
+      setProducts([]);
+      setSales([]);
+      setPurchases([]);
+      setChecks([]);
+      setWorkers([]);
+      setBanks([]);
+      setCurrencies([]);
+      setSalaryPayments([]);
+      setWorkerExpenses([]);
+      setWorkerAttendance([]);
+
+      // Delete all documents from collections
+      const [customersData, vendorsData, categoriesData, productsData, salesData, purchasesData, checksData, workersData, banksData, currenciesData, salaryPaymentsData, workerExpensesData, workerAttendanceData] = await Promise.all([
+        getCustomers(),
+        getVendors(),
+        getCategories(),
+        getProducts(),
+        getSales(),
+        getPurchases(),
+        getChecks(),
+        getWorkers(),
+        getBanks(),
+        getCurrencies(),
+        getSalaryPayments(),
+        getWorkerExpenses(),
+        getWorkerAttendance(),
+      ]);
+
+      // Delete all customers
+      await Promise.all(customersData.map(customer => deleteCustomer(customer.id)));
+      
+      // Delete all vendors
+      await Promise.all(vendorsData.map(vendor => deleteVendor(vendor.id)));
+      
+      // Delete all categories
+      await Promise.all(categoriesData.map(category => deleteCategory(category.id)));
+      
+      // Delete all products
+      await Promise.all(productsData.map(product => deleteProduct(product.id)));
+      
+      // Delete all sales
+      await Promise.all(salesData.map(sale => deleteSale(sale.id)));
+      
+      // Delete all purchases
+      await Promise.all(purchasesData.map(purchase => deletePurchase(purchase.id)));
+      
+      // Delete all checks
+      await Promise.all(checksData.map(check => deleteCheck(check.id)));
+      
+      // Delete all workers
+      await Promise.all(workersData.map(worker => deleteWorker(worker.id)));
+      
+      // Delete all banks
+      await Promise.all(banksData.map(bank => deleteBank(bank.id)));
+      
+      // Delete all currencies
+      await Promise.all(currenciesData.map(currency => deleteCurrency(currency.id)));
+      
+      // Delete all salary payments
+      await Promise.all(salaryPaymentsData.map(payment => deleteSalaryPayment(payment.id)));
+      
+      // Delete all worker expenses
+      await Promise.all(workerExpensesData.map(expense => deleteWorkerExpense(expense.id)));
+      
+      // Delete all worker attendance records
+      await Promise.all(workerAttendanceData.map(attendance => deleteWorkerAttendance(attendance.id)));
+      
+      // Delete all income records
+      const incomesData = await getIncomes();
+      await Promise.all(incomesData.map(income => deleteIncome(income.id)));
+      
+      // Delete all expense records
+      const expensesData = await getExpenses();
+      await Promise.all(expensesData.map(expense => deleteExpense(expense.id)));
+
+      alert("All data has been successfully cleared.");
+    } catch (err) {
+      const handledError = handleFirebaseError(err);
+      logError(handledError, { context: "AdminDashboard - handleResetAllData" });
+      alert(`Error clearing data: ${handledError.message}`);
+    }
+  };
+
   if (loading) {
     return <PageLoadingSpinner message="Loading dashboard data..." />;
   }
@@ -215,6 +340,16 @@ const AdminDashboard = () => {
               </div>
             </div>
             
+            {/* Reset Data Button */}
+            <button
+              onClick={handleResetAllData}
+              className="flex items-center space-x-2 bg-gradient-to-r from-yellow-600 to-red-600 hover:from-yellow-700 hover:to-red-700 text-white px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              title="Reset All Data"
+            >
+              <span className="text-lg">🔄</span>
+              <span className="hidden sm:inline">Reset Data</span>
+            </button>
+
             {/* Logout Button */}
             <button
               onClick={logout}

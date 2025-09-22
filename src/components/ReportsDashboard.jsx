@@ -120,15 +120,25 @@ const ReportsDashboard = ({
   };
 
   // Helper function to get category name
-  const getCategoryName = (categoryId) => {
-    const category = categories.find((cat) => cat.id === categoryId);
-    return category ? category.name : "Uncategorized";
+  const getCategoryName = (product) => {
+    // If product has a direct category field, use it
+    if (product.category) {
+      return product.category;
+    }
+    
+    // Otherwise, look up by categoryId
+    if (product.categoryId) {
+      const category = categories.find((cat) => cat.id === product.categoryId);
+      return category ? category.name : "Uncategorized";
+    }
+    
+    return "Uncategorized";
   };
 
   // Process products to include category names
   const processedProducts = products.map((product) => ({
     ...product,
-    categoryName: getCategoryName(product.categoryId),
+    categoryName: getCategoryName(product),
   }));
 
   const reportTypes = [

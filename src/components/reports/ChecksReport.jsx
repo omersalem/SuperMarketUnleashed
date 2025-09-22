@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
+import { formatCurrency } from "../../utils/currency";
 
 const ChecksReport = ({ checks = [], allChecks = [], dateRange }) => {
   const [showAllChecks, setShowAllChecks] = useState(false);
@@ -66,7 +67,7 @@ const ChecksReport = ({ checks = [], allChecks = [], dateRange }) => {
         <div className="bg-green-50 p-4 rounded-lg border">
           <h3 className="font-semibold text-green-800">Total Amount</h3>
           <p className="text-2xl font-bold text-green-600">
-            ${totalAmount.toFixed(2)}
+            {formatCurrency(totalAmount)}
           </p>
         </div>
         <div className="bg-yellow-50 p-4 rounded-lg border">
@@ -118,7 +119,7 @@ const ChecksReport = ({ checks = [], allChecks = [], dateRange }) => {
                     {check.payee || "N/A"}
                   </td>
                   <td className="border border-gray-300 px-4 py-2 text-right font-medium">
-                    ${(check.amount || 0).toFixed(2)}
+                    {formatCurrency(check.amount || 0)}
                   </td>
                   <td className="border border-gray-300 px-4 py-2 text-center">
                     <span

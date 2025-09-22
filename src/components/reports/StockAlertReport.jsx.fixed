@@ -63,6 +63,7 @@ const StockAlertReport = ({ products = [], dateRange }) => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="border border-gray-300 px-4 py-2 text-left">Product</th>
+                <th className="border border-gray-300 px-4 py-2 text-left">Category</th>
                 <th className="border border-gray-300 px-4 py-2 text-center">Current Stock</th>
                 <th className="border border-gray-300 px-4 py-2 text-right">Price</th>
                 <th className="border border-gray-300 px-4 py-2 text-center">Status</th>
@@ -73,6 +74,7 @@ const StockAlertReport = ({ products = [], dateRange }) => {
                 return (
                   <tr key={product.id || index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                     <td className="border border-gray-300 px-4 py-2">{product.name || 'N/A'}</td>
+                    <td className="border border-gray-300 px-4 py-2">{product.categoryName || 'Uncategorized'}</td>
                     <td className="border border-gray-300 px-4 py-2 text-center font-medium">{product.stock || 0}</td>
                     <td className="border border-gray-300 px-4 py-2 text-right">
                       {formatCurrency(product.price || 0)}

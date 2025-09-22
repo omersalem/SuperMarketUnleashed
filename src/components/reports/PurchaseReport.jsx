@@ -1,5 +1,6 @@
 import React from "react";
 import { format } from "date-fns";
+import { formatCurrency } from "../../utils/currency";
 
 const PurchaseReport = ({ purchases = [], vendors = [], dateRange }) => {
   const getVendorName = (purchase) => {
@@ -35,11 +36,11 @@ const PurchaseReport = ({ purchases = [], vendors = [], dateRange }) => {
         </div>
         <div className="bg-green-50 p-4 rounded-lg border">
           <h3 className="font-semibold text-green-800">Total Amount</h3>
-          <p className="text-2xl font-bold text-green-600">${totalAmount.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-green-600">{formatCurrency(totalAmount)}</p>
         </div>
         <div className="bg-purple-50 p-4 rounded-lg border">
           <h3 className="font-semibold text-purple-800">Average Order</h3>
-          <p className="text-2xl font-bold text-purple-600">${averageOrderValue.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-purple-600">{formatCurrency(averageOrderValue)}</p>
         </div>
       </div>
 
@@ -66,7 +67,7 @@ const PurchaseReport = ({ purchases = [], vendors = [], dateRange }) => {
                     {purchase.products?.length || 0}
                   </td>
                   <td className="border border-gray-300 px-4 py-2 text-right font-medium">
-                    ${(purchase.totalAmount || 0).toFixed(2)}
+                    {formatCurrency(purchase.totalAmount || 0)}
                   </td>
                 </tr>
               ))}

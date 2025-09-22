@@ -1,5 +1,6 @@
 import React from "react";
 import { format } from "date-fns";
+import { formatCurrency } from "../../utils/currency";
 
 const ProfitLossReport = ({ sales = [], purchases = [], salaryPayments = [], workerExpenses = [], dateRange }) => {
   // Revenue calculation
@@ -41,29 +42,29 @@ const ProfitLossReport = ({ sales = [], purchases = [], salaryPayments = [], wor
           <div className="space-y-3">
             <div className="flex justify-between items-center py-2 border-b">
               <span className="font-medium text-green-700">Revenue</span>
-              <span className="font-bold text-green-700">${totalRevenue.toFixed(2)}</span>
+              <span className="font-bold text-green-700">{formatCurrency(totalRevenue)}</span>
             </div>
             <div className="flex justify-between items-center py-2">
               <span className="text-red-600 ml-4">Cost of Goods Sold</span>
-              <span className="text-red-600">-${totalCOGS.toFixed(2)}</span>
+              <span className="text-red-600">-{formatCurrency(totalCOGS)}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-t border-b bg-blue-50">
               <span className="font-medium text-blue-700">Gross Profit</span>
-              <span className="font-bold text-blue-700">${grossProfit.toFixed(2)}</span>
+              <span className="font-bold text-blue-700">{formatCurrency(grossProfit)}</span>
             </div>
             <div className="ml-4 space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-red-600">Salaries</span>
-                <span className="text-red-600">-${totalSalaries.toFixed(2)}</span>
+                <span className="text-red-600">-{formatCurrency(totalSalaries)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-red-600">Other Expenses</span>
-                <span className="text-red-600">-${totalWorkerExpenses.toFixed(2)}</span>
+                <span className="text-red-600">-{formatCurrency(totalWorkerExpenses)}</span>
               </div>
             </div>
             <div className="flex justify-between items-center py-2 border-t border-b bg-gray-50">
               <span className="font-medium">Total Operating Expenses</span>
-              <span className="font-medium text-red-600">-${totalOperatingExpenses.toFixed(2)}</span>
+              <span className="font-medium text-red-600">-{formatCurrency(totalOperatingExpenses)}</span>
             </div>
             <div className={`flex justify-between items-center py-3 border-t-2 ${
               netProfit >= 0 ? 'bg-green-50' : 'bg-red-50'
@@ -72,7 +73,7 @@ const ProfitLossReport = ({ sales = [], purchases = [], salaryPayments = [], wor
               <span className={`font-bold text-lg ${
                 netProfit >= 0 ? 'text-green-700' : 'text-red-700'
               }`}>
-                ${netProfit.toFixed(2)}
+                {formatCurrency(netProfit)}
               </span>
             </div>
           </div>
@@ -97,7 +98,7 @@ const ProfitLossReport = ({ sales = [], purchases = [], salaryPayments = [], wor
             <div className="bg-gray-50 p-4 rounded-lg">
               <div className="text-sm text-gray-600 font-medium">Revenue per Transaction</div>
               <div className="text-2xl font-bold text-gray-700">
-                ${sales.length > 0 ? (totalRevenue / sales.length).toFixed(2) : '0.00'}
+                {sales.length > 0 ? formatCurrency(totalRevenue / sales.length) : formatCurrency(0)}
               </div>
             </div>
             <div className="bg-purple-50 p-4 rounded-lg">
@@ -124,14 +125,14 @@ const ProfitLossReport = ({ sales = [], purchases = [], salaryPayments = [], wor
               <tr className="bg-green-50">
                 <td className="border border-gray-300 px-4 py-2 font-semibold">Total Revenue</td>
                 <td className="border border-gray-300 px-4 py-2 text-right font-bold text-green-600">
-                  ${totalRevenue.toFixed(2)}
+                  {formatCurrency(totalRevenue)}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-right">100.0%</td>
               </tr>
               <tr>
                 <td className="border border-gray-300 px-4 py-2">Cost of Goods Sold</td>
                 <td className="border border-gray-300 px-4 py-2 text-right text-red-600">
-                  ${totalCOGS.toFixed(2)}
+                  {formatCurrency(totalCOGS)}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-right">
                   {totalRevenue > 0 ? ((totalCOGS / totalRevenue) * 100).toFixed(1) : '0.0'}%
@@ -140,7 +141,7 @@ const ProfitLossReport = ({ sales = [], purchases = [], salaryPayments = [], wor
               <tr>
                 <td className="border border-gray-300 px-4 py-2">Salaries</td>
                 <td className="border border-gray-300 px-4 py-2 text-right text-red-600">
-                  ${totalSalaries.toFixed(2)}
+                  {formatCurrency(totalSalaries)}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-right">
                   {totalRevenue > 0 ? ((totalSalaries / totalRevenue) * 100).toFixed(1) : '0.0'}%
@@ -149,7 +150,7 @@ const ProfitLossReport = ({ sales = [], purchases = [], salaryPayments = [], wor
               <tr>
                 <td className="border border-gray-300 px-4 py-2">Other Expenses</td>
                 <td className="border border-gray-300 px-4 py-2 text-right text-red-600">
-                  ${totalWorkerExpenses.toFixed(2)}
+                  {formatCurrency(totalWorkerExpenses)}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-right">
                   {totalRevenue > 0 ? ((totalWorkerExpenses / totalRevenue) * 100).toFixed(1) : '0.0'}%
@@ -160,7 +161,7 @@ const ProfitLossReport = ({ sales = [], purchases = [], salaryPayments = [], wor
                 <td className={`border border-gray-300 px-4 py-2 text-right font-bold ${
                   netProfit >= 0 ? 'text-green-600' : 'text-red-600'
                 }`}>
-                  ${netProfit.toFixed(2)}
+                  {formatCurrency(netProfit)}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-right font-bold">
                   {netMargin.toFixed(1)}%

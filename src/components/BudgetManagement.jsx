@@ -1,106 +1,92 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { format, isWithinInterval } from "date-fns";
 import ResponsiveTable, { createMobileCard } from "./ResponsiveTable";
 import AddIncomeModal from "./AddIncomeModal";
 import AddExpenseModal from "./AddExpenseModal";
 import RoleGuard from "./RoleGuard";
-
-// Mock data for demonstration
-const mockIncomes = [
-  {
-    id: "inc1",
-    amount: 5000,
-    description: "Supermarket Sales",
-    date: "2023-09-01",
-    category: "Sales",
-    source: "Cash Register",
-    notes: "Daily sales"
-  },
-  {
-    id: "inc2",
-    amount: 2000,
-    description: "Online Sales",
-    date: "2023-09-05",
-    category: "Sales",
-    source: "E-commerce",
-    notes: "Online platform sales"
-  },
-  {
-    id: "inc3",
-    amount: 1500,
-    description: "Rent Income",
-    date: "2023-09-10",
-    category: "Rental",
-    source: "Property",
-    notes: "Monthly rental income"
-  }
-];
-
-const mockExpenses = [
-  {
-    id: "exp1",
-    amount: 2000,
-    description: "Vendor Payment",
-    date: "2023-09-02",
-    category: "Vendors",
-    vendor: "Food Supplier",
-    paymentMethod: "Bank Transfer",
-    notes: "Monthly food supply"
-  },
-  {
-    id: "exp2",
-    amount: 1500,
-    description: "Employee Salaries",
-    date: "2023-09-15",
-    category: "Employees",
-    vendor: "Payroll",
-    paymentMethod: "Bank Transfer",
-    notes: "Monthly payroll"
-  },
-  {
-    id: "exp3",
-    amount: 500,
-    description: "Coffee Supplies",
-    date: "2023-09-08",
-    category: "Supplies",
-    vendor: "Coffee Supplier",
-    paymentMethod: "Cash",
-    notes: "Coffee and related supplies"
-  },
-  {
-    id: "exp4",
-    amount: 1000,
-    description: "Maintenance",
-    date: "2023-09-12",
-    category: "Maintenance",
-    vendor: "Repair Service",
-    paymentMethod: "Bank Transfer",
-    notes: "Equipment maintenance"
-  },
-  {
-    id: "exp5",
-    amount: 800,
-    description: "Transportation",
-    date: "2023-09-20",
-    category: "Transportation",
-    vendor: "Fuel Company",
-    paymentMethod: "Credit Card",
-    notes: "Fuel for delivery vehicles"
-  }
-];
+import {
+  getIncomes,
+  getExpenses,
+  addIncome,
+  addExpense,
+  deleteIncome,
+  deleteExpense,
+} from "../firebase/firestore";
 
 const BudgetManagement = ({ userRole = "admin" }) => {
-  const [incomes, setIncomes] = useState(mockIncomes);
-  const [expenses, setExpenses] = useState(mockExpenses);
+  const [incomes, setIncomes] = useState([]);
+  const [expenses, setExpenses] = useState([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [isAddIncomeModalOpen, setIsAddIncomeModalOpen] = useState(false);
   const [isAddExpenseModalOpen, setIsAddExpenseModalOpen] = useState(false);
   const [error, setError] = useState(null);
 
+  // Fetch budget data from Firebase
+  const fetchBudgetData = async () => {
+    try {
+      const incomesData = await getIncomes();
+      const expensesData = await getExpenses();
+      setIncomes(incomesData);
+      setExpenses(expensesData);
+    } catch (error) {
+      setError("Error loading budget data: " + error.message);
+    }
+  };
+
+  // Clear all budget data
+  const clearBudgetData = async () => {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete all budget data? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+    
+    // Ask for password confirmation
+    const password = prompt("Please enter your password to confirm budget data deletion:");
+    if (!password) {
+      alert("Password confirmation required. Budget data deletion cancelled.");
+      return;
+    }
+    
+    // In a real application, you would verify the password with your backend
+    // For this demo, we'll just check if it's not empty
+    if (password.trim() === "") {
+      alert("Invalid password. Budget data deletion cancelled.");
+      return;
+    }
+
+    try {
+      // Clear state
+      setIncomes([]);
+      setExpenses([]);
+
+      // Delete all income records
+      const incomesData = await getIncomes();
+      await Promise.all(incomesData.map((income) => deleteIncome(income.id)));
+
+      // Delete all expense records
+      const expensesData = await getExpenses();
+      await Promise.all(
+        expensesData.map((expense) => deleteExpense(expense.id))
+      );
+
+      alert("All budget data has been successfully cleared.");
+    } catch (error) {
+      setError("Error clearing budget data: " + error.message);
+    }
+  };
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchBudgetData();
+  }, []);
+
   // Filter incomes and expenses by date range
   const filteredIncomes = useMemo(() => {
-    return incomes.filter(income => {
+    return incomes.filter((income) => {
       if (!startDate || !endDate) return true;
 
       const incomeDate = new Date(income.date);
@@ -112,7 +98,7 @@ const BudgetManagement = ({ userRole = "admin" }) => {
   }, [incomes, startDate, endDate]);
 
   const filteredExpenses = useMemo(() => {
-    return expenses.filter(expense => {
+    return expenses.filter((expense) => {
       if (!startDate || !endDate) return true;
 
       const expenseDate = new Date(expense.date);
@@ -124,8 +110,14 @@ const BudgetManagement = ({ userRole = "admin" }) => {
   }, [expenses, startDate, endDate]);
 
   // Calculate totals
-  const totalIncome = filteredIncomes.reduce((sum, income) => sum + income.amount, 0);
-  const totalExpenses = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+  const totalIncome = filteredIncomes.reduce(
+    (sum, income) => sum + income.amount,
+    0
+  );
+  const totalExpenses = filteredExpenses.reduce(
+    (sum, expense) => sum + expense.amount,
+    0
+  );
   const netBudget = totalIncome - totalExpenses;
 
   // Group expenses by category
@@ -151,13 +143,13 @@ const BudgetManagement = ({ userRole = "admin" }) => {
   }, [filteredIncomes]);
 
   // Handle adding new income
-  const handleAddIncome = (income) => {
+  const handleAddIncome = async (income) => {
     try {
       const newIncome = {
-        id: `inc${Date.now()}`,
-        ...income
+        ...income,
       };
-      setIncomes([...incomes, newIncome]);
+      await addIncome(newIncome);
+      fetchBudgetData();
       setIsAddIncomeModalOpen(false);
     } catch (error) {
       setError(error.message);
@@ -165,13 +157,13 @@ const BudgetManagement = ({ userRole = "admin" }) => {
   };
 
   // Handle adding new expense
-  const handleAddExpense = (expense) => {
+  const handleAddExpense = async (expense) => {
     try {
       const newExpense = {
-        id: `exp${Date.now()}`,
-        ...expense
+        ...expense,
       };
-      setExpenses([...expenses, newExpense]);
+      await addExpense(newExpense);
+      fetchBudgetData();
       setIsAddExpenseModalOpen(false);
     } catch (error) {
       setError(error.message);
@@ -186,8 +178,12 @@ const BudgetManagement = ({ userRole = "admin" }) => {
       </div>
       <div className="text-sm">
         <p className="font-medium text-white">{income.description}</p>
-        <p className="text-gray-400">{income.category} • {income.source}</p>
-        <p className="text-gray-500">{format(new Date(income.date), "MMM dd, yyyy")}</p>
+        <p className="text-gray-400">
+          {income.category} • {income.source}
+        </p>
+        <p className="text-gray-500">
+          {format(new Date(income.date), "MMM dd, yyyy")}
+        </p>
       </div>
     </div>
   ));
@@ -200,8 +196,12 @@ const BudgetManagement = ({ userRole = "admin" }) => {
       </div>
       <div className="text-sm">
         <p className="font-medium text-white">{expense.description}</p>
-        <p className="text-gray-400">{expense.category} • {expense.vendor}</p>
-        <p className="text-gray-500">{format(new Date(expense.date), "MMM dd, yyyy")}</p>
+        <p className="text-gray-400">
+          {expense.category} • {expense.vendor}
+        </p>
+        <p className="text-gray-500">
+          {format(new Date(expense.date), "MMM dd, yyyy")}
+        </p>
       </div>
     </div>
   ));
@@ -266,7 +266,7 @@ const BudgetManagement = ({ userRole = "admin" }) => {
         <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-0 text-white">
           Budget Management
         </h2>
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-2">
           <RoleGuard userRole={userRole} allowedRoles={["admin"]}>
             <button
               onClick={() => setIsAddIncomeModalOpen(true)}
@@ -280,6 +280,12 @@ const BudgetManagement = ({ userRole = "admin" }) => {
             >
               Add Expense
             </button>
+            <button
+              onClick={clearBudgetData}
+              className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Clear Budget Data
+            </button>
           </RoleGuard>
         </div>
       </div>
@@ -289,7 +295,9 @@ const BudgetManagement = ({ userRole = "admin" }) => {
       {/* Date Filter */}
       <div className="mb-6 p-4 bg-gray-700 rounded-lg">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3">
-          <h3 className="text-lg font-semibold text-white mb-2 sm:mb-0">Filter by Date Range</h3>
+          <h3 className="text-lg font-semibold text-white mb-2 sm:mb-0">
+            Filter by Date Range
+          </h3>
           <button
             onClick={() => {
               setStartDate("");
@@ -303,13 +311,16 @@ const BudgetManagement = ({ userRole = "admin" }) => {
 
         {startDate && endDate && (
           <div className="text-sm text-green-400 mb-3">
-            Showing from {format(new Date(startDate), "MMM dd, yyyy")} to {format(new Date(endDate), "MMM dd, yyyy")}
+            Showing from {format(new Date(startDate), "MMM dd, yyyy")} to{" "}
+            {format(new Date(endDate), "MMM dd, yyyy")}
           </div>
         )}
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs text-gray-300 mb-1">Start Date</label>
+            <label className="block text-xs text-gray-300 mb-1">
+              Start Date
+            </label>
             <input
               type="date"
               value={startDate}
@@ -333,16 +344,31 @@ const BudgetManagement = ({ userRole = "admin" }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-green-900/30 border border-green-500/30 p-4 rounded-lg">
           <p className="text-sm text-green-300 mb-1">Total Income</p>
-          <p className="text-2xl font-bold text-green-400">+{totalIncome.toFixed(2)} ₪</p>
+          <p className="text-2xl font-bold text-green-400">
+            +{totalIncome.toFixed(2)} ₪
+          </p>
         </div>
         <div className="bg-red-900/30 border border-red-500/30 p-4 rounded-lg">
           <p className="text-sm text-red-300 mb-1">Total Expenses</p>
-          <p className="text-2xl font-bold text-red-400">-{totalExpenses.toFixed(2)} ₪</p>
+          <p className="text-2xl font-bold text-red-400">
+            -{totalExpenses.toFixed(2)} ₪
+          </p>
         </div>
-        <div className={`p-4 rounded-lg ${netBudget >= 0 ? 'bg-blue-900/30 border border-blue-500/30' : 'bg-red-900/30 border border-red-500/30'}`}>
+        <div
+          className={`p-4 rounded-lg ${
+            netBudget >= 0
+              ? "bg-blue-900/30 border border-blue-500/30"
+              : "bg-red-900/30 border border-red-500/30"
+          }`}
+        >
           <p className="text-sm mb-1">Net Budget</p>
-          <p className={`text-2xl font-bold ${netBudget >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
-            {netBudget >= 0 ? '+' : ''}{netBudget.toFixed(2)} ₪
+          <p
+            className={`text-2xl font-bold ${
+              netBudget >= 0 ? "text-blue-400" : "text-red-400"
+            }`}
+          >
+            {netBudget >= 0 ? "+" : ""}
+            {netBudget.toFixed(2)} ₪
           </p>
         </div>
       </div>
@@ -351,13 +377,17 @@ const BudgetManagement = ({ userRole = "admin" }) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Income by Category */}
         <div className="bg-gray-700 p-4 rounded-lg">
-          <h3 className="text-lg font-semibold text-white mb-3">Income by Category</h3>
+          <h3 className="text-lg font-semibold text-white mb-3">
+            Income by Category
+          </h3>
           <div className="space-y-2">
             {Object.entries(incomesByCategory).map(([category, amount]) => (
               <div key={category} className="bg-gray-600 p-3 rounded-lg">
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-white text-sm">{category}</span>
-                  <span className="text-green-400 font-medium">+{amount.toFixed(2)} ₪</span>
+                  <span className="text-green-400 font-medium">
+                    +{amount.toFixed(2)} ₪
+                  </span>
                 </div>
                 <div className="w-full bg-gray-800 rounded-full h-2">
                   <div
@@ -372,13 +402,17 @@ const BudgetManagement = ({ userRole = "admin" }) => {
 
         {/* Expenses by Category */}
         <div className="bg-gray-700 p-4 rounded-lg">
-          <h3 className="text-lg font-semibold text-white mb-3">Expenses by Category</h3>
+          <h3 className="text-lg font-semibold text-white mb-3">
+            Expenses by Category
+          </h3>
           <div className="space-y-2">
             {Object.entries(expensesByCategory).map(([category, amount]) => (
               <div key={category} className="bg-gray-600 p-3 rounded-lg">
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-white text-sm">{category}</span>
-                  <span className="text-red-400 font-medium">-{amount.toFixed(2)} ₪</span>
+                  <span className="text-red-400 font-medium">
+                    -{amount.toFixed(2)} ₪
+                  </span>
                 </div>
                 <div className="w-full bg-gray-800 rounded-full h-2">
                   <div
@@ -398,7 +432,9 @@ const BudgetManagement = ({ userRole = "admin" }) => {
         <div className="bg-gray-700 p-4 rounded-lg">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-white">Income Records</h3>
-            <span className="text-green-400 text-sm">{filteredIncomes.length} records</span>
+            <span className="text-green-400 text-sm">
+              {filteredIncomes.length} records
+            </span>
           </div>
           <ResponsiveTable
             data={filteredIncomes}
@@ -411,8 +447,12 @@ const BudgetManagement = ({ userRole = "admin" }) => {
         {/* Expenses Table */}
         <div className="bg-gray-700 p-4 rounded-lg">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-white">Expense Records</h3>
-            <span className="text-red-400 text-sm">{filteredExpenses.length} records</span>
+            <h3 className="text-lg font-semibold text-white">
+              Expense Records
+            </h3>
+            <span className="text-red-400 text-sm">
+              {filteredExpenses.length} records
+            </span>
           </div>
           <ResponsiveTable
             data={filteredExpenses}
