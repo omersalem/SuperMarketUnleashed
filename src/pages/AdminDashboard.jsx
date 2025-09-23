@@ -324,8 +324,17 @@ const AdminDashboard = () => {
                 <a href="#reports" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">📊 Reports</a>
                 <a href="#customers" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">👥 Customers</a>
                 <a href="#vendors" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">🏪 Vendors</a>
+                <a href="#categories" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">📂 Categories</a>
                 <a href="#products" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">📦 Products</a>
                 <a href="#sales" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">💰 Sales</a>
+                <a href="#payments" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">💳 Payments</a>
+                <a href="#purchases" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">🛒 Purchases</a>
+                <a href="#vendor-payments" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">💸 Vendor Payments</a>
+                <a href="#invoices" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">📄 Invoices</a>
+                <a href="#checks" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">📋 Checks</a>
+                <a href="#workers" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">👷 Workers</a>
+                <a href="#inventory" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">📊 Inventory</a>
+                <a href="#budget" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">💰 Budget</a>
               </div>
             </div>
             
