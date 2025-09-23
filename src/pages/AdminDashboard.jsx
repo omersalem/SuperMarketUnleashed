@@ -20,6 +20,7 @@ import PaymentManagement from "../components/PaymentManagement";
 import VendorPaymentManagement from "../components/VendorPaymentManagement";
 import ReportsDashboard from "../components/ReportsDashboard";
 import BudgetManagement from "../components/BudgetManagement";
+import BackupManagement from "../components/BackupManagement";
 import { handleFirebaseError, logError } from "../utils/errorHandling";
 
 // Firebase functions
@@ -71,6 +72,7 @@ const AdminDashboard = () => {
   const [salaryPayments, setSalaryPayments] = useState([]);
   const [workerExpenses, setWorkerExpenses] = useState([]);
   const [workerAttendance, setWorkerAttendance] = useState([]);
+  const [restoreTimestamp, setRestoreTimestamp] = useState(null);
   // Loading and error states
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -335,6 +337,7 @@ const AdminDashboard = () => {
                 <a href="#workers" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">👷 Workers</a>
                 <a href="#inventory" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">📊 Inventory</a>
                 <a href="#budget" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">💰 Budget</a>
+                <a href="#backup" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">💾 Backup</a>
               </div>
             </div>
             
@@ -357,6 +360,21 @@ const AdminDashboard = () => {
             >
               <span className="text-lg">🔄</span>
               <span className="hidden sm:inline">Reset Data</span>
+            </button>
+            
+            {/* Backup Button */}
+            <button
+              onClick={() => {
+                const element = document.querySelector("#backup");
+                if (element) {
+                  element.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+              className="flex items-center space-x-2 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              title="Backup & Restore Data"
+            >
+              <span className="text-lg">💾</span>
+              <span className="hidden sm:inline">Backup</span>
             </button>
 
             {/* Logout Button */}
@@ -405,6 +423,7 @@ const AdminDashboard = () => {
         <ErrorBoundary fallbackMessage="Customer management failed to load.">
           <section id="customers" className="mb-8">
             <CustomerManagement
+              key={restoreTimestamp}
               customers={customers}
               setCustomers={setCustomers}
             />
@@ -568,6 +587,41 @@ const AdminDashboard = () => {
         <ErrorBoundary fallbackMessage="Budget management failed to load.">
           <section id="budget" className="mb-8">
             <BudgetManagement userRole="admin" />
+          </section>
+        </ErrorBoundary>
+        
+        {/* Backup & Restore Management */}
+        <ErrorBoundary fallbackMessage="Backup management failed to load.">
+          <section id="backup" className="mb-8">
+            <BackupManagement 
+              customers={customers}
+              vendors={vendors}
+              categories={categories}
+              products={products}
+              sales={sales}
+              purchases={purchases}
+              checks={checks}
+              workers={workers}
+              banks={banks}
+              currencies={currencies}
+              salaryPayments={salaryPayments}
+              workerExpenses={workerExpenses}
+              workerAttendance={workerAttendance}
+              setCustomers={setCustomers}
+              setVendors={setVendors}
+              setCategories={setCategories}
+              setProducts={setProducts}
+              setSales={setSales}
+              setPurchases={setPurchases}
+              setChecks={setChecks}
+              setWorkers={setWorkers}
+              setBanks={setBanks}
+              setCurrencies={setCurrencies}
+              setSalaryPayments={setSalaryPayments}
+              setWorkerExpenses={setWorkerExpenses}
+              setWorkerAttendance={setWorkerAttendance}
+              setRestoreTimestamp={setRestoreTimestamp}
+            />
           </section>
         </ErrorBoundary>
       </div>
