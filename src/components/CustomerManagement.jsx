@@ -8,7 +8,7 @@ import { LoadingButton } from "./LoadingSpinner";
 import ResponsiveTable, { createMobileCard } from "./ResponsiveTable";
 import AddCustomerModal from "./AddCustomerModal";
 import EditCustomerModal from "./EditCustomerModal";
-import RoleGuard, { ReadOnlyWrapper, RoleMessage } from "./RoleGuard";
+import RoleGuard, { RoleMessage } from "./RoleGuard";
 
 const CustomerManagement = ({
   customers,

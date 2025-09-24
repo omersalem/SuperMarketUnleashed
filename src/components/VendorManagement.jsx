@@ -4,7 +4,7 @@ import { LoadingButton } from "./LoadingSpinner";
 import ResponsiveTable, { createMobileCard } from "./ResponsiveTable";
 import AddVendorModal from "./AddVendorModal";
 import EditVendorModal from "./EditVendorModal";
-import RoleGuard, { ReadOnlyWrapper, RoleMessage } from "./RoleGuard";
+import RoleGuard, { RoleMessage } from "./RoleGuard";
 
 const VendorManagement = ({ vendors, setVendors, userRole = "admin" }) => {
   const [error, setError] = useState(null);

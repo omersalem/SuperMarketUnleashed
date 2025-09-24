@@ -4,12 +4,11 @@ import {
   updateProduct,
   deleteProduct,
 } from "../firebase/firestore";
-import { LoadingButton, SectionLoadingSpinner } from "./LoadingSpinner";
-import { TableSkeleton } from "./SkeletonLoader";
+import { LoadingButton } from "./LoadingSpinner";
 import ResponsiveTable, { createMobileCard } from "./ResponsiveTable";
 import AddProductModal from "./AddProductModal";
 import EditProductModal from "./EditProductModal";
-import RoleGuard, { ReadOnlyWrapper, RoleMessage } from "./RoleGuard";
+import RoleGuard, { RoleMessage } from "./RoleGuard";
 
 const ProductManagement = ({
   products,
@@ -456,17 +455,3 @@ const ProductManagement = ({
 
 export default ProductManagement;
 
-// Add custom CSS for line-clamp if not available
-const style = document.createElement("style");
-style.textContent = `
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-`;
-if (!document.head.querySelector("style[data-line-clamp]")) {
-  style.setAttribute("data-line-clamp", "true");
-  document.head.appendChild(style);
-}

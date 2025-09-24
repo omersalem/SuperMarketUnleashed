@@ -9,30 +9,9 @@ const RoleGuard = ({
   hideOnDenial = true,
 }) => {
   const hasPermission = allowedRoles.includes(userRole);
-
   if (!hasPermission) {
     return hideOnDenial ? fallback : null;
   }
-
-  return children;
-};
-
-// Higher-order component to wrap buttons and disable them for users
-export const ReadOnlyWrapper = ({ userRole, children, className = "" }) => {
-  const isReadOnly = userRole === "user";
-
-  if (isReadOnly) {
-    return (
-      <div className={`relative ${className}`}>
-        <div className="opacity-50 pointer-events-none">{children}</div>
-        <div
-          className="absolute inset-0 bg-transparent"
-          title="Read-only access"
-        />
-      </div>
-    );
-  }
-
   return children;
 };
 
@@ -44,8 +23,7 @@ export const RoleMessage = ({ userRole }) => {
         <div className="flex items-center space-x-2">
           <span className="text-blue-400">ℹ️</span>
           <span className="text-blue-300">
-            You have read-only access. You can view all data but cannot make
-            changes.
+            You have read-only access. You can view all data but cannot make changes.
           </span>
         </div>
       </div>

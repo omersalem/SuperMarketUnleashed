@@ -2,10 +2,8 @@ import {
   getFirestore,
   collection,
   getDocs,
-  getDoc,
   addDoc,
   doc,
-  updateDoc,
   deleteDoc,
   setDoc,
   query,
@@ -31,15 +29,10 @@ export const addCustomer = async (customer) => {
 export const updateCustomer = async (id, customer) => {
   const customerDoc = doc(db, "customers", id);
   try {
-    const snap = await getDoc(customerDoc);
-    if (!snap.exists()) {
-      await setDoc(customerDoc, customer, { merge: true });
-      return true;
-    }
-    await updateDoc(customerDoc, customer);
+    await setDoc(customerDoc, customer, { merge: true });
     return true;
   } catch (error) {
-    console.error("Error updating customer:", error);
+    console.error("Error updating document:", error);
     throw error;
   }
 };
@@ -75,15 +68,10 @@ export const addVendor = async (vendor) => {
 export const updateVendor = async (id, vendor) => {
   const vendorDoc = doc(db, "vendors", id);
   try {
-    const snap = await getDoc(vendorDoc);
-    if (!snap.exists()) {
-      await setDoc(vendorDoc, vendor, { merge: true });
-      return true;
-    }
-    await updateDoc(vendorDoc, vendor);
+    await setDoc(vendorDoc, vendor, { merge: true });
     return true;
   } catch (error) {
-    console.error("Error updating vendor:", error);
+    console.error("Error updating document:", error);
     throw error;
   }
 };
@@ -117,15 +105,10 @@ export const addCategory = async (category) => {
 export const updateCategory = async (id, category) => {
   const categoryDoc = doc(db, "categories", id);
   try {
-    const snap = await getDoc(categoryDoc);
-    if (!snap.exists()) {
-      await setDoc(categoryDoc, category, { merge: true });
-      return true;
-    }
-    await updateDoc(categoryDoc, category);
+    await setDoc(categoryDoc, category, { merge: true });
     return true;
   } catch (error) {
-    console.error("Error updating category:", error);
+    console.error("Error updating document:", error);
     throw error;
   }
 };
@@ -159,15 +142,10 @@ export const addSale = async (sale) => {
 export const updateSale = async (id, sale) => {
   const saleDoc = doc(db, "sales", id);
   try {
-    const snap = await getDoc(saleDoc);
-    if (!snap.exists()) {
-      await setDoc(saleDoc, sale, { merge: true });
-      return true;
-    }
-    await updateDoc(saleDoc, sale);
+    await setDoc(saleDoc, sale, { merge: true });
     return true;
   } catch (error) {
-    console.error("Error updating sale:", error);
+    console.error("Error updating document:", error);
     throw error;
   }
 };
@@ -201,15 +179,10 @@ export const addProduct = async (product) => {
 export const updateProduct = async (id, product) => {
   const productDoc = doc(db, "products", id);
   try {
-    const snap = await getDoc(productDoc);
-    if (!snap.exists()) {
-      await setDoc(productDoc, product, { merge: true });
-      return true;
-    }
-    await updateDoc(productDoc, product);
+    await setDoc(productDoc, product, { merge: true });
     return true;
   } catch (error) {
-    console.error("Error updating product:", error);
+    console.error("Error updating document:", error);
     throw error;
   }
 };
@@ -243,15 +216,10 @@ export const addPurchase = async (purchase) => {
 export const updatePurchase = async (id, purchase) => {
   const purchaseDoc = doc(db, "purchases", id);
   try {
-    const snap = await getDoc(purchaseDoc);
-    if (!snap.exists()) {
-      await setDoc(purchaseDoc, purchase, { merge: true });
-      return true;
-    }
-    await updateDoc(purchaseDoc, purchase);
+    await setDoc(purchaseDoc, purchase, { merge: true });
     return true;
   } catch (error) {
-    console.error("Error updating purchase:", error);
+    console.error("Error updating document:", error);
     throw error;
   }
 };
@@ -284,7 +252,7 @@ export const addCheck = async (check) => {
 
 export const updateCheck = async (id, check) => {
   const checkDoc = doc(db, "checks", id);
-  await updateDoc(checkDoc, check);
+  await setDoc(checkDoc, check, { merge: true });
 };
 
 export const deleteCheck = async (id) => {
@@ -343,7 +311,7 @@ export const addWorker = async (worker) => {
 
 export const updateWorker = async (id, worker) => {
   const workerDoc = doc(db, "workers", id);
-  await updateDoc(workerDoc, worker);
+  await setDoc(workerDoc, worker, { merge: true });
 };
 
 export const deleteWorker = async (id) => {
@@ -355,11 +323,13 @@ export const deleteWorker = async (id) => {
 const salaryPaymentsCollection = collection(db, "salaryPayments");
 
 export const getSalaryPayments = async (workerId = null) => {
+  if (workerId) {
+    const q = query(salaryPaymentsCollection, where("workerId", "==", workerId));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  }
   const snapshot = await getDocs(salaryPaymentsCollection);
-  const payments = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  return workerId
-    ? payments.filter((payment) => payment.workerId === workerId)
-    : payments;
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
 
 export const addSalaryPayment = async (payment) => {
@@ -376,11 +346,13 @@ export const deleteSalaryPayment = async (id) => {
 const workerExpensesCollection = collection(db, "workerExpenses");
 
 export const getWorkerExpenses = async (workerId = null) => {
+  if (workerId) {
+    const q = query(workerExpensesCollection, where("workerId", "==", workerId));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  }
   const snapshot = await getDocs(workerExpensesCollection);
-  const expenses = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  return workerId
-    ? expenses.filter((expense) => expense.workerId === workerId)
-    : expenses;
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
 
 export const addWorkerExpense = async (expense) => {
@@ -390,7 +362,7 @@ export const addWorkerExpense = async (expense) => {
 
 export const updateWorkerExpense = async (id, expense) => {
   const expenseDoc = doc(db, "workerExpenses", id);
-  await updateDoc(expenseDoc, expense);
+  await setDoc(expenseDoc, expense, { merge: true });
 };
 
 export const deleteWorkerExpense = async (id) => {
@@ -402,14 +374,13 @@ export const deleteWorkerExpense = async (id) => {
 const workerAttendanceCollection = collection(db, "workerAttendance");
 
 export const getWorkerAttendance = async (workerId = null) => {
+  if (workerId) {
+    const q = query(workerAttendanceCollection, where("workerId", "==", workerId));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  }
   const snapshot = await getDocs(workerAttendanceCollection);
-  const attendance = snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-  return workerId
-    ? attendance.filter((record) => record.workerId === workerId)
-    : attendance;
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
 
 export const addWorkerAttendance = async (attendance) => {
@@ -419,7 +390,7 @@ export const addWorkerAttendance = async (attendance) => {
 
 export const updateWorkerAttendance = async (id, attendance) => {
   const attendanceDoc = doc(db, "workerAttendance", id);
-  await updateDoc(attendanceDoc, attendance);
+  await setDoc(attendanceDoc, attendance, { merge: true });
 };
 
 export const deleteWorkerAttendance = async (id) => {

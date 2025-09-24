@@ -8,7 +8,7 @@ import { LoadingButton } from "./LoadingSpinner";
 import ResponsiveTable, { createMobileCard } from "./ResponsiveTable";
 import AddCategoryModal from "./AddCategoryModal";
 import EditCategoryModal from "./EditCategoryModal";
-import RoleGuard, { ReadOnlyWrapper, RoleMessage } from "./RoleGuard";
+import RoleGuard, { RoleMessage } from "./RoleGuard";
 
 const CategoryManagement = ({
   categories,
