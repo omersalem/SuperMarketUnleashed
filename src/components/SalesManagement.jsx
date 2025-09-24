@@ -369,8 +369,8 @@ const SalesManagement = ({
                   className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white text-sm"
                 >
                   <option value="">Select Customer</option>
-                  {customers.map((customer) => (
-                    <option key={customer.id} value={customer.id}>
+                  {customers.map((customer, index) => (
+                    <option key={`${customer.id}-${index}`} value={customer.id}>
                       {customer.name}
                     </option>
                   ))}
@@ -446,8 +446,8 @@ const SalesManagement = ({
             onChange={(e) => setSelectedCustomer(e.target.value)}
           >
             <option value="">-- Select Customer --</option>
-            {customers.map((customer) => (
-              <option key={customer.id} value={customer.id}>
+            {customers.map((customer, index) => (
+              <option key={`${customer.id}-${index}`} value={customer.id}>
                 {customer.name} ({customer.email})
               </option>
             ))}
@@ -465,8 +465,8 @@ const SalesManagement = ({
             value=""
           >
             <option value="">-- Select Product --</option>
-            {products.map((product) => (
-              <option key={product.id} value={product.id}>
+            {products.map((product, index) => (
+              <option key={`${product.id}-${index}`} value={product.id}>
                 {product.name} (Stock: {product.stock})
               </option>
             ))}
@@ -562,7 +562,7 @@ const SalesManagement = ({
                 </tr>
               </thead>
               <tbody>
-                {selectedProducts.map((item) => {
+                {selectedProducts.map((item, index) => {
                   const price =
                     typeof item.price === "number"
                       ? item.price
@@ -574,7 +574,7 @@ const SalesManagement = ({
                   const subtotal =
                     !isNaN(price) && !isNaN(quantity) ? price * quantity : 0;
                   return (
-                    <tr key={item.id}>
+                    <tr key={`${item.id}-${index}`}>
                       <td className="py-2 px-4 border-b border-gray-700">
                         {item.name}
                       </td>

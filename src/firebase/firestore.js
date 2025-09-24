@@ -2,10 +2,14 @@ import {
   getFirestore,
   collection,
   getDocs,
+  getDoc,
   addDoc,
   doc,
   updateDoc,
   deleteDoc,
+  setDoc,
+  query,
+  where,
 } from "firebase/firestore";
 import app from "./config";
 
@@ -26,12 +30,33 @@ export const addCustomer = async (customer) => {
 
 export const updateCustomer = async (id, customer) => {
   const customerDoc = doc(db, "customers", id);
-  await updateDoc(customerDoc, customer);
+  try {
+    const snap = await getDoc(customerDoc);
+    if (!snap.exists()) {
+      await setDoc(customerDoc, customer, { merge: true });
+      return true;
+    }
+    await updateDoc(customerDoc, customer);
+    return true;
+  } catch (error) {
+    console.error("Error updating customer:", error);
+    throw error;
+  }
 };
 
 export const deleteCustomer = async (id) => {
   const customerDoc = doc(db, "customers", id);
-  await deleteDoc(customerDoc);
+  
+  try {
+    await deleteDoc(customerDoc);
+  } catch (error) {
+    console.error("Error deleting customer:", error);
+    // If the document doesn't exist, throw a more specific error
+    if (error.message && error.message.includes("does not exist")) {
+      throw new Error(`No customer found with ID: ${id}`);
+    }
+    throw error;
+  }
 };
 
 // Vendors
@@ -49,12 +74,31 @@ export const addVendor = async (vendor) => {
 
 export const updateVendor = async (id, vendor) => {
   const vendorDoc = doc(db, "vendors", id);
-  await updateDoc(vendorDoc, vendor);
+  try {
+    const snap = await getDoc(vendorDoc);
+    if (!snap.exists()) {
+      await setDoc(vendorDoc, vendor, { merge: true });
+      return true;
+    }
+    await updateDoc(vendorDoc, vendor);
+    return true;
+  } catch (error) {
+    console.error("Error updating vendor:", error);
+    throw error;
+  }
 };
 
 export const deleteVendor = async (id) => {
   const vendorDoc = doc(db, "vendors", id);
-  await deleteDoc(vendorDoc);
+  try {
+    await deleteDoc(vendorDoc);
+  } catch (error) {
+    console.error("Error deleting vendor:", error);
+    if (error.message && error.message.includes("does not exist")) {
+      throw new Error(`No vendor found with ID: ${id}`);
+    }
+    throw error;
+  }
 };
 
 // Categories
@@ -72,12 +116,31 @@ export const addCategory = async (category) => {
 
 export const updateCategory = async (id, category) => {
   const categoryDoc = doc(db, "categories", id);
-  await updateDoc(categoryDoc, category);
+  try {
+    const snap = await getDoc(categoryDoc);
+    if (!snap.exists()) {
+      await setDoc(categoryDoc, category, { merge: true });
+      return true;
+    }
+    await updateDoc(categoryDoc, category);
+    return true;
+  } catch (error) {
+    console.error("Error updating category:", error);
+    throw error;
+  }
 };
 
 export const deleteCategory = async (id) => {
   const categoryDoc = doc(db, "categories", id);
-  await deleteDoc(categoryDoc);
+  try {
+    await deleteDoc(categoryDoc);
+  } catch (error) {
+    console.error("Error deleting category:", error);
+    if (error.message && error.message.includes("does not exist")) {
+      throw new Error(`No category found with ID: ${id}`);
+    }
+    throw error;
+  }
 };
 
 // Sales
@@ -95,12 +158,31 @@ export const addSale = async (sale) => {
 
 export const updateSale = async (id, sale) => {
   const saleDoc = doc(db, "sales", id);
-  await updateDoc(saleDoc, sale);
+  try {
+    const snap = await getDoc(saleDoc);
+    if (!snap.exists()) {
+      await setDoc(saleDoc, sale, { merge: true });
+      return true;
+    }
+    await updateDoc(saleDoc, sale);
+    return true;
+  } catch (error) {
+    console.error("Error updating sale:", error);
+    throw error;
+  }
 };
 
 export const deleteSale = async (id) => {
   const saleDoc = doc(db, "sales", id);
-  await deleteDoc(saleDoc);
+  try {
+    await deleteDoc(saleDoc);
+  } catch (error) {
+    console.error("Error deleting sale:", error);
+    if (error.message && error.message.includes("does not exist")) {
+      throw new Error(`No sale found with ID: ${id}`);
+    }
+    throw error;
+  }
 };
 
 // Products
@@ -118,12 +200,31 @@ export const addProduct = async (product) => {
 
 export const updateProduct = async (id, product) => {
   const productDoc = doc(db, "products", id);
-  await updateDoc(productDoc, product);
+  try {
+    const snap = await getDoc(productDoc);
+    if (!snap.exists()) {
+      await setDoc(productDoc, product, { merge: true });
+      return true;
+    }
+    await updateDoc(productDoc, product);
+    return true;
+  } catch (error) {
+    console.error("Error updating product:", error);
+    throw error;
+  }
 };
 
 export const deleteProduct = async (id) => {
   const productDoc = doc(db, "products", id);
-  await deleteDoc(productDoc);
+  try {
+    await deleteDoc(productDoc);
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    if (error.message && error.message.includes("does not exist")) {
+      throw new Error(`No product found with ID: ${id}`);
+    }
+    throw error;
+  }
 };
 
 // Purchases
@@ -141,12 +242,31 @@ export const addPurchase = async (purchase) => {
 
 export const updatePurchase = async (id, purchase) => {
   const purchaseDoc = doc(db, "purchases", id);
-  await updateDoc(purchaseDoc, purchase);
+  try {
+    const snap = await getDoc(purchaseDoc);
+    if (!snap.exists()) {
+      await setDoc(purchaseDoc, purchase, { merge: true });
+      return true;
+    }
+    await updateDoc(purchaseDoc, purchase);
+    return true;
+  } catch (error) {
+    console.error("Error updating purchase:", error);
+    throw error;
+  }
 };
 
 export const deletePurchase = async (id) => {
   const purchaseDoc = doc(db, "purchases", id);
-  await deleteDoc(purchaseDoc);
+  try {
+    await deleteDoc(purchaseDoc);
+  } catch (error) {
+    console.error("Error deleting purchase:", error);
+    if (error.message && error.message.includes("does not exist")) {
+      throw new Error(`No purchase found with ID: ${id}`);
+    }
+    throw error;
+  }
 };
 
 // Checks

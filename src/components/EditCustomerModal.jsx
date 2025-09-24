@@ -21,11 +21,17 @@ const EditCustomerModal = ({ isOpen, customer, onClose, onUpdate }) => {
       onClose();
     } catch (error) {
       console.error("Error updating customer:", error);
+      if (error.message && error.message.includes("No customer found with ID")) {
+        alert("This customer has been deleted and cannot be updated. Please add the customer again.");
+        onClose();
+      } else {
+        alert("Error updating customer: " + error.message);
+      }
     }
   };
 
   return (
-        <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose}>
       <h2 className="text-2xl font-bold mb-4">Edit Customer</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">

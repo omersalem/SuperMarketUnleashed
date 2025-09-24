@@ -49,7 +49,7 @@ const AddProductModal = ({ isOpen, onClose, onAdd, categories }) => {
   };
 
   return (
-        <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose}>
       <h2 className="text-2xl font-bold mb-4">Add Product</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -72,8 +72,8 @@ const AddProductModal = ({ isOpen, onClose, onAdd, categories }) => {
           <label htmlFor="category" className="block mb-2 text-sm font-medium">Category</label>
           <select name="category" id="category" className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
             <option value="">Select a category</option>
-            {categories.map(category => (
-              <option key={category.id} value={category.id}>{category.name}</option>
+            {categories.map((category, index) => (
+              <option key={`${category.id}-${index}`} value={category.id}>{category.name}</option>
             ))}
           </select>
         </div>

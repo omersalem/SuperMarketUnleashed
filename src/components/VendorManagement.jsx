@@ -44,7 +44,15 @@ const VendorManagement = ({ vendors, setVendors, userRole = "admin" }) => {
       setIsEditModalOpen(false);
       setEditingVendor(null);
     } catch (error) {
-      setError(error.message);
+      // If vendor doesn't exist, just remove it from local state
+      if (error.message && error.message.includes("does not exist")) {
+        setVendors(vendors.filter((v) => v.id !== id));
+        setError("This vendor has already been deleted. Please add the vendor again.");
+        setIsEditModalOpen(false);
+        setEditingVendor(null);
+      } else {
+        setError(error.message);
+      }
     } finally {
       setLoadingStates((prev) => ({ ...prev, editing: false }));
     }
@@ -57,7 +65,13 @@ const VendorManagement = ({ vendors, setVendors, userRole = "admin" }) => {
         await deleteVendor(id);
         setVendors(vendors.filter((vendor) => vendor.id !== id));
       } catch (error) {
-        setError(error.message);
+        // If vendor doesn't exist, just remove it from local state
+        if (error.message && error.message.includes("does not exist")) {
+          setVendors(vendors.filter((vendor) => vendor.id !== id));
+          setError("This vendor has already been deleted.");
+        } else {
+          setError(error.message);
+        }
       } finally {
         setLoadingStates((prev) => ({ ...prev, deleting: null }));
       }
@@ -357,8 +371,8 @@ const VendorManagement = ({ vendors, setVendors, userRole = "admin" }) => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {vendors.map((vendor) => (
-                <VendorCard key={vendor.id} vendor={vendor} />
+              {vendors.map((vendor, index) => (
+                <VendorCard key={`${vendor.id}-${index}`} vendor={vendor} />
               ))}
             </div>
           )}

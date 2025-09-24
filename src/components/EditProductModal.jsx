@@ -53,15 +53,21 @@ const EditProductModal = ({ isOpen, product, onClose, onUpdate, categories }) =>
         productData.imageUrl = imageUrl;
       }
       await onUpdate(product.id, productData);
+      onClose();
     } catch (error) {
       console.error("Error updating product:", error);
+      // If product doesn't exist, show a specific message
+      if (error.message && error.message.includes("does not exist")) {
+        alert("This product has been deleted and cannot be updated. Please add the product again.");
+        onClose();
+      }
     } finally {
       setUploading(false);
     }
   };
 
   return (
-        <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose}>
       <h2 className="text-2xl font-bold mb-4">Edit Product</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -84,8 +90,8 @@ const EditProductModal = ({ isOpen, product, onClose, onUpdate, categories }) =>
           <label htmlFor="category" className="block mb-2 text-sm font-medium">Category</label>
           <select name="category" id="category" className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
             <option value="">Select a category</option>
-            {categories.map(category => (
-              <option key={category.id} value={category.id}>{category.name}</option>
+            {categories.map((category, index) => (
+              <option key={`${category.id}-${index}`} value={category.id}>{category.name}</option>
             ))}
           </select>
         </div>

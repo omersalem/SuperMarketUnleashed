@@ -407,8 +407,8 @@ const PurchaseManagement = ({
             onChange={(e) => setSelectedVendor(e.target.value)}
           >
             <option value="">-- Select Vendor --</option>
-            {vendors.map((vendor) => (
-              <option key={vendor.id} value={vendor.id}>
+            {vendors.map((vendor, index) => (
+              <option key={`${vendor.id}-${index}`} value={vendor.id}>
                 {vendor.name}
               </option>
             ))}
@@ -426,8 +426,8 @@ const PurchaseManagement = ({
             value=""
           >
             <option value="">-- Select Product --</option>
-            {products.map((product) => (
-              <option key={product.id} value={product.id}>
+            {products.map((product, index) => (
+              <option key={`${product.id}-${index}`} value={product.id}>
                 {product.name} (Stock: {product.stock})
               </option>
             ))}
@@ -523,7 +523,7 @@ const PurchaseManagement = ({
                 </tr>
               </thead>
               <tbody>
-                {selectedProducts.map((item) => {
+                {selectedProducts.map((item, index) => {
                   const price =
                     typeof item.price === "number"
                       ? item.price
@@ -535,7 +535,7 @@ const PurchaseManagement = ({
                   const subtotal =
                     !isNaN(price) && !isNaN(quantity) ? price * quantity : 0;
                   return (
-                    <tr key={item.id}>
+                    <tr key={`${item.id}-${index}`}>
                       <td className="py-2 px-4 border-b border-gray-700">
                         {item.name}
                       </td>

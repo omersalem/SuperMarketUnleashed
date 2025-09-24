@@ -60,9 +60,9 @@ const InventoryManagement = ({ products, setProducts, userRole = "admin" }) => {
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => (
+            {products.map((product, index) => (
               <tr
-                key={product.id}
+                key={`${product.id}-${index}`}
                 className={
                   product.stock < lowStockThreshold ? "bg-red-900" : ""
                 }

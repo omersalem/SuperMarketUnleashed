@@ -16,13 +16,25 @@ const EditVendorModal = ({ isOpen, vendor, onClose, onUpdate }) => {
     }
   }, [vendor]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onUpdate(vendor.id, { name, contactPerson, email, phone });
+    try {
+      await onUpdate(vendor.id, { name, contactPerson, email, phone });
+      onClose();
+    } catch (error) {
+      console.error("Error updating vendor:", error);
+      // If vendor doesn't exist, show a specific message
+      if (error.message && error.message.includes("does not exist")) {
+        alert("This vendor has been deleted and cannot be updated. Please add the vendor again.");
+        onClose();
+      } else {
+        alert("Error updating vendor: " + error.message);
+      }
+    }
   };
 
   return (
-        <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose}>
       <h2 className="text-2xl font-bold mb-4">Edit Vendor</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">

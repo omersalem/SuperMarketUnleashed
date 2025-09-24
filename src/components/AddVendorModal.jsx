@@ -7,13 +7,18 @@ const AddVendorModal = ({ isOpen, onClose, onAdd }) => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onAdd({ name, contactPerson, email, phone });
+    try {
+      await onAdd({ name, contactPerson, email, phone });
+    } catch (error) {
+      console.error("Error adding vendor:", error);
+      alert("Error adding vendor: " + error.message);
+    }
   };
 
   return (
-        <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose}>
       <h2 className="text-2xl font-bold mb-4">Add Vendor</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">

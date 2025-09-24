@@ -26,8 +26,9 @@ export const restoreCustomers = async (customers) => {
 
   // Add new customers
   customers.forEach((customer) => {
-    const customerDoc = doc(customersCollection);
-    batch.set(customerDoc, customer);
+    const { id, ...data } = customer;
+    const customerDoc = id ? doc(customersCollection, id) : doc(customersCollection);
+    batch.set(customerDoc, data);
   });
 
   await batch.commit();
@@ -46,8 +47,9 @@ export const restoreVendors = async (vendors) => {
 
   // Add new vendors
   vendors.forEach((vendor) => {
-    const vendorDoc = doc(vendorsCollection);
-    batch.set(vendorDoc, vendor);
+    const { id, ...data } = vendor;
+    const vendorDoc = id ? doc(vendorsCollection, id) : doc(vendorsCollection);
+    batch.set(vendorDoc, data);
   });
 
   await batch.commit();
@@ -66,8 +68,9 @@ export const restoreCategories = async (categories) => {
 
   // Add new categories
   categories.forEach((category) => {
-    const categoryDoc = doc(categoriesCollection);
-    batch.set(categoryDoc, category);
+    const { id, ...data } = category;
+    const categoryDoc = id ? doc(categoriesCollection, id) : doc(categoriesCollection);
+    batch.set(categoryDoc, data);
   });
 
   await batch.commit();
@@ -86,8 +89,9 @@ export const restoreProducts = async (products) => {
 
   // Add new products
   products.forEach((product) => {
-    const productDoc = doc(productsCollection);
-    batch.set(productDoc, product);
+    const { id, ...data } = product;
+    const productDoc = id ? doc(productsCollection, id) : doc(productsCollection);
+    batch.set(productDoc, data);
   });
 
   await batch.commit();
@@ -106,8 +110,9 @@ export const restoreSales = async (sales) => {
 
   // Add new sales
   sales.forEach((sale) => {
-    const saleDoc = doc(salesCollection);
-    batch.set(saleDoc, sale);
+    const { id, ...data } = sale;
+    const saleDoc = id ? doc(salesCollection, id) : doc(salesCollection);
+    batch.set(saleDoc, data);
   });
 
   await batch.commit();
@@ -126,8 +131,9 @@ export const restorePurchases = async (purchases) => {
 
   // Add new purchases
   purchases.forEach((purchase) => {
-    const purchaseDoc = doc(purchasesCollection);
-    batch.set(purchaseDoc, purchase);
+    const { id, ...data } = purchase;
+    const purchaseDoc = id ? doc(purchasesCollection, id) : doc(purchasesCollection);
+    batch.set(purchaseDoc, data);
   });
 
   await batch.commit();
@@ -146,8 +152,9 @@ export const restoreChecks = async (checks) => {
 
   // Add new checks
   checks.forEach((check) => {
-    const checkDoc = doc(checksCollection);
-    batch.set(checkDoc, check);
+    const { id, ...data } = check;
+    const checkDoc = id ? doc(checksCollection, id) : doc(checksCollection);
+    batch.set(checkDoc, data);
   });
 
   await batch.commit();
@@ -166,8 +173,9 @@ export const restoreWorkers = async (workers) => {
 
   // Add new workers
   workers.forEach((worker) => {
-    const workerDoc = doc(workersCollection);
-    batch.set(workerDoc, worker);
+    const { id, ...data } = worker;
+    const workerDoc = id ? doc(workersCollection, id) : doc(workersCollection);
+    batch.set(workerDoc, data);
   });
 
   await batch.commit();
@@ -186,8 +194,9 @@ export const restoreBanks = async (banks) => {
 
   // Add new banks
   banks.forEach((bank) => {
-    const bankDoc = doc(banksCollection);
-    batch.set(bankDoc, bank);
+    const { id, ...data } = bank;
+    const bankDoc = id ? doc(banksCollection, id) : doc(banksCollection);
+    batch.set(bankDoc, data);
   });
 
   await batch.commit();
@@ -206,8 +215,9 @@ export const restoreCurrencies = async (currencies) => {
 
   // Add new currencies
   currencies.forEach((currency) => {
-    const currencyDoc = doc(currenciesCollection);
-    batch.set(currencyDoc, currency);
+    const { id, ...data } = currency;
+    const currencyDoc = id ? doc(currenciesCollection, id) : doc(currenciesCollection);
+    batch.set(currencyDoc, data);
   });
 
   await batch.commit();
@@ -226,8 +236,9 @@ export const restoreSalaryPayments = async (salaryPayments) => {
 
   // Add new salary payments
   salaryPayments.forEach((salaryPayment) => {
-    const salaryPaymentDoc = doc(salaryPaymentsCollection);
-    batch.set(salaryPaymentDoc, salaryPayment);
+    const { id, ...data } = salaryPayment;
+    const salaryPaymentDoc = id ? doc(salaryPaymentsCollection, id) : doc(salaryPaymentsCollection);
+    batch.set(salaryPaymentDoc, data);
   });
 
   await batch.commit();
@@ -246,8 +257,9 @@ export const restoreWorkerExpenses = async (workerExpenses) => {
 
   // Add new worker expenses
   workerExpenses.forEach((workerExpense) => {
-    const workerExpenseDoc = doc(workerExpensesCollection);
-    batch.set(workerExpenseDoc, workerExpense);
+    const { id, ...data } = workerExpense;
+    const workerExpenseDoc = id ? doc(workerExpensesCollection, id) : doc(workerExpensesCollection);
+    batch.set(workerExpenseDoc, data);
   });
 
   await batch.commit();
@@ -266,8 +278,9 @@ export const restoreWorkerAttendance = async (workerAttendance) => {
 
   // Add new worker attendance
   workerAttendance.forEach((attendance) => {
-    const attendanceDoc = doc(workerAttendanceCollection);
-    batch.set(attendanceDoc, attendance);
+    const { id, ...data } = attendance;
+    const attendanceDoc = id ? doc(workerAttendanceCollection, id) : doc(workerAttendanceCollection);
+    batch.set(attendanceDoc, data);
   });
 
   await batch.commit();

@@ -54,7 +54,14 @@ const CustomerManagement = ({
       setIsEditModalOpen(false);
       setEditingCustomer(null);
     } catch (error) {
-      setError(error.message);
+      if (error.message && error.message.includes("No customer found with ID")) {
+        setCustomers(customers.filter((c) => c.id !== id));
+        setError("This customer has been deleted. Please add the customer again.");
+        setIsEditModalOpen(false);
+        setEditingCustomer(null);
+      } else {
+        setError(error.message);
+      }
     } finally {
       setLoadingStates((prev) => ({ ...prev, editing: false }));
     }
@@ -67,7 +74,12 @@ const CustomerManagement = ({
         await deleteCustomer(id);
         setCustomers(customers.filter((customer) => customer.id !== id));
       } catch (error) {
-        setError(error.message);
+        if (error.message && error.message.includes("No customer found with ID")) {
+          setCustomers(customers.filter((customer) => customer.id !== id));
+          setError("This customer has been deleted.");
+        } else {
+          setError(error.message);
+        }
       } finally {
         setLoadingStates((prev) => ({ ...prev, deleting: null }));
       }
@@ -359,8 +371,8 @@ const CustomerManagement = ({
           </div>
         ) : viewMode === "cards" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {customers.map((customer) => (
-              <CustomerCard key={customer.id} customer={customer} />
+            {customers.map((customer, index) => (
+              <CustomerCard key={`${customer.id}-${index}`} customer={customer} />
             ))}
           </div>
         ) : (

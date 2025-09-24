@@ -1,9 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Modal from './Modal';
 
 const AddToStockModal = ({ isOpen, onClose, onAddToStock, products }) => {
   const [selectedProductId, setSelectedProductId] = useState('');
   const [quantity, setQuantity] = useState(1);
+
+  // Deduplicate products by id to avoid duplicate React keys in the select
+  const uniqueProducts = useMemo(() => {
+    const seen = new Set();
+    return (products || []).filter((p) => {
+      if (!p || !p.id) return false;
+      if (seen.has(p.id)) return false;
+      seen.add(p.id);
+      return true;
+    });
+  }, [products]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,8 +34,10 @@ const AddToStockModal = ({ isOpen, onClose, onAddToStock, products }) => {
           <label htmlFor="product" className="block mb-2 text-sm font-medium">Select Product</label>
           <select id="product" className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value={selectedProductId} onChange={(e) => setSelectedProductId(e.target.value)} required>
             <option value="">-- Select Product --</option>
-            {products.map(product => (
-              <option key={product.id} value={product.id}>{product.name} (Current Stock: {product.stock})</option>
+            {uniqueProducts.map((product, idx) => (
+              <option key={`${product.id}-${idx}`} value={product.id}>
+                {product.name} (Current Stock: {product.stock})
+              </option>
             ))}
           </select>
         </div>

@@ -58,7 +58,15 @@ const ProductManagement = ({
       setIsEditModalOpen(false);
       setEditingProduct(null);
     } catch (error) {
-      setError(error.message);
+      // If product doesn't exist, just remove it from local state
+      if (error.message && error.message.includes("does not exist")) {
+        setProducts(products.filter((p) => p.id !== id));
+        setError("This product has already been deleted. Please add the product again.");
+        setIsEditModalOpen(false);
+        setEditingProduct(null);
+      } else {
+        setError(error.message);
+      }
     } finally {
       setLoadingStates((prev) => ({ ...prev, editing: false }));
     }
@@ -71,7 +79,13 @@ const ProductManagement = ({
         await deleteProduct(id);
         setProducts(products.filter((product) => product.id !== id));
       } catch (error) {
-        setError(error.message);
+        // If product doesn't exist, just remove it from local state
+        if (error.message && error.message.includes("does not exist")) {
+          setProducts(products.filter((product) => product.id !== id));
+          setError("This product has already been deleted.");
+        } else {
+          setError(error.message);
+        }
       } finally {
         setLoadingStates((prev) => ({ ...prev, deleting: null }));
       }
@@ -419,8 +433,8 @@ const ProductManagement = ({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
+              {products.map((product, index) => (
+                <ProductCard key={`${product.id}-${index}`} product={product} />
               ))}
             </div>
           )}

@@ -54,7 +54,15 @@ const CategoryManagement = ({
       setIsEditModalOpen(false);
       setEditingCategory(null);
     } catch (error) {
-      setError(error.message);
+      // If category doesn't exist, just remove it from local state
+      if (error.message && error.message.includes("does not exist")) {
+        setCategories(categories.filter((c) => c.id !== id));
+        setError("This category has already been deleted. Please add the category again.");
+        setIsEditModalOpen(false);
+        setEditingCategory(null);
+      } else {
+        setError(error.message);
+      }
     } finally {
       setLoadingStates((prev) => ({ ...prev, editing: false }));
     }
@@ -67,7 +75,13 @@ const CategoryManagement = ({
         await deleteCategory(id);
         setCategories(categories.filter((category) => category.id !== id));
       } catch (error) {
-        setError(error.message);
+        // If category doesn't exist, just remove it from local state
+        if (error.message && error.message.includes("does not exist")) {
+          setCategories(categories.filter((category) => category.id !== id));
+          setError("This category has already been deleted.");
+        } else {
+          setError(error.message);
+        }
       } finally {
         setLoadingStates((prev) => ({ ...prev, deleting: null }));
       }
@@ -332,8 +346,8 @@ const CategoryManagement = ({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {categories.map((category) => (
-                <CategoryCard key={category.id} category={category} />
+              {categories.map((category, index) => (
+                <CategoryCard key={`${category.id}-${index}`} category={category} />
               ))}
             </div>
           )}

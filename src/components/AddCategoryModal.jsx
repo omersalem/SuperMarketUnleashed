@@ -5,13 +5,18 @@ const AddCategoryModal = ({ isOpen, onClose, onAdd }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onAdd({ name, description });
+    try {
+      await onAdd({ name, description });
+    } catch (error) {
+      console.error("Error adding category:", error);
+      alert("Error adding category: " + error.message);
+    }
   };
 
   return (
-        <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose}>
       <h2 className="text-2xl font-bold mb-4">Add Category</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">

@@ -12,13 +12,25 @@ const EditCategoryModal = ({ isOpen, category, onClose, onUpdate }) => {
     }
   }, [category]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onUpdate(category.id, { name, description });
+    try {
+      await onUpdate(category.id, { name, description });
+      onClose();
+    } catch (error) {
+      console.error("Error updating category:", error);
+      // If category doesn't exist, show a specific message
+      if (error.message && error.message.includes("does not exist")) {
+        alert("This category has been deleted and cannot be updated. Please add the category again.");
+        onClose();
+      } else {
+        alert("Error updating category: " + error.message);
+      }
+    }
   };
 
   return (
-        <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose}>
       <h2 className="text-2xl font-bold mb-4">Edit Category</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
