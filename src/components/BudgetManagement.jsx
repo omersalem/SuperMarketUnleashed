@@ -7,6 +7,9 @@ import RoleGuard from "./RoleGuard";
 import {
   getIncomes,
   getExpenses,
+  getSales,
+  getPurchases,
+  getProducts,
   addIncome,
   addExpense,
   deleteIncome,
@@ -16,6 +19,9 @@ import {
 const BudgetManagement = ({ userRole = "admin" }) => {
   const [incomes, setIncomes] = useState([]);
   const [expenses, setExpenses] = useState([]);
+  const [sales, setSales] = useState([]);
+  const [purchases, setPurchases] = useState([]);
+  const [products, setProducts] = useState([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [isAddIncomeModalOpen, setIsAddIncomeModalOpen] = useState(false);
@@ -25,10 +31,19 @@ const BudgetManagement = ({ userRole = "admin" }) => {
   // Fetch budget data from Firebase
   const fetchBudgetData = async () => {
     try {
-      const incomesData = await getIncomes();
-      const expensesData = await getExpenses();
-      setIncomes(incomesData);
-      setExpenses(expensesData);
+      const [incomesData, expensesData, salesData, purchasesData, productsData] = await Promise.all([
+        getIncomes(),
+        getExpenses(),
+        getSales(),
+        getPurchases(),
+        getProducts(),
+      ]);
+      setIncomes(incomesData || []);
+      setExpenses(expensesData || []);
+      // Keep all transactions; we'll exclude payment-only where appropriate (P&L)
+      setSales(salesData || []);
+      setPurchases(purchasesData || []);
+      setProducts(productsData || []);
     } catch (error) {
       setError("Error loading budget data: " + error.message);
     }
@@ -109,16 +124,158 @@ const BudgetManagement = ({ userRole = "admin" }) => {
     });
   }, [expenses, startDate, endDate]);
 
-  // Calculate totals
-  const totalIncome = filteredIncomes.reduce(
-    (sum, income) => sum + income.amount,
-    0
-  );
-  const totalExpenses = filteredExpenses.reduce(
-    (sum, expense) => sum + expense.amount,
-    0
-  );
-  const netBudget = totalIncome - totalExpenses;
+  // Filter sales and purchases by date range (exclude payment-only records)
+  const filteredSales = useMemo(() => {
+    const base = (sales || []).filter((s) => !s.isPaymentOnly);
+    return base.filter((sale) => {
+      if (!startDate || !endDate) return true;
+      const d = new Date(sale.date);
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      return isWithinInterval(d, { start, end });
+    });
+  }, [sales, startDate, endDate]);
+ 
+  const filteredPurchases = useMemo(() => {
+    const base = (purchases || []).filter((p) => !p.isPaymentOnly);
+    return base.filter((purchase) => {
+      if (!startDate || !endDate) return true;
+      const d = new Date(purchase.date);
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      return isWithinInterval(d, { start, end });
+    });
+  }, [purchases, startDate, endDate]);
+
+  // Calculate totals and advanced financial metrics
+  const totalIncome = filteredIncomes.reduce((sum, income) => sum + (income.amount || 0), 0);
+  const totalExpenses = filteredExpenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
+  const totalSales = filteredSales.reduce((sum, sale) => sum + (sale.totalAmount || 0), 0);
+  const totalPurchases = filteredPurchases.reduce((sum, purchase) => sum + (purchase.totalAmount || 0), 0);
+ 
+  // Helper for date range
+  const inRange = (dateStr) => {
+    if (!startDate || !endDate) return true;
+    const d = new Date(dateStr);
+    const s = new Date(startDate);
+    const e = new Date(endDate);
+    return isWithinInterval(d, { start: s, end: e });
+  };
+ 
+  // Build product average cost map from ALL purchases (moving average across history)
+  const averageCostByProduct = useMemo(() => {
+    const totals = new Map(); // id -> { qty, cost }
+    (purchases || []).forEach((p) => {
+      const items = Array.isArray(p.items) && p.items.length > 0
+        ? p.items.map(it => ({ productId: it.productId || it.id, qty: it.quantity || 0, price: (it.priceAtPurchase ?? it.price ?? 0) }))
+        : (Array.isArray(p.products) ? p.products.map(it => ({ productId: it.id, qty: it.quantity || 0, price: (it.price ?? 0) })) : []);
+      items.forEach(({ productId, qty, price }) => {
+        if (!productId || !qty) return;
+        const acc = totals.get(productId) || { qty: 0, cost: 0 };
+        acc.qty += Number(qty) || 0;
+        acc.cost += (Number(qty) || 0) * (Number(price) || 0);
+        totals.set(productId, acc);
+      });
+    });
+    const avg = new Map();
+    totals.forEach((v, k) => {
+      avg.set(k, v.qty > 0 ? v.cost / v.qty : 0);
+    });
+    return avg;
+  }, [purchases]);
+ 
+  // Quantities sold and purchased in period (by product)
+  const soldQtyByProduct = useMemo(() => {
+    const m = new Map();
+    filteredSales.forEach((s) => {
+      const items = Array.isArray(s.items) ? s.items : [];
+      items.forEach((it) => {
+        const id = it.productId || it.id;
+        const q = Number(it.quantity) || 0;
+        if (!id || !q) return;
+        m.set(id, (m.get(id) || 0) + q);
+      });
+    });
+    return m;
+  }, [filteredSales]);
+ 
+  const purchasedQtyByProduct = useMemo(() => {
+    const m = new Map();
+    filteredPurchases.forEach((p) => {
+      const items = Array.isArray(p.items) && p.items.length > 0
+        ? p.items
+        : (Array.isArray(p.products) ? p.products.map(it => ({ productId: it.id, quantity: it.quantity })) : []);
+      items.forEach((it) => {
+        const id = it.productId || it.id;
+        const q = Number(it.quantity) || 0;
+        if (!id || !q) return;
+        m.set(id, (m.get(id) || 0) + q);
+      });
+    });
+    return m;
+  }, [filteredPurchases]);
+ 
+  // Approximate Opening/Closing inventory quantities for the period
+  // OpeningQty = ClosingQty - PurchasedQty(period) + SoldQty(period)
+  const closingQtyByProduct = useMemo(() => {
+    const m = new Map();
+    (products || []).forEach((p) => {
+      if (!p?.id) return;
+      m.set(p.id, Number(p.stock) || 0);
+    });
+    return m;
+  }, [products]);
+ 
+  const purchasesValueInPeriod = useMemo(() => {
+    let total = 0;
+    filteredPurchases.forEach((p) => {
+      const items = Array.isArray(p.items) && p.items.length > 0
+        ? p.items.map(it => ({ qty: it.quantity || 0, price: (it.priceAtPurchase ?? it.price ?? 0) }))
+        : (Array.isArray(p.products) ? p.products.map(it => ({ qty: it.quantity || 0, price: (it.price ?? 0) })) : []);
+      items.forEach(({ qty, price }) => {
+        total += (Number(qty) || 0) * (Number(price) || 0);
+      });
+    });
+    return total;
+  }, [filteredPurchases]);
+ 
+  const { openingInventoryValue, closingInventoryValue } = useMemo(() => {
+    let openingValue = 0;
+    let closingValue = 0;
+    closingQtyByProduct.forEach((closingQty, id) => {
+      const purchased = purchasedQtyByProduct.get(id) || 0;
+      const sold = soldQtyByProduct.get(id) || 0;
+      const openingQty = Math.max(0, closingQty - purchased + sold);
+      const avgCost = averageCostByProduct.get(id) || 0;
+      openingValue += openingQty * avgCost;
+      closingValue += closingQty * avgCost;
+    });
+    return { openingInventoryValue: openingValue, closingInventoryValue: closingValue };
+  }, [closingQtyByProduct, purchasedQtyByProduct, soldQtyByProduct, averageCostByProduct]);
+ 
+  // COGS via accounting identity: Opening + Purchases - Closing
+  const cogs = Math.max(0, openingInventoryValue + purchasesValueInPeriod - closingInventoryValue);
+ 
+  // Gross and Net
+  const grossProfit = totalSales - cogs;
+  const netProfit = grossProfit + totalIncome - totalExpenses;
+ 
+  // Working capital and cash-flow approximations for the period
+  const receivables = filteredSales.reduce((sum, s) => sum + (s.balance || 0), 0);
+  const payables = filteredPurchases.reduce((sum, p) => sum + (p.balance || 0), 0);
+ 
+  const paymentOnlySalesInPeriod = (sales || []).filter((s) => s.isPaymentOnly && inRange(s.date));
+  const paymentOnlyPurchasesInPeriod = (purchases || []).filter((p) => p.isPaymentOnly && inRange(p.date));
+ 
+  const cashIn = filteredSales.reduce((sum, s) => sum + (s.amountPaid || 0), 0)
+    + paymentOnlySalesInPeriod.reduce((sum, s) => sum + (s.amountPaid || 0), 0)
+    + totalIncome; // assume manual incomes are cash in
+ 
+  const cashOut = filteredPurchases.reduce((sum, p) => sum + (p.amountPaid || 0), 0)
+    + paymentOnlyPurchasesInPeriod.reduce((sum, p) => sum + (p.amountPaid || 0), 0)
+    + totalExpenses; // assume manual expenses are cash out
+ 
+  const netCashFlow = cashIn - cashOut;
 
   // Group expenses by category
   const expensesByCategory = useMemo(() => {
@@ -210,24 +367,24 @@ const BudgetManagement = ({ userRole = "admin" }) => {
   const incomeColumns = [
     {
       key: "date",
-      label: "Date",
+      header: "Date",
       render: (income) => format(new Date(income.date), "MMM dd, yyyy"),
     },
     {
       key: "description",
-      label: "Description",
+      header: "Description",
     },
     {
       key: "category",
-      label: "Category",
+      header: "Category",
     },
     {
       key: "source",
-      label: "Source",
+      header: "Source",
     },
     {
       key: "amount",
-      label: "Amount",
+      header: "Amount",
       render: (income) => `+${income.amount} ₪`,
       className: "text-green-400",
     },
@@ -237,24 +394,24 @@ const BudgetManagement = ({ userRole = "admin" }) => {
   const expenseColumns = [
     {
       key: "date",
-      label: "Date",
+      header: "Date",
       render: (expense) => format(new Date(expense.date), "MMM dd, yyyy"),
     },
     {
       key: "description",
-      label: "Description",
+      header: "Description",
     },
     {
       key: "category",
-      label: "Category",
+      header: "Category",
     },
     {
       key: "vendor",
-      label: "Vendor",
+      header: "Vendor",
     },
     {
       key: "amount",
-      label: "Amount",
+      header: "Amount",
       render: (expense) => `-${expense.amount} ₪`,
       className: "text-red-400",
     },
@@ -340,37 +497,64 @@ const BudgetManagement = ({ userRole = "admin" }) => {
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      {/* Summary Cards (Comprehensive) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 mb-6">
         <div className="bg-green-900/30 border border-green-500/30 p-4 rounded-lg">
-          <p className="text-sm text-green-300 mb-1">Total Income</p>
-          <p className="text-2xl font-bold text-green-400">
-            +{totalIncome.toFixed(2)} ₪
-          </p>
+          <p className="text-sm text-green-300 mb-1">Sales Revenue</p>
+          <p className="text-2xl font-bold text-green-400">+{totalSales.toFixed(2)} ₪</p>
+        </div>
+        <div className="bg-emerald-900/30 border border-emerald-500/30 p-4 rounded-lg">
+          <p className="text-sm text-emerald-300 mb-1">Other Income</p>
+          <p className="text-2xl font-bold text-emerald-400">+{totalIncome.toFixed(2)} ₪</p>
         </div>
         <div className="bg-red-900/30 border border-red-500/30 p-4 rounded-lg">
-          <p className="text-sm text-red-300 mb-1">Total Expenses</p>
-          <p className="text-2xl font-bold text-red-400">
-            -{totalExpenses.toFixed(2)} ₪
+          <p className="text-sm text-red-300 mb-1">COGS</p>
+          <p className="text-2xl font-bold text-red-400">-{cogs.toFixed(2)} ₪</p>
+        </div>
+        <div className="bg-indigo-900/30 border border-indigo-500/30 p-4 rounded-lg">
+          <p className="text-sm text-indigo-300 mb-1">Gross Profit</p>
+          <p className="text-2xl font-bold text-indigo-400">{grossProfit >= 0 ? "+" : ""}{grossProfit.toFixed(2)} ₪</p>
+        </div>
+        <div className="bg-rose-900/30 border border-rose-500/30 p-4 rounded-lg">
+          <p className="text-sm text-rose-300 mb-1">Other Expenses</p>
+          <p className="text-2xl font-bold text-rose-400">-{totalExpenses.toFixed(2)} ₪</p>
+        </div>
+        <div className={`p-4 rounded-lg ${netProfit >= 0 ? 'bg-blue-900/30 border border-blue-500/30' : 'bg-red-900/30 border border-red-500/30'}`}>
+          <p className="text-sm mb-1">Net Profit</p>
+          <p className={`text-2xl font-bold ${netProfit >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
+            {netProfit >= 0 ? '+' : ''}{netProfit.toFixed(2)} ₪
           </p>
         </div>
-        <div
-          className={`p-4 rounded-lg ${
-            netBudget >= 0
-              ? "bg-blue-900/30 border border-blue-500/30"
-              : "bg-red-900/30 border border-red-500/30"
-          }`}
-        >
-          <p className="text-sm mb-1">Net Budget</p>
-          <p
-            className={`text-2xl font-bold ${
-              netBudget >= 0 ? "text-blue-400" : "text-red-400"
-            }`}
-          >
-            {netBudget >= 0 ? "+" : ""}
-            {netBudget.toFixed(2)} ₪
-          </p>
+        <div className="p-4 rounded-lg bg-gray-800/50 border border-gray-700">
+          <p className="text-sm text-gray-300 mb-1">Inventory (Closing)</p>
+          <p className="text-2xl font-bold text-gray-100">{closingInventoryValue.toFixed(2)} ₪</p>
         </div>
+      </div>
+
+      {/* Working Capital & Cash Flow */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="bg-yellow-900/30 border border-yellow-500/30 p-4 rounded-lg">
+          <p className="text-sm text-yellow-300 mb-1">Accounts Receivable</p>
+          <p className="text-2xl font-bold text-yellow-400">₪{receivables.toFixed(2)}</p>
+        </div>
+        <div className="bg-orange-900/30 border border-orange-500/30 p-4 rounded-lg">
+          <p className="text-sm text-orange-300 mb-1">Accounts Payable</p>
+          <p className="text-2xl font-bold text-orange-400">₪{payables.toFixed(2)}</p>
+        </div>
+        <div className="bg-teal-900/30 border border-teal-500/30 p-4 rounded-lg">
+          <p className="text-sm text-teal-300 mb-1">Cash In (approx)</p>
+          <p className="text-2xl font-bold text-teal-400">+{cashIn.toFixed(2)} ₪</p>
+        </div>
+        <div className="bg-fuchsia-900/30 border border-fuchsia-500/30 p-4 rounded-lg">
+          <p className="text-sm text-fuchsia-300 mb-1">Cash Out (approx)</p>
+          <p className="text-2xl font-bold text-fuchsia-400">-{cashOut.toFixed(2)} ₪</p>
+        </div>
+      </div>
+      <div className="mb-10 p-4 rounded-lg border" style={{ borderColor: netCashFlow >= 0 ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)', background: 'rgba(255,255,255,0.03)' }}>
+        <p className="text-sm mb-1">Net Cash Flow (approx)</p>
+        <p className={`text-2xl font-bold ${netCashFlow >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+          {netCashFlow >= 0 ? '+' : ''}{netCashFlow.toFixed(2)} ₪
+        </p>
       </div>
 
       {/* Charts Section */}
@@ -439,7 +623,7 @@ const BudgetManagement = ({ userRole = "admin" }) => {
           <ResponsiveTable
             data={filteredIncomes}
             columns={incomeColumns}
-            MobileCard={IncomeMobileCard}
+            mobileCardComponent={IncomeMobileCard}
             emptyMessage="No income records found. Add your first income to get started!"
           />
         </div>
@@ -457,7 +641,7 @@ const BudgetManagement = ({ userRole = "admin" }) => {
           <ResponsiveTable
             data={filteredExpenses}
             columns={expenseColumns}
-            MobileCard={ExpenseMobileCard}
+            mobileCardComponent={ExpenseMobileCard}
             emptyMessage="No expense records found. Add your first expense to get started!"
           />
         </div>

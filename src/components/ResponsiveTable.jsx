@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 
-const ResponsiveTable = ({
-  data = [],
-  columns = [],
-  className = "",
-  mobileCardComponent: MobileCard,
-  loading = false,
-  emptyMessage = "No data available",
-}) => {
+const ResponsiveTable = (props) => {
+  const {
+    data = [],
+    columns = [],
+    className = "",
+    loading = false,
+    emptyMessage = "No data available",
+  } = props;
+  const MobileCard = props.mobileCardComponent || props.mobileCard;
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -72,7 +73,7 @@ const ResponsiveTable = ({
                   <span className="text-sm text-white text-right max-w-xs truncate">
                     {column.render
                       ? column.render(item, index)
-                      : item[column.key]}
+                      : item[column.key ?? column.accessor]}
                   </span>
                 </div>
               ))}
@@ -96,7 +97,7 @@ const ResponsiveTable = ({
                   column.className || ""
                 }`}
               >
-                {column.header}
+                {column.header ?? column.label}
               </th>
             ))}
           </tr>
@@ -116,7 +117,7 @@ const ResponsiveTable = ({
                 >
                   {column.render
                     ? column.render(item, rowIndex)
-                    : item[column.key]}
+                    : item[column.key ?? column.accessor]}
                 </td>
               ))}
             </tr>
