@@ -13,6 +13,8 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  // Admin email shown in the access notes (override with VITE_ADMIN_EMAIL)
+  const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || "omersalem2008@gmail.com";
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
@@ -58,7 +60,7 @@ const LoginPage = () => {
         }}
       >
         <div className="text-center">
-          <h1 className="text-2xl sm:text-3xl font-bold">{t("login.title")}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Sign in to SuperMarket Admin</h1>
         </div>
         <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
           <div>
@@ -93,29 +95,25 @@ const LoginPage = () => {
             />
           </div>
           <div className="text-center text-sm text-gray-400 bg-gray-700/50 p-3 rounded-md">
-            <p className="mb-1">
-              🔒 <strong>Access Level:</strong>
+            <p className="mb-1">🔒 <strong>Access Levels</strong></p>
+            <p>
+              • <span className="text-blue-400">{ADMIN_EMAIL}</span> — Admin (Full Access)
             </p>
             <p>
-              • <span className="text-blue-400">omersalem2008@gmail.com</span> →
-              Admin Access
-            </p>
-            <p>
-              • <span className="text-green-400">All other emails</span> →
-              Read-Only Access
+              • <span className="text-green-400">All other emails</span> — Read‑only access
             </p>
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <LoadingButton
             type="submit"
             loading={loading}
-            loadingText={t("login.loggingIn") || "Logging in..."}
+            loadingText={"Signing in..."}
             className="w-full py-3 sm:py-2 px-4 font-bold text-white rounded-full touch-manipulation"
             style={{
               background: "linear-gradient(to right, #007BFF, #00AFFF)",
             }}
           >
-            {t("login.loginButton")}
+            Sign In
           </LoadingButton>
         </form>
         <div className="flex justify-center space-x-4 sm:space-x-6">
