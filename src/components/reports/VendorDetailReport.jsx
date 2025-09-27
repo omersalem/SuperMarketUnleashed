@@ -37,8 +37,7 @@ const VendorDetailReport = ({ vendors = [], purchases = [], dateRange }) => {
         0
       );
       const totalPaid = vendorPurchases.reduce(
-        (sum, purchase) =>
-          sum + (purchase.amountPaid || purchase.totalAmount || 0),
+        (sum, purchase) => sum + (purchase.amountPaid ?? 0),
         0
       );
       const totalBalance = vendorPurchases.reduce(
@@ -151,17 +150,37 @@ const VendorDetailReport = ({ vendors = [], purchases = [], dateRange }) => {
     const pageHeight = doc.internal.pageSize.height;
     let yPosition = 20;
 
-    // Header
-    doc.setFontSize(18);
-    doc.setTextColor(40, 40, 40);
-    doc.text("Vendor Detail Report", 20, yPosition);
+    // Header with background color
+    doc.setFillColor(102, 51, 153); // Purple for vendor reports
+    doc.rect(0, 0, doc.internal.pageSize.width, 25, "F");
+    doc.setFontSize(22);
+    doc.setTextColor(255, 255, 255);
+    doc.text("Vendor Detail Report", 20, yPosition + 15);
 
-    yPosition += 10;
-    doc.setFontSize(14);
-    doc.setTextColor(0, 100, 200);
+    // --- Custom Shopping Cart Logo ---
+    const logoX = doc.internal.pageSize.width - 40;
+    const logoY = 8;
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(0.5);
+
+    // Cart basket
+    doc.line(logoX, logoY, logoX + 20, logoY); // Top
+    doc.line(logoX, logoY, logoX + 4, logoY + 10); // Left
+    doc.line(logoX + 4, logoY + 10, logoX + 22, logoY + 10); // Bottom
+
+    // Cart handle
+    doc.line(logoX + 20, logoY, logoX + 25, logoY - 3);
+
+    // Wheels
+    doc.circle(logoX + 7, logoY + 12, 1.5);
+    doc.circle(logoX + 19, logoY + 12, 1.5);
+
+    yPosition += 35;
+    doc.setFontSize(18);
+    doc.setTextColor(0, 50, 150);
     doc.text(vendor.name || "N/A", 20, yPosition);
 
-    yPosition += 10;
+    yPosition += 15;
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     doc.text(
@@ -180,99 +199,380 @@ const VendorDetailReport = ({ vendors = [], purchases = [], dateRange }) => {
 
     yPosition += 20;
 
-    // Vendor Information
-    doc.setFontSize(12);
+    // --- Enhanced Vendor Information Section ---
+    const infoBoxStartY = yPosition - 5;
+    const infoBoxHeight = 38; // Increased height for more info
+
+    doc.setFillColor(245, 240, 250); // Light purple
+    doc.rect(
+      15,
+      infoBoxStartY,
+      doc.internal.pageSize.width - 30,
+      infoBoxHeight,
+      "F"
+    );
+
+    doc.setFontSize(14);
     doc.setTextColor(40, 40, 40);
     doc.text("Vendor Information:", 20, yPosition);
     yPosition += 10;
 
     doc.setFontSize(10);
+    doc.setTextColor(60, 60, 60);
+
+    // Column 1
     doc.text(`Contact Person: ${vendor.contactPerson || "N/A"}`, 20, yPosition);
-    doc.text(`Phone: ${vendor.phone || "N/A"}`, 120, yPosition);
-    yPosition += 6;
+    yPosition += 7;
+    doc.text(`Phone: ${vendor.phone || "N/A"}`, 20, yPosition);
+    yPosition += 7;
     doc.text(`Email: ${vendor.email || "N/A"}`, 20, yPosition);
-    yPosition += 6;
-    doc.text(`Address: ${vendor.address || "N/A"}`, 20, yPosition);
-    yPosition += 15;
 
-    // Summary Statistics
-    doc.setFontSize(12);
-    doc.text("Purchase Summary:", 20, yPosition);
-    yPosition += 10;
-
-    doc.setFontSize(10);
-    doc.text(`Total Orders: ${vendor.totalOrders}`, 20, yPosition);
-    doc.text(`Total Amount: ${formatCurrency(vendor.totalAmount)}`, 70, yPosition);
-    doc.text(`Total Paid: ${formatCurrency(vendor.totalPaid)}`, 120, yPosition);
-    doc.text(`Balance: ${formatCurrency(vendor.totalBalance)}`, 170, yPosition);
-    yPosition += 6;
+    // Column 2
+    let yPosCol2 = yPosition - 14; // Reset Y for the second column
+    const col2X = doc.internal.pageSize.width / 2 + 10; // Start second column past the midpoint
+    doc.text(`Address: ${vendor.address || "N/A"}`, col2X, yPosCol2);
+    yPosCol2 += 7;
     doc.text(
-      `Average Order: ${formatCurrency(vendor.averageOrderValue)}`,
-      20,
-      yPosition
+      `First Order: ${
+        vendor.firstOrderDate
+          ? format(vendor.firstOrderDate, "MMM dd, yyyy")
+          : "N/A"
+      }`,
+      col2X,
+      yPosCol2
     );
-    doc.text(`Items Supplied: ${vendor.totalItemsSupplied}`, 70, yPosition);
+    yPosCol2 += 7;
+    doc.text(
+      `Last Order: ${
+        vendor.lastOrderDate
+          ? format(vendor.lastOrderDate, "MMM dd, yyyy")
+          : "N/A"
+      }`,
+      col2X,
+      yPosCol2
+    );
+
+    // Update yPosition to be below the info box
+    yPosition = infoBoxStartY + infoBoxHeight + 10;
+
+    // Summary Statistics with color boxes
+    doc.setFillColor(240, 250, 240); // Light green
+    doc.rect(15, yPosition - 5, doc.internal.pageSize.width - 30, 80, "F");
+    doc.setFontSize(14);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Purchase Summary:", 20, yPosition);
     yPosition += 15;
+
+    // Summary metrics in boxes
+    const metrics = [
+      {
+        label: "Total Orders",
+        value: String(vendor.totalOrders || 0),
+        color: [230, 230, 250],
+      }, // Light purple
+      {
+        label: "Total Amount",
+        value: `NIS ${parseFloat(vendor.totalAmount || 0)
+          .toFixed(2)
+          .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+        color: [220, 250, 220],
+      }, // Light green
+      {
+        label: "Total Paid",
+        value: `NIS ${parseFloat(vendor.totalPaid || 0)
+          .toFixed(2)
+          .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+        color: [230, 230, 250],
+      }, // Light purple
+      {
+        label: "Balance",
+        value: `NIS ${parseFloat(vendor.totalBalance || 0)
+          .toFixed(2)
+          .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+        color: [250, 220, 220],
+      }, // Light red
+      {
+        label: "Avg. Order",
+        value: `NIS ${parseFloat(vendor.averageOrderValue || 0)
+          .toFixed(2)
+          .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+        color: [240, 220, 250],
+      }, // Light violet
+      {
+        label: "Items Supplied",
+        value: String(vendor.totalItemsSupplied || 0),
+        color: [250, 245, 220],
+      },
+    ];
+
+    // Draw metric boxes
+    const boxWidth = (doc.internal.pageSize.width - 50) / 3;
+    const boxHeight = 25;
+
+    const horizontalGap = 5;
+    const verticalGap = 5;
+
+    for (let i = 0; i < metrics.length; i++) {
+      const row = Math.floor(i / 3);
+      const col = i % 3;
+
+      const x = 15 + col * (boxWidth + horizontalGap);
+      const y = yPosition + row * (boxHeight + verticalGap);
+
+      doc.setFillColor(...metrics[i].color);
+      doc.rect(x, y, boxWidth, boxHeight, "F");
+
+      doc.setFontSize(9);
+      doc.setTextColor(80, 80, 80);
+      doc.text(metrics[i].label, x + 5, y + 10);
+
+      doc.setFontSize(11);
+      doc.setTextColor(40, 40, 40);
+      doc.text(metrics[i].value, x + 5, y + 20);
+    }
+
+    yPosition += 2 * (boxHeight + verticalGap) + 10;
 
     // Recent Transactions Table
     if (vendor.purchases && vendor.purchases.length > 0) {
-      doc.setFontSize(12);
+      // Add a colored header for the section title
+      doc.setFillColor(102, 51, 153); // Purple
+      doc.rect(15, yPosition - 5, doc.internal.pageSize.width - 30, 10, "F");
+      doc.setFontSize(14);
+      doc.setTextColor(255, 255, 255);
       doc.text("Recent Transactions:", 20, yPosition);
-      yPosition += 5;
+      yPosition += 10;
 
-      const tableData = vendor.purchases
-        .slice(0, 10)
-        .map((purchase) => [
+      const tableData = vendor.purchases.slice(0, 15).map((purchase) => {
+        const total = parseFloat(purchase.totalAmount || 0);
+        const paid = parseFloat(purchase.amountPaid ?? 0); // Corrected logic
+        const balance = total - paid;
+
+        return [
           format(new Date(purchase.date), "MMM dd, yyyy"),
           `${(purchase.products || purchase.items || []).length} items`,
-          `${formatCurrency(purchase.totalAmount || 0)}`,
-          `${formatCurrency(purchase.amountPaid || purchase.totalAmount || 0)}`,
-          `${formatCurrency(purchase.balance || 0)}`,
+          `NIS ${total.toFixed(2)}`,
+          `NIS ${paid.toFixed(2)}`,
+          `NIS ${balance.toFixed(2)}`,
           purchase.paymentMethod || "cash",
-        ]);
-
-      doc.autoTable({
-        startY: yPosition,
-        head: [["Date", "Items", "Total", "Paid", "Balance", "Method"]],
-        body: tableData,
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: [66, 139, 202] },
+          purchase.paymentStatus || "unpaid",
+        ];
       });
 
-      yPosition = doc.lastAutoTable.finalY + 10;
+      const startY = yPosition;
+      const columnWidths = [25, 20, 25, 25, 25, 20, 20];
+      const headers = [
+        "Date",
+        "Items",
+        "Total",
+        "Paid",
+        "Balance",
+        "Method",
+        "Status",
+      ];
+
+      doc.setFillColor(102, 51, 153); // Purple header
+      doc.setFontSize(9);
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+
+      // First, draw all the background rectangles for the header
+      let xPos = 15;
+      headers.forEach((header, i) => {
+        doc.rect(xPos, startY, columnWidths[i], 8, "F");
+        xPos += columnWidths[i];
+      });
+
+      // Then, draw the text on top of the backgrounds
+      xPos = 15;
+      headers.forEach((header, i) => {
+        doc.text(header, xPos + 2, startY + 5);
+        xPos += columnWidths[i];
+      });
+
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(40, 40, 40);
+      doc.setFontSize(8);
+      yPosition = startY + 8;
+
+      tableData.forEach((row, i) => {
+        xPos = 15;
+        if (i % 2 === 0) {
+          doc.setFillColor(245, 245, 245);
+          doc.rect(xPos, yPosition, doc.internal.pageSize.width - 30, 7, "F");
+        }
+        row.forEach((cell, j) => {
+          doc.text(String(cell), xPos + 2, yPosition + 5);
+          xPos += columnWidths[j];
+        });
+        yPosition += 7;
+      });
+
+      yPosition += 10;
     }
 
-    // Top Products
-    if (Object.keys(vendor.productsSupplied).length > 0) {
-      if (yPosition > pageHeight - 60) {
+    // Payment Status Distribution with Bar Chart
+    if (
+      Object.keys(vendor.paymentStatusCount).length > 0 &&
+      yPosition < pageHeight - 100
+    ) {
+      if (yPosition > pageHeight - 100) {
         doc.addPage();
         yPosition = 20;
       }
 
-      doc.setFontSize(12);
+      doc.setFillColor(250, 245, 240);
+      doc.rect(15, yPosition - 5, doc.internal.pageSize.width - 30, 5, "F");
+      doc.setFontSize(14);
+      doc.setTextColor(40, 40, 40);
+      doc.text("Payment Status Distribution:", 20, yPosition);
+      yPosition += 15;
+
+      // Draw a simple bar chart for payment status
+      const statusData = Object.entries(vendor.paymentStatusCount)
+        .map(([status, count]) => ({
+          status,
+          count,
+          percentage:
+            vendor.totalOrders > 0
+              ? ((count / vendor.totalOrders) * 100).toFixed(1)
+              : 0,
+        }))
+        .filter((item) => item.count > 0)
+        .sort((a, b) => b.count - a.count);
+
+      // Define colors for different payment statuses
+      const colors = [
+        [46, 204, 113], // Green for paid
+        [241, 196, 15], // Yellow for partial
+        [231, 76, 60], // Red for unpaid
+      ];
+
+      // Draw chart title
+      doc.setFontSize(10);
+      doc.setTextColor(60, 60, 60);
+      doc.text("Payment Status Usage", 20, yPosition);
+      yPosition += 15;
+
+      // Draw bars
+      const maxBarWidth = doc.internal.pageSize.width - 100;
+      const barHeight = 15;
+      const barSpacing = 5;
+
+      statusData.forEach((item, index) => {
+        const barWidth = (item.count / vendor.totalOrders) * maxBarWidth;
+        const x = 20;
+        const y = yPosition + index * (barHeight + barSpacing);
+
+        // Draw bar background
+        doc.setFillColor(230, 230, 230);
+        doc.rect(x, y, maxBarWidth, barHeight, "F");
+
+        // Draw bar
+        doc.setFillColor(...colors[index % colors.length]);
+        doc.rect(x, y, barWidth, barHeight, "F");
+
+        // Draw percentage text
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(9);
+        doc.text(`${item.percentage}%`, x + barWidth / 2, y + barHeight / 2, {
+          align: "center",
+        });
+
+        // Draw status name
+        doc.setTextColor(40, 40, 40);
+        doc.text(
+          `${item.status} (${item.count} orders)`,
+          x + maxBarWidth + 10,
+          y + barHeight / 2
+        );
+      });
+
+      yPosition += statusData.length * (barHeight + barSpacing) + 10;
+    }
+
+    // Top Products
+    if (Object.keys(vendor.productsSupplied).length > 0) {
+      if (yPosition > pageHeight - 80) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      // Add a colored header for the section title
+      doc.setFillColor(102, 51, 153); // Purple
+      doc.rect(15, yPosition - 5, doc.internal.pageSize.width - 30, 10, "F");
+      doc.setFontSize(14);
+      doc.setTextColor(255, 255, 255);
       doc.text("Top Products Supplied:", 20, yPosition);
-      yPosition += 5;
+      yPosition += 10;
 
       const productData = Object.entries(vendor.productsSupplied)
         .sort((a, b) => b[1].quantity - a[1].quantity)
-        .slice(0, 15)
-        .map(([name, data]) => [
-          name,
-          data.quantity.toString(),
-          `${formatCurrency(data.totalValue)}`,
-          format(new Date(data.lastSupplied), "MMM dd, yyyy"),
-        ]);
+        .slice(0, 12)
+        .map(([name, data]) => {
+          const totalValue = parseFloat(data.totalValue || 0);
+          return [
+            name,
+            data.quantity.toString(),
+            `NIS ${totalValue.toFixed(2)}`,
+            format(new Date(data.lastSupplied), "MMM dd, yyyy"),
+          ];
+        });
 
-      doc.autoTable({
-        startY: yPosition,
-        head: [["Product", "Quantity", "Total Value", "Last Supplied"]],
-        body: productData,
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: [66, 139, 202] },
+      const startY = yPosition;
+      const columnWidths = [80, 20, 35, 35];
+      const headers = ["Product", "Quantity", "Total Value", "Last Supplied"];
+      let xPos = 15;
+
+      doc.setFillColor(102, 51, 153); // Purple header
+      doc.setFontSize(9);
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+
+      headers.forEach((header, i) => {
+        doc.rect(xPos, startY, columnWidths[i], 8, "F");
+        doc.text(header, xPos + 2, startY + 5);
+        xPos += columnWidths[i];
+      });
+
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(40, 40, 40);
+      doc.setFontSize(8);
+      yPosition = startY + 8;
+
+      productData.forEach((row, i) => {
+        xPos = 15;
+        if (i % 2 === 0) doc.setFillColor(245, 245, 245);
+        else doc.setFillColor(255, 255, 255);
+        doc.rect(xPos, yPosition, doc.internal.pageSize.width - 30, 7, "F");
+        row.forEach((cell, j) => {
+          doc.text(String(cell), xPos + 2, yPosition + 5);
+          xPos += columnWidths[j];
+        });
+        yPosition += 7;
       });
     }
 
-    doc.save(`vendor-detail-${vendor.name || "report"}.pdf`);
+    // Add footer
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(
+        `Page ${i} of ${pageCount}`,
+        doc.internal.pageSize.width / 2,
+        doc.internal.pageSize.height - 10,
+        { align: "center" }
+      );
+    }
+
+    doc.save(
+      `vendor-detail-${vendor.name || "report"}-${format(
+        new Date(),
+        "yyyy-MM-dd"
+      )}.pdf`
+    );
   };
 
   if (showDetailView && selectedVendor) {
@@ -577,7 +877,7 @@ const VendorDetailReport = ({ vendors = [], purchases = [], dateRange }) => {
                       {formatCurrency(purchase.totalAmount || 0)}
                     </td>
                     <td className="px-4 py-3 text-sm text-right text-blue-600 font-medium">
-                      {formatCurrency(purchase.amountPaid || purchase.totalAmount || 0)}
+                      {formatCurrency(purchase.amountPaid ?? 0)}
                     </td>
                     <td
                       className={`px-4 py-3 text-sm text-right font-medium ${

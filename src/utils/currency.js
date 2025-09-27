@@ -6,27 +6,32 @@
 const DEFAULT_CURRENCY = "NIS";
 const DEFAULT_CURRENCY_SYMBOL = "₪";
 const DEFAULT_CURRENCY_FORMAT = {
-  style: "currency",
-  currency: DEFAULT_CURRENCY,
+  style: "decimal",
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 };
 
 // Format currency with proper symbol and formatting
-export const formatCurrency = (amount, currency = DEFAULT_CURRENCY) => {
+export const formatCurrency = (amount, currency = DEFAULT_CURRENCY, useStandardFormat = false) => {
   // Handle null, undefined, or non-numeric values
   if (amount === null || amount === undefined || isNaN(amount)) {
-    return DEFAULT_CURRENCY_SYMBOL + "0.00";
+    return "₪0.00"; // Use direct Unicode character
   }
 
   // Convert to number if it's a string
   const numericAmount = typeof amount === "string" ? parseFloat(amount) : amount;
 
-  // Return formatted currency
-  return new Intl.NumberFormat("he-IL", {
-    ...DEFAULT_CURRENCY_FORMAT,
-    currency,
+  // Use direct Unicode character for the symbol instead of getting it dynamically
+  const symbol = "₪"; // Direct Unicode for Shekel
+
+  // Format the number without currency symbol using en-US to avoid spacing issues
+  const formattedNumber = new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(numericAmount);
+
+  // Manually add the currency symbol at the beginning
+  return `${symbol}${formattedNumber}`;
 };
 
 // Get currency symbol based on currency code
@@ -95,10 +100,18 @@ export const calculatePercentage = (amount, percentage) => {
 
 // Format currency for display in tables (more compact)
 export const formatCurrencyForTable = (amount, currency = DEFAULT_CURRENCY) => {
-  const symbol = getCurrencySymbol(currency);
+  // Use direct Unicode character for the symbol instead of getting it dynamically
+  const symbol = "₪"; // Direct Unicode for Shekel
   const numericAmount = typeof amount === "string" ? parseFloat(amount) : amount;
 
-  if (isNaN(numericAmount)) return `${symbol}0`;
+  if (isNaN(numericAmount)) return "₪0";
 
-  return `${symbol}${numericAmount.toFixed(2)}`;
+  // Format the number without currency symbol using en-US to avoid spacing issues
+  const formattedNumber = new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(numericAmount);
+
+  // Manually add the currency symbol at the beginning
+  return `${symbol}${formattedNumber}`;
 };
