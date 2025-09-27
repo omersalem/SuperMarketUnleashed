@@ -93,7 +93,7 @@ const CustomerManagement = ({
       loadingStates.editing && editingCustomer?.id === customer.id;
 
     return (
-      <div className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 rounded-2xl p-6 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 ease-out hover:border-white/30">
+      <div className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-gray-700 rounded-2xl p-6 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 ease-out hover:border-gray-600">
         {/* Floating glow effect */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-blue-500/10 group-hover:via-purple-500/10 group-hover:to-pink-500/10 rounded-2xl transition-all duration-500 ease-out"></div>
 
@@ -293,13 +293,13 @@ const CustomerManagement = ({
 
             {/* View Toggle */}
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
-              <div className="flex bg-white/10 backdrop-blur-md rounded-xl p-1 border border-white/20">
+              <div className="flex bg-gray-800/50 backdrop-blur-md rounded-xl p-1 border border-gray-700">
                 <button
                   onClick={() => setViewMode("cards")}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                     viewMode === "cards"
                       ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
-                      : "text-gray-300 hover:text-white hover:bg-white/10"
+                      : "text-gray-300 hover:text-white hover:bg-gray-700/40"
                   }`}
                 >
                   🃏 Cards
@@ -309,7 +309,7 @@ const CustomerManagement = ({
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                     viewMode === "table"
                       ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
-                      : "text-gray-300 hover:text-white hover:bg-white/10"
+                      : "text-gray-300 hover:text-white hover:bg-gray-700/40"
                   }`}
                 >
                   📊 Table
@@ -376,7 +376,7 @@ const CustomerManagement = ({
             ))}
           </div>
         ) : (
-          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden">
+          <div className="bg-gray-800/60 backdrop-blur-md border border-gray-700 rounded-2xl overflow-hidden">
             <ResponsiveTable
               columns={columns}
               data={customers}

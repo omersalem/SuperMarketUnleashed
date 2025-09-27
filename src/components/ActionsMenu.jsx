@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 
 const menuItems = [
   { href: "#overview", label: "📊 Overview" },
@@ -22,11 +22,41 @@ const menuItems = [
 
 const ActionsMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
+  const firstItemRef = useRef(null);
+
+  // Toggle menu on button click
+  const toggleMenu = useCallback(() => setIsOpen((v) => !v), []);
+
+  // Close on outside click
+  useEffect(() => {
+    const onDocClick = (e) => {
+      if (!containerRef.current) return;
+      if (!containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
+
+  // Keyboard support: Esc to close, ArrowDown to focus first item
+  const onButtonKeyDown = (e) => {
+    if (e.key === "Escape") setIsOpen(false);
+    if (e.key === "ArrowDown") {
+      setIsOpen(true);
+      setTimeout(() => firstItemRef.current?.focus(), 0);
+    }
+  };
 
   return (
-    <div className="relative" onMouseLeave={() => setIsOpen(false)}>
+    <div className="relative" ref={containerRef}>
       <button
-        onMouseEnter={() => setIsOpen(true)}
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        onClick={toggleMenu}
+        onKeyDown={onButtonKeyDown}
         className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 text-sm font-medium"
       >
         <span>Actions</span>
@@ -34,13 +64,20 @@ const ActionsMenu = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl py-2 z-50 border border-gray-700">
-          {menuItems.map((item) => (
+        <div
+          role="menu"
+          aria-label="Actions"
+          className="absolute right-0 mt-2 w-56 bg-gray-800 rounded-lg shadow-xl py-2 z-[1001] border border-gray-700"
+        >
+          {menuItems.map((item, idx) => (
             <a
               key={item.href}
               href={item.href}
+              role="menuitem"
+              ref={idx === 0 ? firstItemRef : undefined}
               onClick={() => setIsOpen(false)}
-              className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+              className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-150 focus:outline-none focus:bg-gray-700"
+              tabIndex={0}
             >
               {item.label}
             </a>

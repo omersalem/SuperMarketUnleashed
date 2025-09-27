@@ -42,7 +42,7 @@ const InvoiceManagement = ({
       header: "Invoice ID",
       accessor: "id",
       render: (row) => (
-        <div className="font-mono text-xs text-gray-600">{row.id}</div>
+        <div className="font-mono text-xs text-gray-300">{row.id}</div>
       ),
     },
     {
@@ -70,7 +70,7 @@ const InvoiceManagement = ({
       header: "Total Amount",
       accessor: "totalAmount",
       render: (row) => (
-        <div className="font-semibold text-green-600">
+        <div className="font-semibold text-green-400">
           {formatCurrency(row.totalAmount)}
         </div>
       ),
@@ -81,7 +81,7 @@ const InvoiceManagement = ({
       render: (row) => (
         <div
           className={`font-semibold ${
-            row.balance > 0 ? "text-red-600" : "text-gray-700"
+            row.balance > 0 ? "text-red-400" : "text-gray-300"
           }`}
         >
           {formatCurrency(row.balance)}
@@ -118,8 +118,8 @@ const InvoiceManagement = ({
   ];
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">
+    <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 text-gray-100">
+      <h2 className="text-2xl font-bold text-white mb-4">
         Invoice Management
       </h2>
       <div className="mb-4">
@@ -128,12 +128,12 @@ const InvoiceManagement = ({
           placeholder="Search by customer name or invoice ID..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full max-w-sm px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full max-w-sm px-3 py-2 bg-gray-900 border border-gray-700 rounded-md text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
       <ResponsiveTable columns={columns} data={filteredSales} keyField="id" />
       {filteredSales.length === 0 && (
-        <div className="text-center py-8 text-gray-500">No invoices found.</div>
+        <div className="text-center py-8 text-gray-400">No invoices found.</div>
       )}
     </div>
   );

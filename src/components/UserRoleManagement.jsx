@@ -89,9 +89,9 @@ const UserRoleManagement = () => {
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border">
+    <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 text-gray-100">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2 sm:mb-0">
+        <h2 className="text-2xl font-bold text-white mb-2 sm:mb-0">
           User Role Management
         </h2>
         <button
@@ -103,7 +103,7 @@ const UserRoleManagement = () => {
       </div>
 
       {showAddUserGuide && (
-        <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg mb-6 text-sm">
+        <div className="bg-blue-900/20 border border-blue-700 text-blue-300 p-4 rounded-lg mb-6 text-sm">
           <h4 className="font-bold mb-2">How to Add a New User:</h4>
           <ol className="list-decimal list-inside space-y-2">
             <li>
@@ -128,41 +128,41 @@ const UserRoleManagement = () => {
         </div>
       )}
 
-      <div className="overflow-x-auto border-t pt-4">
+      <div className="overflow-x-auto border-t border-gray-700 pt-4">
         <table className="min-w-full">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-900">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
                 User Email
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
                 Current Role
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase">
                 Action
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-700">
             {users.map((user) => (
               <tr
                 key={user.id}
-                className={`hover:bg-gray-50 ${
+                className={`hover:bg-gray-800/50 ${
                   pendingChanges[user.id] &&
                   pendingChanges[user.id] !== user.role
-                    ? "bg-yellow-50"
+                    ? "bg-yellow-900/20"
                     : ""
                 }`}
               >
-                <td className="px-6 py-4 text-sm text-gray-900">
+                <td className="px-6 py-4 text-sm text-gray-100">
                   {user.email}
                 </td>
                 <td className="px-6 py-4 text-sm">
                   <span
                     className={`px-2 py-1 text-xs font-semibold rounded-full ${
                       user.role === "admin"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-green-100 text-green-800"
+                        ? "bg-red-500/20 text-red-300"
+                        : "bg-green-500/20 text-green-300"
                     }`}
                   >
                     {user.role}
@@ -170,7 +170,7 @@ const UserRoleManagement = () => {
                 </td>
                 <td className="px-6 py-4 text-center">
                   {user.id === currentUser.uid ? (
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-400">
                       Cannot change own role
                     </span>
                   ) : (
@@ -181,7 +181,7 @@ const UserRoleManagement = () => {
                           handlePendingChange(user.id, e.target.value)
                         }
                         disabled={updating === user.id}
-                        className="px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="px-3 py-1 border border-gray-700 rounded-md text-sm text-gray-100 bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="user">User (Read-Only)</option>
                         <option value="admin">Admin (Full Access)</option>
@@ -192,14 +192,14 @@ const UserRoleManagement = () => {
                             <button
                               onClick={() => confirmRoleChange(user.id)}
                               disabled={updating === user.id}
-                              className="px-3 py-1 text-xs font-semibold text-white bg-green-600 rounded-md hover:bg-green-700 disabled:bg-gray-400"
+                              className="px-3 py-1 text-xs font-semibold text-white bg-green-600 rounded-md hover:bg-green-700 disabled:bg-gray-500"
                             >
                               {updating === user.id ? "Saving..." : "Save"}
                             </button>
                             <button
                               onClick={() => cancelChange(user.id)}
                               disabled={updating === user.id}
-                              className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+                              className="px-3 py-1 text-xs font-semibold text-gray-200 bg-gray-700 rounded-md hover:bg-gray-600 disabled:bg-gray-600"
                             >
                               Cancel
                             </button>
