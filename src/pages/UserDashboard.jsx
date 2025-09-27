@@ -19,7 +19,9 @@ import InventoryManagement from "../components/InventoryManagement";
 import PaymentManagement from "../components/PaymentManagement";
 import VendorPaymentManagement from "../components/VendorPaymentManagement";
 import ReportsDashboard from "../components/ReportsDashboard";
+import UserRoleManagement from "../components/UserRoleManagement";
 import { handleFirebaseError, logError } from "../utils/errorHandling";
+import { useDashboardData } from "../hooks/useDashboardData";
 
 import {
   getCustomers,
@@ -38,22 +40,24 @@ import {
 } from "../firebase/firestore";
 
 const UserDashboard = () => {
-  const { currentUser, logout, userRole } = useContext(AuthContext);
-  const [customers, setCustomers] = useState([]);
-  const [vendors, setVendors] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [sales, setSales] = useState([]);
-  const [purchases, setPurchases] = useState([]);
-  const [checks, setChecks] = useState([]);
-  const [workers, setWorkers] = useState([]);
-  const [banks, setBanks] = useState([]);
-  const [currencies, setCurrencies] = useState([]);
-  const [salaryPayments, setSalaryPayments] = useState([]);
-  const [workerExpenses, setWorkerExpenses] = useState([]);
-  const [workerAttendance, setWorkerAttendance] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { currentUser, logout } = useContext(AuthContext);
+  const {
+    customers,
+    vendors,
+    categories,
+    products,
+    sales,
+    purchases,
+    checks,
+    workers,
+    banks,
+    currencies,
+    salaryPayments,
+    workerExpenses,
+    workerAttendance,
+    loading,
+    error,
+  } = useDashboardData();
   const [loadingStates, setLoadingStates] = useState({
     initial: true,
     reports: false,
@@ -67,66 +71,6 @@ const UserDashboard = () => {
     workers: false,
     inventory: false,
   });
-
-  useEffect(() => {
-    const fetchAllData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const [
-          customersData,
-          vendorsData,
-          categoriesData,
-          productsData,
-          salesData,
-          purchasesData,
-          checksData,
-          workersData,
-          banksData,
-          currenciesData,
-          salaryPaymentsData,
-          workerExpensesData,
-          workerAttendanceData,
-        ] = await Promise.all([
-          getCustomers(),
-          getVendors(),
-          getCategories(),
-          getProducts(),
-          getSales(),
-          getPurchases(),
-          getChecks(),
-          getWorkers(),
-          getBanks(),
-          getCurrencies(),
-          getSalaryPayments(),
-          getWorkerExpenses(),
-          getWorkerAttendance(),
-        ]);
-        setCustomers(customersData);
-        setVendors(vendorsData);
-        setCategories(categoriesData);
-        setProducts(productsData);
-        setSales(salesData);
-        setPurchases(purchasesData);
-        setChecks(checksData);
-        setWorkers(workersData);
-        setBanks(banksData);
-        setCurrencies(currenciesData);
-        setSalaryPayments(salaryPaymentsData);
-        setWorkerExpenses(workerExpensesData);
-        setWorkerAttendance(workerAttendanceData);
-      } catch (err) {
-        const handledError = handleFirebaseError(err);
-        logError(handledError, { context: "UserDashboard - fetchAllData" });
-        setError(handledError.message);
-      } finally {
-        setLoading(false);
-        setLoadingStates((prev) => ({ ...prev, initial: false }));
-      }
-    };
-
-    fetchAllData();
-  }, []);
 
   // Helper function to handle section loading
   const handleSectionLoading = (section, isLoading) => {
@@ -178,8 +122,8 @@ const UserDashboard = () => {
               <span className="hidden sm:inline">Logout</span>
               <span className="text-base">🚪</span>
             </button>
-
-            <MobileNav userRole={userRole} />
+            {/* The userRole is always 'user' here, so we can hardcode it or remove if MobileNav doesn't need it for users */}
+            <MobileNav userRole="user" />
           </div>
         </div>
       </nav>
@@ -254,25 +198,6 @@ const UserDashboard = () => {
           </section>
         </ErrorBoundary>
 
-        {userRole === "admin" && (
-          <ErrorBoundary fallbackMessage="Sales management failed to load.">
-            <section id="sales" className="mb-8">
-              <SalesManagement
-                sales={sales}
-                setSales={setSales}
-                customers={customers}
-                products={products}
-                setProducts={setProducts}
-                banks={banks}
-                setBanks={setBanks}
-                currencies={currencies}
-                setCurrencies={setCurrencies}
-                userRole="user"
-              />
-            </section>
-          </ErrorBoundary>
-        )}
-
         <ErrorBoundary fallbackMessage="Payment management failed to load.">
           <section id="payments" className="mb-8">
             <PaymentManagement
@@ -287,42 +212,6 @@ const UserDashboard = () => {
             />
           </section>
         </ErrorBoundary>
-
-        {userRole === "admin" && (
-          <ErrorBoundary fallbackMessage="Purchase management failed to load.">
-            <section id="purchases" className="mb-8">
-              <PurchaseManagement
-                purchases={purchases}
-                setPurchases={setPurchases}
-                vendors={vendors}
-                products={products}
-                setProducts={setProducts}
-                banks={banks}
-                setBanks={setBanks}
-                currencies={currencies}
-                setCurrencies={setCurrencies}
-                userRole="user"
-              />
-            </section>
-          </ErrorBoundary>
-        )}
-
-        {userRole === "admin" && (
-          <ErrorBoundary fallbackMessage="Vendor payment management failed to load.">
-            <section id="vendor-payments" className="mb-8">
-              <VendorPaymentManagement
-                purchases={purchases}
-                setPurchases={setPurchases}
-                vendors={vendors}
-                banks={banks}
-                setBanks={setBanks}
-                currencies={currencies}
-                setCurrencies={setCurrencies}
-                userRole="user"
-              />
-            </section>
-          </ErrorBoundary>
-        )}
 
         <ErrorBoundary fallbackMessage="Invoice management failed to load.">
           <section id="invoices" className="mb-8">
@@ -364,18 +253,6 @@ const UserDashboard = () => {
             />
           </section>
         </ErrorBoundary>
-
-        {userRole === "admin" && (
-          <ErrorBoundary fallbackMessage="Inventory management failed to load.">
-            <section id="inventory" className="mb-8">
-              <InventoryManagement
-                products={products}
-                setProducts={setProducts}
-                userRole="user"
-              />
-            </section>
-          </ErrorBoundary>
-        )}
       </div>
     </div>
   );

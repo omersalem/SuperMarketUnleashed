@@ -256,8 +256,6 @@ const VendorDetailReport = ({ vendors = [], purchases = [], dateRange }) => {
     yPosition = infoBoxStartY + infoBoxHeight + 10;
 
     // Summary Statistics with color boxes
-    doc.setFillColor(240, 250, 240); // Light green
-    doc.rect(15, yPosition - 5, doc.internal.pageSize.width - 30, 80, "F");
     doc.setFontSize(14);
     doc.setTextColor(40, 40, 40);
     doc.text("Purchase Summary:", 20, yPosition);

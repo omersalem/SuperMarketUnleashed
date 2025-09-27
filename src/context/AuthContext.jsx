@@ -1,8 +1,12 @@
 import React, { createContext, useState, useEffect } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { handleFirebaseError, logError } from "../utils/errorHandling";
-import LoadingSpinner from "../components/LoadingSpinner";
-import { signIn, signOut } from "../firebase/auth";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
+import { auth, db } from "../firebase/config";
+import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 
 export const AuthContext = createContext();
 
@@ -10,125 +14,85 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // Function to determine user role based on email
-  const determineUserRole = (userEmail) => {
-    // List of admin emails - add more emails here to grant admin access
-    const adminEmails = [
-      "omersalem2008@gmail.com",
-      // "another-admin@example.com",  // Uncomment and add more admin emails as needed
-      // "third-admin@example.com",
-    ];
+  const login = (email, password) => {
+    return signInWithEmailAndPassword(auth, email, password);
+  };
 
-    if (adminEmails.includes(userEmail)) {
-      return "admin";
-    }
-    return "user"; // All other users get readonly access
+  const signup = (email, password) => {
+    return createUserWithEmailAndPassword(auth, email, password);
+  };
+
+  const logout = () => {
+    return signOut(auth);
   };
 
   useEffect(() => {
-    const auth = getAuth();
+    // This is the main authentication state listener
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
 
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      (user) => {
-        try {
-          setCurrentUser(user);
-          if (user) {
-            // Automatically determine role based on email
-            const role = determineUserRole(user.email);
-            setUserRole(role);
-          } else {
-            setUserRole(null);
-          }
-          setError(null); // Clear any previous errors
-          setLoading(false);
-        } catch (err) {
-          const handledError = handleFirebaseError(err);
-          logError(handledError, {
-            context: "AuthContext - onAuthStateChanged",
-          });
-          setError(handledError.message);
-          setLoading(false);
-        }
-      },
-      (authError) => {
-        // Handle authentication errors
-        const handledError = handleFirebaseError(authError);
-        logError(handledError, {
-          context: "AuthContext - authentication error",
-        });
-        setError(handledError.message);
+      if (!user) {
+        // If no user is logged in, reset role and finish loading
+        setUserRole(null);
         setLoading(false);
       }
-    );
+      // If a user is logged in, the role listener below will handle setting the role and loading state.
+    });
 
-    return unsubscribe;
+    return () => unsubscribeAuth();
   }, []);
 
-  const login = async (email, password) => {
-    try {
-      const user = await signIn(email, password);
-      // Automatically determine role based on email
-      const role = determineUserRole(email);
-      setCurrentUser(user);
-      setUserRole(role);
-      setError(null);
-      return { user, role };
-    } catch (err) {
-      const handledError = handleFirebaseError(err);
-      logError(handledError, {
-        context: "AuthContext - login",
-      });
-      setError(handledError.message);
-      throw handledError;
+  useEffect(() => {
+    let unsubscribeRole;
+
+    if (currentUser) {
+      // If a user is logged in, set up a REAL-TIME listener for their role.
+      const userDocRef = doc(db, "users", currentUser.uid);
+
+      unsubscribeRole = onSnapshot(
+        userDocRef,
+        async (docSnap) => {
+          let finalRole = "user"; // Default to 'user'
+
+          if (docSnap.exists()) {
+            // If the user document exists, get their role
+            finalRole = docSnap.data().role || "user";
+          } else {
+            // If the document doesn't exist (e.g., first-time sign-up), create it.
+            // The master admin email is the ONLY one that gets 'admin' role on creation.
+            const newRole =
+              currentUser.email === "omersalem2008@gmail.com"
+                ? "admin"
+                : "user";
+            await setDoc(userDocRef, {
+              email: currentUser.email,
+              role: newRole,
+              createdAt: new Date(),
+            });
+            finalRole = newRole;
+          }
+
+          // Master override: The primary admin can never be demoted.
+          if (currentUser.email === "omersalem2008@gmail.com") {
+            finalRole = "admin";
+          }
+
+          setUserRole(finalRole);
+          setLoading(false);
+        },
+        (error) => {
+          console.error("Error listening to user role:", error);
+          setLoading(false);
+        }
+      );
     }
-  };
 
-  const logout = async () => {
-    try {
-      await signOut();
-      setCurrentUser(null);
-      setUserRole(null);
-      setError(null);
-    } catch (err) {
-      const handledError = handleFirebaseError(err);
-      logError(handledError, {
-        context: "AuthContext - logout",
-      });
-      setError(handledError.message);
-    }
-  };
+    // Cleanup the role listener when the user changes or logs out
+    return () => unsubscribeRole && unsubscribeRole();
+  }, [currentUser]);
 
-  const value = {
-    currentUser,
-    userRole,
-    loading,
-    error,
-    login,
-    logout,
-    clearError: () => setError(null),
-  };
+  const value = { currentUser, userRole, loading, login, signup, logout };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {loading ? (
-        <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-          <div className="text-center">
-            <LoadingSpinner
-              size="large"
-              color="blue"
-              text="Initializing application..."
-            />
-            <div className="mt-4 text-sm text-gray-400">
-              Setting up authentication and loading your data
-            </div>
-          </div>
-        </div>
-      ) : (
-        children
-      )}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

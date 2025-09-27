@@ -9,9 +9,22 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import app from "./config";
+import { db } from "./config";
 
-const db = getFirestore(app);
+// --- User Role Management Functions ---
+const usersCollection = collection(db, "users");
+
+export const getAllUsers = async () => {
+  const snapshot = await getDocs(usersCollection);
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
+
+export const updateUserRole = async (userId, newRole) => {
+  const userDoc = doc(db, "users", userId);
+  // Use setDoc with merge:true to update or create the role field without overwriting the whole document
+  await setDoc(userDoc, { role: newRole }, { merge: true });
+};
+// --- End User Role Management Functions ---
 
 // Customers
 const customersCollection = collection(db, "customers");
@@ -39,7 +52,7 @@ export const updateCustomer = async (id, customer) => {
 
 export const deleteCustomer = async (id) => {
   const customerDoc = doc(db, "customers", id);
-  
+
   try {
     await deleteDoc(customerDoc);
   } catch (error) {
@@ -324,7 +337,10 @@ const salaryPaymentsCollection = collection(db, "salaryPayments");
 
 export const getSalaryPayments = async (workerId = null) => {
   if (workerId) {
-    const q = query(salaryPaymentsCollection, where("workerId", "==", workerId));
+    const q = query(
+      salaryPaymentsCollection,
+      where("workerId", "==", workerId)
+    );
     const snapshot = await getDocs(q);
     return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   }
@@ -347,7 +363,10 @@ const workerExpensesCollection = collection(db, "workerExpenses");
 
 export const getWorkerExpenses = async (workerId = null) => {
   if (workerId) {
-    const q = query(workerExpensesCollection, where("workerId", "==", workerId));
+    const q = query(
+      workerExpensesCollection,
+      where("workerId", "==", workerId)
+    );
     const snapshot = await getDocs(q);
     return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   }
@@ -375,7 +394,10 @@ const workerAttendanceCollection = collection(db, "workerAttendance");
 
 export const getWorkerAttendance = async (workerId = null) => {
   if (workerId) {
-    const q = query(workerAttendanceCollection, where("workerId", "==", workerId));
+    const q = query(
+      workerAttendanceCollection,
+      where("workerId", "==", workerId)
+    );
     const snapshot = await getDocs(q);
     return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   }
@@ -434,4 +456,4 @@ export const deleteExpense = async (id) => {
   await deleteDoc(expenseDoc);
 };
 
-export default db;
+export { db };
