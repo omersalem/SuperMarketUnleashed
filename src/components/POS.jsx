@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { formatCurrency } from "../utils/currency";
 import { addSale, updateProduct } from "../firebase/firestore";
 import { handleFirebaseError, logError } from "../utils/errorHandling";
+import CheckPaymentModal from "./CheckPaymentModal";
 
 const POS = ({
   products = [],
@@ -10,6 +11,10 @@ const POS = ({
   categories = [],
   setSales,
   onClose,
+  banks = [],
+  setBanks,
+  currencies = [],
+  setCurrencies,
 }) => {
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,6 +30,11 @@ const POS = ({
     type: "",
   });
   const searchInputRef = React.useRef(null);
+
+  // Check payment modal state
+  const [showCheckModal, setShowCheckModal] = useState(false);
+  const [checkPaymentAmount, setCheckPaymentAmount] = useState(0);
+  const [checkDetails, setCheckDetails] = useState(null);
 
 // Helpers to normalize product fields across old/new schemas
 const getStock = (p) => {
@@ -171,9 +181,22 @@ const getPrice = (p) => {
           : parseFloat(amountPaid) > 0
           ? "partial"
           : "unpaid",
+      ...(paymentMethod === "check" && checkDetails ? { checkDetails } : {}),
     };
 
     try {
+      // If payment method is check, ensure details are provided
+      if (paymentMethod === "check" && !checkDetails) {
+        setCheckPaymentAmount(parseFloat(amountPaid) || cartTotal);
+        setShowCheckModal(true);
+        setIsProcessing(false);
+        setCheckoutStatus({
+          message: "Please complete check details",
+          type: "error",
+        });
+        return;
+      }
+
       // Verify stock availability before processing
       const insufficient = cart.filter((item) => {
         const originalProduct = products.find((p) => p.id === item.id);
@@ -252,6 +275,23 @@ const getPrice = (p) => {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [handleKeyDown]);
+
+  const handlePaymentMethodChange = (e) => {
+    const method = e.target.value;
+    setPaymentMethod(method);
+    if (method === "check") {
+      const amt = parseFloat(amountPaid) || cartTotal;
+      setCheckPaymentAmount(amt);
+      setShowCheckModal(true);
+    } else {
+      setCheckDetails(null);
+    }
+  };
+
+  const handleCheckPaymentConfirm = (details) => {
+    setCheckDetails(details);
+    setShowCheckModal(false);
+  };
 
   const handleBarcodeScan = (e) => {
     if (e.key === "Enter" && searchTerm.trim() !== "") {
@@ -517,7 +557,7 @@ const getPrice = (p) => {
             <div className="flex items-center space-x-2 mb-4">
               <select
                 value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
+                onChange={handlePaymentMethodChange}
                 className="p-2 bg-gray-700 rounded border border-gray-600 flex-grow"
               >
                 <option value="cash">Cash</option>
@@ -567,6 +607,17 @@ const getPrice = (p) => {
           </button>
         </div>
       </div>
+
+      <CheckPaymentModal
+        isOpen={showCheckModal}
+        onClose={() => setShowCheckModal(false)}
+        onConfirm={handleCheckPaymentConfirm}
+        banks={banks}
+        setBanks={setBanks}
+        currencies={currencies}
+        setCurrencies={setCurrencies}
+        paymentAmount={checkPaymentAmount}
+      />
     </div>
   );
 };

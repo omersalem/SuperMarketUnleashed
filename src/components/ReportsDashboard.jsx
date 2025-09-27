@@ -979,7 +979,7 @@ const ReportsDashboard = ({
       {/* Report Content */}
       <div
         ref={reportRef}
-        className={`bg-white rounded-lg p-3 sm:p-6 text-black transition-opacity duration-300 ${
+        className={`report-surface bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 rounded-lg p-3 sm:p-6 text-gray-100 transition-opacity duration-300 ${
           isLoadingData ? "opacity-50" : "opacity-100"
         }`}
       >

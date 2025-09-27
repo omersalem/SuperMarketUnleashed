@@ -197,15 +197,15 @@ const SalesReport = ({
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+      <div className="flex space-x-1 bg-gray-800/50 p-1 rounded-lg border border-gray-700">
         {["overview", "workers", "expenses", "attendance"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
               activeTab === tab
-                ? "bg-white text-blue-600 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-blue-600/30 text-blue-300 border border-blue-500/40 shadow-sm"
+                : "text-gray-300 hover:text-white"
             }`}
           >
             {tab === "overview" && "📊 Sales Overview"}
@@ -217,13 +217,13 @@ const SalesReport = ({
       </div>
 
       {/* Month Selector */}
-      <div className="flex items-center justify-center space-x-4 bg-gray-50 p-4 rounded-lg">
-        <label className="text-sm font-medium text-gray-700">View Month:</label>
+      <div className="flex items-center justify-center space-x-4 bg-gray-800/40 p-4 rounded-lg border border-gray-700">
+        <label className="text-sm font-medium text-gray-200">View Month:</label>
         <input
           type="month"
           value={format(currentMonth, "yyyy-MM")}
           onChange={(e) => setCurrentMonth(new Date(e.target.value + "-01"))}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-2 bg-gray-900 border border-gray-700 rounded-md text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
@@ -303,7 +303,7 @@ const SalesReport = ({
       {/* Workers Tab */}
       {activeTab === "workers" && (
         <div className="space-y-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">
+          <h3 className="text-xl font-semibold text-gray-100 mb-4">
             Worker Salary Management
           </h3>
 
@@ -340,72 +340,72 @@ const SalesReport = ({
             {workerStats.map((worker) => (
               <div
                 key={worker.id}
-                className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
+                className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-sm"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-lg font-semibold text-gray-800">
+                  <h4 className="text-lg font-semibold text-gray-100">
                     {worker.name}
                   </h4>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-400">
                     {worker.position}
                   </span>
                 </div>
 
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Monthly Salary:</span>
-                    <span className="font-medium text-green-600">
+                    <span className="text-gray-300">Monthly Salary:</span>
+                    <span className="font-medium text-green-500">
                       {formatCurrency(worker.salary || 0)}
                     </span>
                   </div>
 
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Total Days in Month:</span>
-                    <span className="font-medium text-gray-700">
+                    <span className="text-gray-300">Total Days in Month:</span>
+                    <span className="font-medium text-gray-200">
                       {worker.totalDaysInMonth}
                     </span>
                   </div>
 
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Working Days:</span>
-                    <span className="font-medium">
+                    <span className="text-gray-300">Working Days:</span>
+                    <span className="font-medium text-gray-200">
                       {worker.workingDaysCount}
                     </span>
                   </div>
 
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Daily Salary:</span>
-                    <span className="font-medium text-blue-600">
+                    <span className="text-gray-300">Daily Salary:</span>
+                    <span className="font-medium text-blue-400">
                       {formatCurrency(worker.dailySalary)}
                     </span>
                   </div>
 
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Monthly Expenses:</span>
-                    <span className="font-medium text-red-600">
+                    <span className="text-gray-300">Monthly Expenses:</span>
+                    <span className="font-medium text-red-400">
                       -{formatCurrency(worker.totalMonthlyExpenses)}
                     </span>
                   </div>
 
                   <div className="flex justify-between">
-                    <span className="text-gray-600">
+                    <span className="text-gray-300">
                       Absences ({worker.absentWorkingDays} working days):
                     </span>
-                    <span className="font-medium text-red-600">
+                    <span className="font-medium text-red-400">
                       -{formatCurrency(worker.absenceDeduction)}
                     </span>
                   </div>
 
-                  <div className="border-t pt-3 mt-3">
+                  <div className="border-t border-gray-700 pt-3 mt-3">
                     <div className="flex justify-between">
-                      <span className="font-semibold text-gray-800">
+                      <span className="font-semibold text-gray-100">
                         Remaining Salary:
                       </span>
                       <span
                         className={`font-bold text-lg ${
                           worker.remainingSalary >= 0
-                            ? "text-green-600"
-                            : "text-red-600"
+                            ? "text-green-400"
+                            : "text-red-400"
                         }`}
                       >
                         {formatCurrency(worker.remainingSalary)}

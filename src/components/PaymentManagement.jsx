@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { updateSale, addSale } from "../firebase/firestore";
 import { format } from "date-fns";
 import ResponsiveTable, { createMobileCard } from "./ResponsiveTable";
@@ -24,6 +24,18 @@ const PaymentManagement = ({
   const [paymentNotes, setPaymentNotes] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // Smooth scroll to payment form when a sale is selected
+  const formRef = useRef(null);
+  useEffect(() => {
+    if (formRef.current && selectedSale) {
+      try {
+        formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch {
+        // no-op if scroll fails
+      }
+    }
+  }, [selectedSale]);
 
   // Standalone payment states
   const [showStandalonePayment, setShowStandalonePayment] = useState(false);
@@ -665,14 +677,14 @@ const PaymentManagement = ({
         <ResponsiveTable
           data={unpaidSales}
           columns={tableColumns}
-          MobileCard={PaymentMobileCard}
+          mobileCardComponent={PaymentMobileCard}
           emptyMessage="No outstanding sales found."
         />
       </div>
 
       {/* Payment Form */}
       {selectedSale && (
-        <div className="bg-gray-700 p-6 rounded-lg">
+        <div ref={formRef} className="bg-gray-700 p-6 rounded-lg">
           <h3 className="text-lg font-semibold mb-4 text-white">
             Add Payment for Sale
           </h3>
@@ -686,18 +698,18 @@ const PaymentManagement = ({
               </p>
               <p className="text-gray-300">
                 <span className="font-medium">Date:</span>{" "}
-                {format(new Date(selectedSale.date), "MMM dd, yyyy")}
+                {format(new Date(selectedSale.date || Date.now()), "MMM dd, yyyy")}
               </p>
               <p className="text-gray-300">
-                <span className="font-medium">Total Amount:</span> $
+                <span className="font-medium">Total Amount:</span> ₪
                 {(selectedSale.totalAmount || 0).toFixed(2)}
               </p>
               <p className="text-gray-300">
-                <span className="font-medium">Amount Paid:</span> $
+                <span className="font-medium">Amount Paid:</span> ₪
                 {(selectedSale.amountPaid || 0).toFixed(2)}
               </p>
               <p className="text-red-400 font-medium">
-                <span className="font-medium">Outstanding:</span> $
+                <span className="font-medium">Outstanding:</span> ₪
                 {(selectedSale.balance || 0).toFixed(2)}
               </p>
             </div>

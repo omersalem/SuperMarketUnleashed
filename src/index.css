@@ -47,3 +47,91 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: #6b7280;
 }
+
+/* Dark themed report surface overrides to harmonize with the rest of the app */
+.report-surface {
+  /* Fallback if Tailwind classes fail for any reason */
+  background: linear-gradient(135deg, #1f2937, #111827, #1f2937);
+  color: #e5e7eb;
+  border-radius: 0.75rem;
+}
+
+/* Neutralize light backgrounds inside reports */
+.report-surface .bg-white { background-color: #111827 !important; }
+.report-surface .bg-gray-50 { background-color: #1f2937 !important; }
+
+/* Tinted gradient cards for summary metrics (soft, glassy feel) */
+.report-surface .bg-blue-50 {
+  background: linear-gradient(135deg, rgba(59,130,246,0.16), rgba(59,130,246,0.05)) !important;
+  border-color: #374151 !important;
+}
+.report-surface .bg-green-50 {
+  background: linear-gradient(135deg, rgba(34,197,94,0.16), rgba(34,197,94,0.05)) !important;
+  border-color: #374151 !important;
+}
+.report-surface .bg-purple-50 {
+  background: linear-gradient(135deg, rgba(139,92,246,0.16), rgba(139,92,246,0.05)) !important;
+  border-color: #374151 !important;
+}
+.report-surface .bg-red-50 {
+  background: linear-gradient(135deg, rgba(239,68,68,0.16), rgba(239,68,68,0.05)) !important;
+  border-color: #374151 !important;
+}
+.report-surface .bg-yellow-50 {
+  background: linear-gradient(135deg, rgba(234,179,8,0.16), rgba(234,179,8,0.05)) !important;
+  border-color: #374151 !important;
+}
+.report-surface .bg-orange-50 {
+  background: linear-gradient(135deg, rgba(249,115,22,0.16), rgba(249,115,22,0.05)) !important;
+  border-color: #374151 !important;
+}
+
+/* Borders and separators to dark mode */
+.report-surface .border-gray-300,
+.report-surface .border-gray-200,
+.report-surface .border-gray-100 {
+  border-color: #374151 !important; /* gray-700 */
+}
+.report-surface .border { border-color: #374151 !important; }
+
+/* Text colors to readable light tones */
+.report-surface .text-black,
+.report-surface .text-gray-900,
+.report-surface .text-gray-800 { color: #e5e7eb !important; } /* gray-200 */
+.report-surface .text-gray-700,
+.report-surface .text-gray-600 { color: #d1d5db !important; } /* gray-300 */
+.report-surface .text-gray-500 { color: #9ca3af !important; } /* gray-400 */
+
+/* Tables */
+.report-surface table { color: #e5e7eb !important; }
+.report-surface thead,
+.report-surface .bg-gray-50 th {
+  background-color: #0f172a !important; /* slate-900-ish for header contrast */
+  color: #e5e7eb !important;
+}
+.report-surface td,
+.report-surface th {
+  border-color: #374151 !important;
+}
+.report-surface tbody tr.bg-white { background-color: #111827 !important; }
+.report-surface tbody tr.bg-gray-50 { background-color: #1f2937 !important; }
+
+/* Inputs within reports */
+.report-surface input[type="text"],
+.report-surface input[type="date"],
+.report-surface input[type="number"],
+.report-surface select,
+.report-surface textarea {
+  background-color: #111827 !important; /* gray-900 */
+  border-color: #374151 !important;     /* gray-700 */
+  color: #f3f4f6 !important;            /* gray-100 */
+}
+.report-surface input::placeholder,
+.report-surface textarea::placeholder {
+  color: #9ca3af !important;            /* gray-400 */
+}
+
+/* Utility: soften hover highlights on rows */
+.report-surface .hover\\:bg-gray-50:hover { background-color: #0b1220 !important; } /* deep slate tint */
+
+/* Keep status badges and brand colors intact (no override here) */
