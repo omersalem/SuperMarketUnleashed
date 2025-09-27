@@ -1,211 +1,140 @@
-import React, { useState, useMemo } from "react";
-import ResponsiveTable, { createMobileCard } from "./ResponsiveTable";
+import React, { useMemo, useState } from "react";
 import { format } from "date-fns";
+import { formatCurrency } from "../utils/currency";
+import ResponsiveTable from "./ResponsiveTable";
 
-const InvoiceManagement = ({ sales, customers, userRole, currentUserId }) => {
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+const InvoiceManagement = ({
+  sales = [],
+  customers = [],
+  userRole,
+  currentUserId,
+}) => {
+  const [searchTerm, setSearchTerm] = useState("");
 
   const filteredSales = useMemo(() => {
-    return sales.filter((sale) => {
-      // Apply date range filter
-      if (startDate && endDate) {
-        const saleDate = new Date(sale.date);
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        
-        if (saleDate < start || saleDate > end) {
-          return false;
-        }
-      }
-      return true;
+    let invoices = sales;
+
+    // For regular users, only show their own invoices
+    if (userRole === "user" && currentUserId) {
+      invoices = sales.filter((sale) => sale.userId === currentUserId);
+    }
+
+    if (!searchTerm) {
+      return invoices;
+    }
+
+    const lowercasedFilter = searchTerm.toLowerCase();
+    return invoices.filter((sale) => {
+      return (
+        sale.customerName?.toLowerCase().includes(lowercasedFilter) ||
+        sale.id?.toLowerCase().includes(lowercasedFilter)
+      );
     });
-  }, [sales, startDate, endDate]);
+  }, [sales, searchTerm, userRole, currentUserId]);
 
-  // Calculate total amounts based on filtered sales
-  const totalInvoices = filteredSales.length;
-  const totalSalesAmount = filteredSales.reduce((sum, sale) => sum + sale.totalAmount, 0);
-  const totalPaidAmount = filteredSales.reduce((sum, sale) => sum + sale.amountPaid, 0);
-  const totalBalance = filteredSales.reduce((sum, sale) => sum + sale.balance, 0);
+  const getCustomerEmail = (customerId) => {
+    const customer = customers.find((c) => c.id === customerId);
+    return customer?.email || "N/A";
+  };
 
-  // Create mobile card component for invoices
-  const InvoiceMobileCard = createMobileCard(({ item: sale, index }) => {
-    const customer = customers?.find((c) => c.id === sale.customerId);
-
-    return (
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="font-bold text-lg text-white">
-            INV-{String(index + 1).padStart(3, "0")}
-          </h3>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-gray-400">Customer:</span>
-            <p className="text-white font-medium">
-              {customer ? customer.name : "Unknown Customer"}
-            </p>
-          </div>
-          <div>
-            <span className="text-gray-400">Date:</span>
-            <p className="text-white font-medium">
-              {new Date(sale.date).toLocaleDateString()}
-            </p>
-          </div>
-          <div>
-            <span className="text-gray-400">Total Amount:</span>
-            <p className="text-green-400 font-medium">
-              ₪{sale.totalAmount.toFixed(2)}
-            </p>
-          </div>
-          <div>
-            <span className="text-gray-400">Items:</span>
-            <p className="text-blue-400 font-medium">
-              {sale.items.length} item(s)
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-3">
-          <span className="text-gray-400 text-sm">Items Detail:</span>
-          <div className="mt-2 space-y-1">
-            {sale.items.map((item, index) => (
-              <div
-                key={index}
-                className="text-sm text-white bg-gray-700 p-2 rounded"
-              >
-                {item.name} - {item.quantity} × ₪{item.priceAtSale.toFixed(2)}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  });
-
-  // Table columns configuration
-  const tableColumns = [
+  const columns = [
     {
-      key: "invoiceNumber",
-      label: "Invoice #",
-      render: (invoice, index) => `INV-${String(index + 1).padStart(3, "0")}`,
+      header: "Invoice ID",
+      accessor: "id",
+      render: (row) => (
+        <div className="font-mono text-xs text-gray-600">{row.id}</div>
+      ),
     },
     {
-      key: "customerName",
-      label: "Customer Name",
-      render: (invoice) => {
-        const customer = customers.find((c) => c.id === invoice.customerId);
-        return customer ? customer.name : "Unknown Customer";
-      },
+      header: "Date",
+      accessor: "date",
+      render: (row) => (
+        <div className="text-sm">
+          {format(new Date(row.date), "MMM dd, yyyy")}
+        </div>
+      ),
     },
     {
-      key: "date",
-      label: "Date",
-      render: (sale) => new Date(sale.date).toLocaleDateString(),
+      header: "Customer",
+      accessor: "customerName",
+      render: (row) => (
+        <div>
+          <div className="font-medium">{row.customerName}</div>
+          <div className="text-xs text-gray-500">
+            {getCustomerEmail(row.customerId)}
+          </div>
+        </div>
+      ),
     },
     {
-      key: "totalAmount",
-      label: "Total Amount",
-      render: (sale) => (
-        <span className="text-green-400 font-medium">
-          ₪{sale.totalAmount.toFixed(2)}
+      header: "Total Amount",
+      accessor: "totalAmount",
+      render: (row) => (
+        <div className="font-semibold text-green-600">
+          {formatCurrency(row.totalAmount)}
+        </div>
+      ),
+    },
+    {
+      header: "Balance",
+      accessor: "balance",
+      render: (row) => (
+        <div
+          className={`font-semibold ${
+            row.balance > 0 ? "text-red-600" : "text-gray-700"
+          }`}
+        >
+          {formatCurrency(row.balance)}
+        </div>
+      ),
+    },
+    {
+      header: "Status",
+      accessor: "paymentStatus",
+      render: (row) => (
+        <span
+          className={`px-2 py-1 text-xs font-semibold rounded-full ${
+            row.paymentStatus === "paid"
+              ? "bg-green-100 text-green-800"
+              : row.paymentStatus === "partial"
+              ? "bg-yellow-100 text-yellow-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
+          {row.paymentStatus}
         </span>
       ),
     },
     {
-      key: "items",
-      label: "Items",
-      render: (sale) => (
-        <ul className="text-sm">
-          {sale.items.map((item, index) => (
-            <li key={index} className="mb-1">
-              {item.name} ({item.quantity} × ₪{item.priceAtSale.toFixed(2)})
-            </li>
-          ))}
-        </ul>
+      header: "Items",
+      accessor: "products",
+      render: (row) => (
+        <div className="text-xs text-gray-500">
+          {/* Defensive check to prevent crash if products is undefined */}
+          {(row.products || []).map((p) => p.name).join(", ")}
+        </div>
       ),
     },
   ];
 
   return (
-    <div className="bg-gray-800 p-3 sm:p-6 rounded-lg shadow-lg mt-4 sm:mt-8 max-w-full overflow-hidden">
-      <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-white">
+    <div className="bg-white p-6 rounded-lg shadow-sm border">
+      <h2 className="text-2xl font-bold text-gray-800 mb-4">
         Invoice Management
       </h2>
-      
-      {/* Summary Section */}
-      <div className="mb-6 p-4 bg-gray-700 rounded-lg">
-        <h3 className="text-lg font-semibold text-white mb-3">Summary</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-gray-800 p-3 rounded-lg">
-            <p className="text-sm text-gray-300">Total Invoices</p>
-            <p className="text-xl font-bold text-purple-400">{totalInvoices}</p>
-          </div>
-          <div className="bg-gray-800 p-3 rounded-lg">
-            <p className="text-sm text-gray-300">Total Sales Amount</p>
-            <p className="text-xl font-bold text-green-400">₪{totalSalesAmount.toFixed(2)}</p>
-          </div>
-          <div className="bg-gray-800 p-3 rounded-lg">
-            <p className="text-sm text-gray-300">Total Paid Amount</p>
-            <p className="text-xl font-bold text-blue-400">₪{totalPaidAmount.toFixed(2)}</p>
-          </div>
-          <div className="bg-gray-800 p-3 rounded-lg">
-            <p className="text-sm text-gray-300">Total Balance</p>
-            <p className="text-xl font-bold text-red-400">₪{totalBalance.toFixed(2)}</p>
-          </div>
-        </div>
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Search by customer name or invoice ID..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full max-w-sm px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
-      
-      {/* Date Filter */}
-      <div className="mb-6 p-4 bg-gray-700 rounded-lg">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3">
-          <h3 className="text-lg font-semibold text-white mb-2 sm:mb-0">Filter by Date Range</h3>
-          <button
-            onClick={() => {
-              setStartDate("");
-              setEndDate("");
-            }}
-            className="px-3 py-1 bg-gray-600 text-white rounded-md text-sm hover:bg-gray-500 transition-colors"
-          >
-            Clear Filter
-          </button>
-        </div>
-        
-        {startDate && endDate && (
-          <div className="text-sm text-green-400 mb-3">
-            Showing from {format(new Date(startDate), "MMM dd, yyyy")} to {format(new Date(endDate), "MMM dd, yyyy")}
-          </div>
-        )}
-        
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs text-gray-300 mb-1">Start Date</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-gray-300 mb-1">End Date</label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm"
-            />
-          </div>
-        </div>
-      </div>
-
-      <ResponsiveTable
-        data={filteredSales}
-        columns={tableColumns}
-        MobileCard={InvoiceMobileCard}
-        emptyMessage="No invoices found."
-      />
+      <ResponsiveTable columns={columns} data={filteredSales} keyField="id" />
+      {filteredSales.length === 0 && (
+        <div className="text-center py-8 text-gray-500">No invoices found.</div>
+      )}
     </div>
   );
 };

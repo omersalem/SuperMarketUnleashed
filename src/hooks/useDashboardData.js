@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { handleFirebaseError, logError } from "../utils/errorHandling";
 import {
   getCustomers,
@@ -15,6 +15,7 @@ import {
   getWorkerExpenses,
   getWorkerAttendance,
 } from "../firebase/firestore";
+import { AuthContext } from "../context/AuthContext";
 
 export const useDashboardData = () => {
   const [data, setData] = useState({
@@ -34,9 +35,14 @@ export const useDashboardData = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { currentUser } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchAllData = async () => {
+      if (!currentUser) {
+        setLoading(false);
+        return;
+      }
       try {
         setLoading(true);
         setError(null);
@@ -94,7 +100,7 @@ export const useDashboardData = () => {
     };
 
     fetchAllData();
-  }, []);
+  }, [currentUser]);
 
-  return { ...data, setData, loading, error };
+  return { data, setData, loading, error };
 };

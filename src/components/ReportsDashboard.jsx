@@ -30,6 +30,10 @@ const ReportsDashboard = ({
   workerAttendance = [],
   checks = [],
   categories = [],
+  setProducts,
+  setSales,
+  onLoadingChange,
+  userRole,
 }) => {
   const [selectedReport, setSelectedReport] = useState("sales");
   const [dateRange, setDateRange] = useState({
@@ -132,27 +136,34 @@ const ReportsDashboard = ({
     });
     return { byId, byName };
   }, [categories]);
- 
+
   // Helper function to get category name (robust to different product shapes/legacy data)
   const getCategoryName = (product) => {
     if (!product) return "Uncategorized";
- 
+
     // 1) Already computed fields
-    if (typeof product.categoryName === "string" && product.categoryName.trim()) {
+    if (
+      typeof product.categoryName === "string" &&
+      product.categoryName.trim()
+    ) {
       return product.categoryName.trim();
     }
- 
+
     // 2) Direct string category on product
     if (typeof product.category === "string" && product.category.trim()) {
       return product.category.trim();
     }
- 
+
     // 3) Object category with name property
-    if (product.category && typeof product.category === "object" && typeof product.category.name === "string") {
+    if (
+      product.category &&
+      typeof product.category === "object" &&
+      typeof product.category.name === "string"
+    ) {
       const nm = product.category.name.trim();
       if (nm) return nm;
     }
- 
+
     // 4) Try to resolve via possible id fields
     const candidates = [];
     const pushId = (val) => {
@@ -162,7 +173,11 @@ const ReportsDashboard = ({
       } else if (typeof val === "object") {
         if (val.id) candidates.push(String(val.id).trim());
         // Firestore ref-like shape
-        if (val._key && val._key.path && Array.isArray(val._key.path.segments)) {
+        if (
+          val._key &&
+          val._key.path &&
+          Array.isArray(val._key.path.segments)
+        ) {
           const segs = val._key.path.segments;
           candidates.push(String(segs[segs.length - 1]).trim());
         }
@@ -172,20 +187,20 @@ const ReportsDashboard = ({
         }
       }
     };
- 
+
     pushId(product.categoryId);
     pushId(product.categoryID);
     pushId(product.category_id);
     pushId(product.categoryRef);
     pushId(product.category_ref);
- 
+
     // Resolve against categories map by id first
     for (const id of candidates) {
       if (categoriesMap.byId.has(id)) {
         return categoriesMap.byId.get(id);
       }
     }
- 
+
     // 5) Fallback: if product has a category string that doesn't match id, try name lookup (case-insensitive)
     if (typeof product.category === "string" && product.category.trim()) {
       const key = product.category.trim().toLowerCase();
@@ -193,7 +208,7 @@ const ReportsDashboard = ({
         return categoriesMap.byName.get(key);
       }
     }
- 
+
     return "Uncategorized";
   };
 

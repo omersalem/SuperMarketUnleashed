@@ -23,24 +23,10 @@ import UserRoleManagement from "../components/UserRoleManagement";
 import { handleFirebaseError, logError } from "../utils/errorHandling";
 import { useDashboardData } from "../hooks/useDashboardData";
 
-import {
-  getCustomers,
-  getVendors,
-  getCategories,
-  getProducts,
-  getSales,
-  getPurchases,
-  getChecks,
-  getWorkers,
-  getBanks,
-  getCurrencies,
-  getSalaryPayments,
-  getWorkerExpenses,
-  getWorkerAttendance,
-} from "../firebase/firestore";
-
 const UserDashboard = () => {
   const { currentUser, logout } = useContext(AuthContext);
+  const { data, loading, error } = useDashboardData();
+  // Correctly destructure the arrays from the data object, providing default empty arrays for safety.
   const {
     customers,
     vendors,
@@ -55,9 +41,7 @@ const UserDashboard = () => {
     salaryPayments,
     workerExpenses,
     workerAttendance,
-    loading,
-    error,
-  } = useDashboardData();
+  } = data || {};
   const [loadingStates, setLoadingStates] = useState({
     initial: true,
     reports: false,
@@ -161,7 +145,9 @@ const UserDashboard = () => {
           <section id="customers" className="mb-8">
             <CustomerManagement
               customers={customers}
-              setCustomers={setCustomers}
+              setCustomers={() => {
+                /* Read-only, no-op */
+              }}
               userRole="user"
             />
           </section>
@@ -171,7 +157,9 @@ const UserDashboard = () => {
           <section id="vendors" className="mb-8">
             <VendorManagement
               vendors={vendors}
-              setVendors={setVendors}
+              setVendors={() => {
+                /* Read-only, no-op */
+              }}
               userRole="user"
             />
           </section>
@@ -181,7 +169,9 @@ const UserDashboard = () => {
           <section id="categories" className="mb-8">
             <CategoryManagement
               categories={categories}
-              setCategories={setCategories}
+              setCategories={() => {
+                /* Read-only, no-op */
+              }}
               userRole="user"
             />
           </section>
@@ -191,7 +181,9 @@ const UserDashboard = () => {
           <section id="products" className="mb-8">
             <ProductManagement
               products={products}
-              setProducts={setProducts}
+              setProducts={() => {
+                /* Read-only, no-op */
+              }}
               categories={categories}
               userRole="user"
             />
@@ -202,12 +194,18 @@ const UserDashboard = () => {
           <section id="payments" className="mb-8">
             <PaymentManagement
               sales={sales}
-              setSales={setSales}
+              setSales={() => {
+                /* Read-only, no-op */
+              }}
               customers={customers}
               banks={banks}
-              setBanks={setBanks}
+              setBanks={() => {
+                /* Read-only, no-op */
+              }}
               currencies={currencies}
-              setCurrencies={setCurrencies}
+              setCurrencies={() => {
+                /* Read-only, no-op */
+              }}
               userRole="user"
             />
           </section>
@@ -228,11 +226,17 @@ const UserDashboard = () => {
           <section id="checks" className="mb-8">
             <CheckManagement
               checks={checks}
-              setChecks={setChecks}
+              setChecks={() => {
+                /* Read-only, no-op */
+              }}
               banks={banks}
-              setBanks={setBanks}
+              setBanks={() => {
+                /* Read-only, no-op */
+              }}
               currencies={currencies}
-              setCurrencies={setCurrencies}
+              setCurrencies={() => {
+                /* Read-only, no-op */
+              }}
               userRole="user"
             />
           </section>
@@ -242,13 +246,21 @@ const UserDashboard = () => {
           <section id="workers" className="mb-8">
             <WorkerManagement
               workers={workers}
-              setWorkers={setWorkers}
+              setWorkers={() => {
+                /* Read-only, no-op */
+              }}
               salaryPayments={salaryPayments}
-              setSalaryPayments={setSalaryPayments}
+              setSalaryPayments={() => {
+                /* Read-only, no-op */
+              }}
               workerExpenses={workerExpenses}
-              setWorkerExpenses={setWorkerExpenses}
+              setWorkerExpenses={() => {
+                /* Read-only, no-op */
+              }}
               workerAttendance={workerAttendance}
-              setWorkerAttendance={setWorkerAttendance}
+              setWorkerAttendance={() => {
+                /* Read-only, no-op */
+              }}
               userRole="user"
             />
           </section>
